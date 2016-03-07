@@ -42,8 +42,6 @@ function Player(district, sector, x, y)
 	
 	// User Interface
 	this.m_liUI = new Array();
-	this.m_kRadar = new Radar(this);
-	this.m_kRadar.addSignature(new RadarSignature(this.m_kShip, 0, this.m_kShip));
 	
 	//this.createUI();
 	
@@ -60,9 +58,6 @@ Player.prototype.update = function()
 	
 	// Updateing a structure if one is currently attempting to be placed
 	this.updateStructurePlacement()
-		
-	// Update radar objects position
-	this.m_kRadar.update();
 }
 
 Player.prototype.draw = function()
@@ -97,9 +92,6 @@ Player.prototype.draw = function()
 	
 	// Draw Exp Bar
 	this.drawExpBar();
-	
-	// Draw the radar
-	this.m_kRadar.draw();
 }
 
 // EVENTS

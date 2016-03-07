@@ -541,31 +541,7 @@ Sector.prototype.addShip = function(ship)
 	
 	// Add the ship to the radar if it's not the players ship
 	if(ship.m_iID != m_kPlayer.m_kShip.m_iID)
-	{
 		m_kLog.addItem("An unknown ship has entered the sector.", 2500, 255, 0, 0);
-		
-		m_kPlayer.m_kRadar.addSignature(new RadarSignature(m_kPlayer.m_kShip, 3, ship));
-	}
-	else
-	{
-		// Reset radar!
-		m_kPlayer.m_kRadar.clear();
-		
-		var _structures = this.m_kStructureManager.m_liStructures;
-		var _asteroids = this.m_kAsteroidManager.m_liAsteroids;
-		
-		// Add all existing structures
-		for(var i = 0; i < _structures.length; i++)
-		{
-			m_kPlayer.m_kRadar.addSignature(new RadarSignature(m_kPlayer.m_kShip, 1, _structures[i]));
-		}
-		
-		// Add all existing asteroids
-		for(var i = 0; i < _asteroids.length; i++)
-		{
-			m_kPlayer.m_kRadar.addSignature(new RadarSignature(m_kPlayer.m_kShip, 2, _asteroids[i]));
-		}
-	}
 }
 
 Sector.prototype.removeShip = function(ship)
