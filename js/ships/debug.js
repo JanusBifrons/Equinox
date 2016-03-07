@@ -12,7 +12,6 @@ function Debug(x, y, moveX, moveY, owner)
 	
 	// These must be reinitialized
 	// because Javascript is crazy...
-	this.m_kRadar = new Radar();
 	this.m_liWeapons = new Array();
 	this.m_liShields = new Array();
 	
