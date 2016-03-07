@@ -344,14 +344,14 @@ CollisionManager.prototype.shipToStructure = function(ship, structure)
 		for(var i = 0; i < _weapons.length; i++)
 			for(var j = 0; j < structure.m_liShields.length; j++)
 				if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liShields[j]))
-					_weapons[i].onHit(structure);
+					_weapons[i].onHit(structure.m_liComponents[j]);
 	}
 	else
 	{
 		for(var i = 0; i < _weapons.length; i++)
 			for(var j = 0; j < structure.m_liComponents.length; j++)
 				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liComponents[j].m_cdCollision))
-					_weapons[i].onHit(structure);
+					_weapons[i].onHit(structure.m_liComponents[j]);
 	}
 		
 	if(ship.m_iTeam == structure.m_iTeam)

@@ -801,6 +801,11 @@ Structure.prototype.checkGenerator = function(power)
 		this.m_iPowerDrain += power;
 		this.m_bPowerTransfering = true;
 		
+		m_kLog.addStaticItem("I'm transfering some power!");
+		m_kLog.addStaticItem("Type: " + this.m_iType);
+		
+		m_kLog.addStaticItem("Generation: " + _generation);
+		
 		return true;
 	}
 	else

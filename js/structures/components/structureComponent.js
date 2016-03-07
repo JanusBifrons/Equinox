@@ -55,6 +55,13 @@ StructureComponent.prototype.draw = function()
 	m_kContext.fill();
 }
 
+// EVENTS
+
+StructureComponent.prototype.onHit = function(damage)
+{
+	this.m_kOwner.onHit(damage);
+}
+
 // HELPERS
 
 StructureComponent.prototype.scale = function()

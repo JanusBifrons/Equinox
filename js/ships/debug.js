@@ -46,7 +46,8 @@ function Debug(x, y, moveX, moveY, owner)
 	this.m_iHull = 250;
 	this.m_iHullRegen = 2.5;
 	
-	this.m_iPowerRegen = 7.5;
+	//this.m_iPowerRegen = 7.5;
+	this.m_iPowerRegen = 75;
 	this.m_iPowerStored = 100;
 	this.m_iPowerCap = 100;
 	
