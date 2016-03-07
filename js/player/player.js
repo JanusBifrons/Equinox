@@ -34,7 +34,7 @@ function Player(district, sector, x, y)
 	this.m_kShip = new Debug(x, y, 0, 0, this);
 	//this.m_kShip = new Asylum(x, y, 0, 0, this);
 	//this.m_kShip = new Tyrant(x, y, 0, 0, this);
-	//this.m_kShip = new Havok(x, y, 0, 0, this);
+	////this.m_kShip = new Havok(x, y, 0, 0, this);
 	
 	// This is compensation for my terrible input code which is buggy
 	this.m_iInteriaTimerMax = 1000;
