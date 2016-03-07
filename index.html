@@ -1,0 +1,166 @@
+<html>
+<head>
+
+<title>Equinox Vertical Slice</title>
+
+<!-- JS JS FILES -->
+
+<script type="text/javascript" src="js/quadtree.js"></script>
+<script type="text/javascript" src="js/SAT.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+
+<script type="text/javascript" src="js/util/camera.js"></script>
+<script type="text/javascript" src="js/util/input.js"></script>
+<script type="text/javascript" src="js/util/util.js"></script>
+<script type="text/javascript" src="js/util/log.js"></script>
+<script type="text/javascript" src="js/util/logItem.js"></script>
+<script type="text/javascript" src="js/util/collisionManager.js"></script>
+<script type="text/javascript" src="js/util/gameStats.js"></script>
+<script type="text/javascript" src="js/util/shipParts.js"></script>
+<script type="text/javascript" src="js/util/scrap.js"></script>
+
+<script type="text/javascript" src="js/pathfinding/route.js"></script>
+<script type="text/javascript" src="js/pathfinding/pathfinder.js"></script>
+<script type="text/javascript" src="js/pathfinding/request.js"></script>
+<script type="text/javascript" src="js/pathfinding/requestResult.js"></script>
+
+<script type="text/javascript" src="js/states/state.js"></script>
+<script type="text/javascript" src="js/states/stateManager.js"></script>
+
+<script type="text/javascript" src="js/states/gameState.js"></script>
+
+<script type="text/javascript" src="js/structures/structureManager.js"></script>
+<script type="text/javascript" src="js/structures/structure.js"></script>
+
+<script type="text/javascript" src="js/structures/control.js"></script>
+<script type="text/javascript" src="js/structures/connector.js"></script>
+<script type="text/javascript" src="js/structures/extractor.js"></script>
+<script type="text/javascript" src="js/structures/solar.js"></script>
+<script type="text/javascript" src="js/structures/beacon.js"></script>
+<script type="text/javascript" src="js/structures/respawn.js"></script>
+<script type="text/javascript" src="js/structures/teleporter.js"></script>
+<script type="text/javascript" src="js/structures/battery.js"></script>
+<script type="text/javascript" src="js/structures/repair.js"></script>
+<script type="text/javascript" src="js/structures/storage.js"></script>
+
+<script type="text/javascript" src="js/structures/components/structureComponent.js"></script>
+
+<script type="text/javascript" src="js/structures/components/hull/hexHull.js"></script>
+<script type="text/javascript" src="js/structures/components/hull/rectHull.js"></script>
+
+<script type="text/javascript" src="js/structures/components/stat/energyBar.js"></script>
+<script type="text/javascript" src="js/structures/components/stat/metalBar.js"></script>
+
+<script type="text/javascript" src="js/structures/components/resources/solarPanelSmall.js"></script>
+
+<script type="text/javascript" src="js/structures/turrets/beamTurret.js"></script>
+<script type="text/javascript" src="js/structures/turrets/cannonTurret.js"></script>
+<script type="text/javascript" src="js/structures/turrets/tractorTurret.js"></script>
+
+<script type="text/javascript" src="js/player/player.js"></script>
+<script type="text/javascript" src="js/player/radar.js"></script>
+<script type="text/javascript" src="js/player/radarSignature.js"></script>
+
+<script type="text/javascript" src="js/ships/ship.js"></script>
+
+<script type="text/javascript" src="js/ships/asylum.js"></script>
+<script type="text/javascript" src="js/ships/tyrant.js"></script>
+<script type="text/javascript" src="js/ships/havok.js"></script>
+<script type="text/javascript" src="js/ships/debug.js"></script>
+
+<script type="text/javascript" src="js/ships/components/shipComponent.js"></script>
+
+<script type="text/javascript" src="js/ships/components/cockpits/cockpit.js"></script>
+
+<script type="text/javascript" src="js/ships/components/wings/leftWing.js"></script>
+<script type="text/javascript" src="js/ships/components/wings/rightWing.js"></script>
+<script type="text/javascript" src="js/ships/components/wings/rearLeftWing.js"></script>
+<script type="text/javascript" src="js/ships/components/wings/rearRightWing.js"></script>
+
+<script type="text/javascript" src="js/ships/components/body/leftPad.js"></script>
+<script type="text/javascript" src="js/ships/components/body/rightPad.js"></script>
+<script type="text/javascript" src="js/ships/components/body/shortPillar.js"></script>
+
+<script type="text/javascript" src="js/ships/components/engines/roundEngine.js"></script>
+
+<script type="text/javascript" src="js/weapons/weapon.js"></script>
+<script type="text/javascript" src="js/weapons/beam.js"></script>
+<script type="text/javascript" src="js/weapons/cannon.js"></script>
+<script type="text/javascript" src="js/weapons/missileLauncher.js"></script>
+
+<script type="text/javascript" src="js/weapons/cannons/lightCannon.js"></script>
+<script type="text/javascript" src="js/weapons/cannons/mediumCannon.js"></script>
+<script type="text/javascript" src="js/weapons/beams/lightBeam.js"></script>
+<script type="text/javascript" src="js/weapons/beams/mediumBeam.js"></script>
+<script type="text/javascript" src="js/weapons/beams/construction.js"></script>
+<script type="text/javascript" src="js/weapons/beams/tractor.js"></script>
+<script type="text/javascript" src="js/weapons/beams/extractorBeam.js"></script>
+
+<script type="text/javascript" src="js/weapons/objects/objectFactory.js"></script>
+<script type="text/javascript" src="js/weapons/objects/laser.js"></script>
+<script type="text/javascript" src="js/weapons/objects/missile.js"></script>
+
+<script type="text/javascript" src="js/weapons/objects/lasers/lightLaser.js"></script>
+<script type="text/javascript" src="js/weapons/objects/lasers/mediumLaser.js"></script>
+
+<script type="text/javascript" src="js/world/sector.js"></script>
+<script type="text/javascript" src="js/world/district.js"></script>
+<script type="text/javascript" src="js/world/asteroid.js"></script>
+<script type="text/javascript" src="js/world/asteroidManager.js"></script>
+
+<script type="text/javascript" src="js/ai/ai.js"></script>
+<script type="text/javascript" src="js/ai/aiManager.js"></script>
+
+<script type="text/javascript" src="js/ui/uiButton.js"></script>
+<script type="text/javascript" src="js/ui/uiConstruction.js"></script>
+
+<!-- END JS FILES -->
+
+<script>
+
+function run()
+{		
+	// Update timer
+	timer();
+	
+	// Update the game logic
+	update();
+	
+	// Update input
+	inputUpdate();
+	
+	// Draw the game
+	draw();
+
+	// Calls this function and runs the game
+	window.requestAnimationFrame(run);
+}
+
+</script>
+
+<style>
+	{margin: 0; padding: 0;}
+	
+	html, body{width: 100%, body: 100%; margin: 0; padding: 0;}
+	
+	body{background-color:#FFAAAA}
+</style>
+
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<script type="text/javascript">	
+		// Init timer
+		timer();
+	
+		// Initialize the game
+		initMain();
+		
+		// Initialize input
+		initInput();
+		
+		// Start the game loop
+		window.requestAnimationFrame(run);
+	</script>
+</body>
+</html>
