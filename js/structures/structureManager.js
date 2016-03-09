@@ -11,12 +11,6 @@ StructureManager.prototype.update = function()
 	// Structure for manager to delete
 	var _index = -1;
 	
-	// Reset structures
-	for(var i = 0; i < this.m_liStructures.length; i++)
-	{
-		this.m_liStructures[i].resetVariables();
-	}
-	
 	// Update structures
 	for(var i = 0; i < this.m_liStructures.length; i++)
 	{	
@@ -52,6 +46,15 @@ StructureManager.prototype.draw = function()
 }
 
 // HELPERS
+
+StructureManager.prototype.resetStructures = function()
+{
+	// Reset structures
+	for(var i = 0; i < this.m_liStructures.length; i++)
+	{
+		this.m_liStructures[i].resetVariables();
+	}
+}
 
 StructureManager.prototype.requestRespawn = function(ship)
 {

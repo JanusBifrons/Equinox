@@ -7,6 +7,7 @@ function Pathfinder()
 	
 	this.m_kStart = new Structure();
 	this.m_kCurrentNode = this.m_kStart;
+	this.m_kSavedCurrentNode = this.m_kStart;
 	this.m_iDrain;
 	
 	this.m_kRequestResult = new RequestResult();
@@ -20,6 +21,7 @@ Pathfinder.prototype.makeRequest = function(request)
 	// Set start position (so we can tell when we are done)
 	this.m_kStart = request.m_kStructure;
 	this.m_kCurrentNode = this.m_kStart;
+	this.m_kSavedCurrentNode = this.m_kStart;
 	this.m_kRequestResult.m_kRequest = request;
 	
 	this.m_liOpenList.push(this.m_kCurrentNode);
@@ -129,13 +131,25 @@ Pathfinder.prototype.findPath = function(request)
 
 Pathfinder.prototype.goalCheck = function(request, currentNode)
 {		
+	// Check if this node has some or all of the item requested
 	if(currentNode.checkRequest(request))
 	{				
-		this.m_kRequestResult.m_kStructure = currentNode;
-
-		return true;
+		this.m_kRequestResult.m_liStructures.push(currentNode);
+		
+		// Check if we have all we asked for
+		if(this.m_kRequestResult.m_iAmount == request.m_iAmount)
+		{		
+			// All done!
+			return true;
+		}
+		else
+		{
+			// Nope, keep going!
+			return false;
+		}
 	}
 	
+	// None found yet!
 	return false;
 }
 

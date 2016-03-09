@@ -81,8 +81,7 @@ EnergyBar.prototype.draw = function()
 		_power = (this.m_iCurrentDrain / this.m_kOwner.m_iPowerGenerated) * 100;	
 		_power = Math.round(_power);
 	}
-
-
+	
 	// Call base update
 	StructureComponent.prototype.draw.call(this);
 	
