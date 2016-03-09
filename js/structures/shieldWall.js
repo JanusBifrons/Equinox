@@ -90,7 +90,7 @@ ShieldWall.prototype.onRequest = function(request)
 
 ShieldWall.prototype.onHitDrain = function(damage)
 {	
-	if(Structure.prototype.onRequest.call(this, new Request(this, 0, 5)))
+	if(Structure.prototype.onRequest.call(this, new Request(this, 0, 9)))
 	{
 	}
 	else

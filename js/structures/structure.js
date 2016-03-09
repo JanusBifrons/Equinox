@@ -61,8 +61,8 @@ function Structure()
 	this.m_iHeuristic = 0;
 	this.m_iTotal = 0;
 	this.m_iMaxConnections = 0;
-	this.m_iRequestDelay = 0;
 	this.m_iRequestDelayMax = 5000;
+	this.m_iRequestDelay = (this.m_iRequestDelayMax * 0.2);
 	
 	// Power
 	this.m_iPowerStored = 0;
@@ -208,7 +208,7 @@ Structure.prototype.draw = function()
 		
 		m_kContext.lineWidth = 0.5;
 		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 250 + this.m_iRadius, 0, 2 * Math.PI);
+		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 750 + this.m_iRadius, 0, 2 * Math.PI);
 		m_kContext.stroke();
 		m_kContext.closePath();
 	}
@@ -605,7 +605,7 @@ Structure.prototype.setConnectors = function()
 	
 		_distance = calculateDistance(this.m_liPos, _vector);
 		
-		if(_distance < (this.m_iRadius + 250) + _structures[i].m_iRadius)
+		if(_distance < (this.m_iRadius + 750) + _structures[i].m_iRadius)
 		{
 			if(this.m_liSiblings.length < this.m_iMaxConnections)
 			{
