@@ -75,6 +75,7 @@ function Ship()
 	this.m_liHull = new Array();
 	
 	// Drawing
+	this.m_bDrawUI = false;
 	this.m_bDrawShield = false;
 	this.m_iR = 0;
 	this.m_iG = 0;
@@ -229,6 +230,100 @@ Ship.prototype.draw = function()
 	// Draw components
 	for(var i = 0; i < this.m_liComponents.length; i++)
 		this.m_liComponents[i].draw();
+	
+	if(this.m_bDrawUI)
+	{
+		this.drawUI();
+	}
+	
+	this.m_bDrawUI = false;
+}
+
+// I hate this name, but nevermind... drawStats is already taken!
+Ship.prototype.drawUI = function()
+{
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 1;
+	
+	// Top Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Top Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Percents
+	var _shieldPercent = (this.m_iShields / this.m_iShieldCap);
+	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
+	var _hullPercent = (this.m_iHull / this.m_iHullCap);
+	
+	var _step = this.m_iRadius * 0.14;
+	
+	this.drawStatBar(_shieldPercent, 0, 'blue');
+	this.drawStatBar(_armourPercent, _step, 'grey');
+	this.drawStatBar(_hullPercent, _step * 2, 'brown');
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
+Ship.prototype.drawStatBar = function(percent, offset, colour)
+{
+	var _x = -this.m_iRadius;
+	var _y = this.m_iRadius;
+	var _width = this.m_iRadius * 2;
+	var _height = this.m_iRadius * 0.15;
+	
+	_y += offset;
+	
+		
+	m_kContext.lineWidth = 0.1;
+	
+	// Border and Background
+	m_kContext.fillStyle = concatenate(255, 255, 255, 127);;
+	m_kContext.fillRect(_x, _y, _width, _height);
+	
+	m_kContext.fillStyle = 'black';
+	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), _width * 0.99, _height - (_y * 0.02));
+	
+	m_kContext.fillStyle = colour;
+	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), (_width * 0.99) * percent, _height - (_y * 0.02));
 }
 
 // This function is called by the player and not this class!

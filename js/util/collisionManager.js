@@ -3,6 +3,54 @@ function CollisionManager()
 	this.m_kResponse = new SAT.Response();
 }
 
+CollisionManager.prototype.checkMouse = function(mousePos, quadTree)
+{
+	var _mousePos = {
+		x: mousePos.x,
+		y: mousePos.y, 
+		width: 5,
+		height: 5
+	};
+	
+	var _mouseCircle = new C(new V(mousePos.x, mousePos.y), 5);
+	
+	var _elements = quadTree.retrieve(_mousePos);
+	
+	for(var i = 0; i < _elements.length; i++)
+	{
+		// SHIP!
+		if(_elements[i].type == 0)
+		{			
+			var _ship = _elements[i].object;
+			
+			for(var k = 0; k < _ship.m_liShields.length; k++)
+			{
+				if(this.circleCircleCollisionDetection(_ship.m_liShields[k], _mouseCircle))
+				{
+					// Make it draw stats!
+					_ship.m_bDrawUI = true;
+					return;
+				}
+			}
+		}
+		
+		// STRUCTURE!
+		if(_elements[i].type == 1)
+		{			
+			var _structure = _elements[i].object;
+			
+			for(var k = 0; k < _structure.m_liShields.length; k++)
+			{
+				if(this.circleCircleCollisionDetection(_structure.m_liShields[k], _mouseCircle))
+				{
+					// Make it draw stats!
+					_structure.m_bDrawUI = true;
+				}
+			}
+		}
+	}
+}
+
 CollisionManager.prototype.checkCollisions = function(quadTree, ships, structures, asteroids, objects)
 {
 	// THINGS WHICH MOVE VS EVERYTHING
