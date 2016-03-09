@@ -411,6 +411,17 @@ Player.prototype.updateInput = function()
 	if(isKeyDown(51))
 	{
 		this.m_bPlacingStructure = true;
+		this.m_kStructure = new ShieldWall(getMouseX(), getMouseY());
+		this.m_iStructureIndex = 2;
+	}
+	
+	// Temporarily disable all other structures
+	return;
+	
+	// 3 KEY
+	if(isKeyDown(51))
+	{
+		this.m_bPlacingStructure = true;
 		this.m_kStructure = new Extractor(getMouseX(), getMouseY());
 		this.m_iStructureIndex = 2;
 	}
@@ -526,7 +537,8 @@ Player.prototype.structureFromIndex = function(index)
 			break;
 			
 		case 2:
-			return new Extractor(0, 0);
+			//return new Extractor(0, 0);
+			return new ShieldWall(0, 0);
 			break;
 			
 		case 3:

@@ -9,9 +9,7 @@ function Ship()
 	this.m_iID = guid();
 	
 	// Life stats
-	this.m_bIsAlive = false;
-	//this.m_bIsAlive = true;
-	this.m_bIsRespawning = false;
+	this.m_bIsAlive = true;
 	
 	// Construction
 	this.m_bIsConstructed = true;	// Cannot construct ships at the moment!
@@ -109,10 +107,23 @@ Ship.prototype.update = function()
 	}
 	
 	if(this.m_bInertialDampeners && !this.m_bIsAccelerating)
-	{			
+	{					
+		if(this.m_iSpeed < this.m_iAccel)
+		{
+			this.m_liMove[0] = 0;
+			this.m_liMove[1] = 0;
+		}
+		else
+		{
+			var _direction = Math.atan2(this.m_liMove[1], this.m_liMove[0]);
+			
+			this.m_liMove[0] -= Math.cos(_direction) * this.m_iAccel;
+			this.m_liMove[1] -= Math.sin(_direction) * this.m_iAccel;
+		}
+
 		// Friction
-		this.m_liMove[0] *= 0.95;
-		this.m_liMove[1] *= 0.95;
+		//this.m_liMove[0] *= 0.95;
+		//this.m_liMove[1] *= 0.95;
 		//this.m_liMove[0] *= 0.995;
 		//this.m_liMove[1] *= 0.995;
 	}

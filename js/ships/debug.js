@@ -46,7 +46,8 @@ function Debug(x, y, moveX, moveY, owner)
 	this.m_iHull = 250;
 	this.m_iHullRegen = 2.5;
 	
-	this.m_iPowerRegen = 7.5;
+	//this.m_iPowerRegen = 7.5;
+	this.m_iPowerRegen = 75;
 	this.m_iPowerStored = 100;
 	this.m_iPowerCap = 100;
 	
@@ -60,7 +61,7 @@ function Debug(x, y, moveX, moveY, owner)
 	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
 	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
 	_beams.push(_beam1);
-	_beams.push(_beam2);
+	//_beams.push(_beam2);
 	
 	var _cannons = new Array();
 	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);

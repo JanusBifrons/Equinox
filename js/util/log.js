@@ -166,9 +166,9 @@ Log.prototype.addItem = function(text, fadeOut, r, g, b)
 	this.m_liLogItems.push(logItem);
 }
 
-Log.prototype.addStaticItem = function(text, r, g, b)
+Log.prototype.addStaticItem = function(text)
 {
-	var logItem = new LogItem(text, 1000, r, g, b);
+	var logItem = new LogItem(text, 1000, 255, 255, 255);
 	
 	this.m_liStaticLogItems.push(logItem);
 }

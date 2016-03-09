@@ -58,24 +58,25 @@ function Sector(id, row, col, district, isSpawn)
 }
 
 Sector.prototype.update = function()
-{	
-	// Run some debug code
-	// - Remove all projectiles
-	// - Calculate all metal
-	if(m_kPlayer.m_kShip.m_kSector.m_iID == this.m_iID)
-		this.debug();
-	
+{		
 	// Populate this sectors quad tree!
 	this.populateQuadTree(this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
-
+	
+		
 	// Check all collisions for this sector!
 	m_kCollisionManager.checkCollisions(this.m_kQuadTree, this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
-
+	
+	this.m_kStructureManager.resetStructures();
+		
+	// Check all collisions for this sector!
+	m_kCollisionManager.checkWeapons(this.m_kQuadTree, this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
+	
+	
 	// Update all of the asteroids in the sector
-	this.m_kAsteroidManager.update();
+	this.m_kAsteroidManager.update();	
 	
 	// Update all of the structures in the sector
-	this.m_kStructureManager.update();
+	this.m_kStructureManager.update();	
 	
 	// Update all of the ships in the sector
 	this.updateShips();
@@ -91,6 +92,12 @@ Sector.prototype.update = function()
 	
 	// Update the respawn list to check if players are waiting to respawn and can respawn
 	this.updateRespawn();
+	
+	// Run some debug code
+	// - Remove all projectiles
+	// - Calculate all metal
+	if(m_kPlayer.m_kShip.m_kSector.m_iID == this.m_iID)
+		this.debug();
 }
 
 Sector.prototype.draw = function()
@@ -302,11 +309,11 @@ Sector.prototype.debug = function()
 	}
 	
 	// Print it to the screen!
-	m_kLog.addStaticItem("Metal: " + _metal, 255, 165, 0);
+	//m_kLog.addStaticItem("Metal: " + _metal, 255, 165, 0);
 	m_kLog.addStaticItem("Power: (+" + _powerGenerated + "/ -" + _powerDrarined + ")", 255, 255, 50);
 	
 	// Print it to the screen!
-	m_kLog.addStaticItem("Objects: " + this.m_liObjects.length, 255, 255, 255);
+	//m_kLog.addStaticItem("Objects: " + this.m_liObjects.length, 255, 255, 255);
 }
 
 Sector.prototype.drawSectorInfo = function()
@@ -539,7 +546,7 @@ Sector.prototype.addShip = function(ship)
 	
 	ship.onEnterSector(this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids);
 	
-	// Add the ship to the radar if it's not the players ship
+	// If this isn't the player, notify them somebody has entered the sector!
 	if(ship.m_iID != m_kPlayer.m_kShip.m_iID)
 		m_kLog.addItem("An unknown ship has entered the sector.", 2500, 255, 0, 0);
 }
@@ -569,11 +576,6 @@ Sector.prototype.removeShip = function(ship)
 Sector.prototype.addStructure = function(structure)
 {
 	this.m_kStructureManager.addStructure(structure);
-	
-	if(m_kPlayer)
-	{
-		m_kPlayer.m_kRadar.addSignature(new RadarSignature(m_kPlayer.m_kShip, 1, structure));
-	}
 }
 
 Sector.prototype.createScrap = function(object)

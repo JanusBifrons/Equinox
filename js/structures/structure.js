@@ -61,6 +61,8 @@ function Structure()
 	this.m_iHeuristic = 0;
 	this.m_iTotal = 0;
 	this.m_iMaxConnections = 0;
+	this.m_iRequestDelayMax = 5000;
+	this.m_iRequestDelay = (this.m_iRequestDelayMax * 0.2);
 	
 	// Power
 	this.m_iPowerStored = 0;
@@ -206,7 +208,7 @@ Structure.prototype.draw = function()
 		
 		m_kContext.lineWidth = 0.5;
 		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 250 + this.m_iRadius, 0, 2 * Math.PI);
+		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 750 + this.m_iRadius, 0, 2 * Math.PI);
 		m_kContext.stroke();
 		m_kContext.closePath();
 	}
@@ -526,8 +528,20 @@ Structure.prototype.onCollision = function(ship)
 
 Structure.prototype.onRequest = function(request)
 {	
+	if(this.m_iRequestDelay < this.m_iRequestDelayMax)
+	{
+		this.m_iRequestDelay += m_fElapsedTime;
+		
+		return false;
+	}
+
 	// Make the request
 	m_kPathfinder.makeRequest(request);
+	
+	if(!m_kPathfinder.m_kRequestResult.m_bRequestCompleted)
+	{
+		this.m_iRequestDelay = 0;
+	}
 	
 	// Return the result!
 	return m_kPathfinder.m_kRequestResult.m_bRequestCompleted;
@@ -591,7 +605,7 @@ Structure.prototype.setConnectors = function()
 	
 		_distance = calculateDistance(this.m_liPos, _vector);
 		
-		if(_distance < (this.m_iRadius + 250) + _structures[i].m_iRadius)
+		if(_distance < (this.m_iRadius + 750) + _structures[i].m_iRadius)
 		{
 			if(this.m_liSiblings.length < this.m_iMaxConnections)
 			{
@@ -623,6 +637,8 @@ Structure.prototype.checkRequest = function(request)
 		// Unconstructed buildings cannot transfer resources!
 		return false;
 	}	
+	
+	var _requestAmount = request.m_iAmount - m_kPathfinder.m_kRequestResult.m_iAmount;
 
 	switch(request.m_iType)
 	{
@@ -631,21 +647,21 @@ Structure.prototype.checkRequest = function(request)
 			// Don't transfer from battery to battery!
 			if(!request.m_kStructure.m_bBattery)
 			{
-				if(this.checkBattery(request.m_iAmount))
+				if(this.checkBattery(_requestAmount))
 				{
-					// Enough in battery!
+					// Some in battery!
 					return true;
 				}
 				else
 				{
 					// Check generator
-					return this.checkGenerator(request.m_iAmount);
+					return this.checkGenerator(_requestAmount);
 				}
 			}
 			else
 			{
 				// Check generator
-				return this.checkGenerator(request.m_iAmount);
+				return this.checkGenerator(_requestAmount);
 			}
 			break;
 			
@@ -653,28 +669,33 @@ Structure.prototype.checkRequest = function(request)
 		case 1:
 			if(!request.m_kStructure.m_bMetalStore)
 			{
-				return this.checkMetal(request.m_iAmount);
+				return this.checkMetal(_requestAmount);
 			}
 			else
 			{
 				// Only collect from extractors!
 				if(this.m_iType == 6)
 				{
-					return this.checkMetal(request.m_iAmount);
+					return this.checkMetal(_requestAmount);
 				}
 			}
 			break;
 			
-		// CONTROL
+		// CONTROL (team)
 		case 2:			
 			if(this.m_iType == 0)
 			{
+				m_kPathfinder.m_kRequestResult.addAmount(this, 1);
 				return true;
 			}
 			else
 			{
 				return false;
 			}
+			break;
+			
+		// EMERGENCY POWER (as much as you can get)
+		case 3:
 			break;
 	}
 	
@@ -696,7 +717,7 @@ Structure.prototype.updateDrawTimer = function()
 }
 
 Structure.prototype.resetVariables = function()
-{
+{	
 	// Reset variables
 	this.m_iPowerDrain = 0;
 	this.m_bPowerTransfering = false;
@@ -782,6 +803,11 @@ Structure.prototype.regenStats = function()
 		this.m_iPowerStored = this.m_iPowerStoreMax;
 }	
 
+Structure.prototype.emergencyPower = function(power)
+{
+	return false;
+}
+
 Structure.prototype.checkGenerator = function(power)
 {	
 	// Check if this building generates power
@@ -797,6 +823,9 @@ Structure.prototype.checkGenerator = function(power)
 	// Check if we have enough to power this structure
 	if(_generation >= power)
 	{
+		// Fulfil the request
+		m_kPathfinder.m_kRequestResult.addAmount(this, power);
+		
 		// Power available!
 		this.m_iPowerDrain += power;
 		this.m_bPowerTransfering = true;
@@ -805,44 +834,81 @@ Structure.prototype.checkGenerator = function(power)
 	}
 	else
 	{		
-		return false;
+		// Transfer the remaining power
+		m_kPathfinder.m_kRequestResult.addAmount(this, _generation);
+		
+		// Max out the remaining power
+		this.m_iPowerDrain += _generation;
+		this.m_bPowerTransfering = true;
+		
+		return true;
 	}
 }
 
 Structure.prototype.checkBattery = function(power)
 {	
+	// Check if this is a battery
 	if(!this.m_bBattery)
-	{
-		// Not a battery
 		return false;
-	}
+	
+	// Check if you have any power
+	if(this.m_iPowerStored <= 0)
+		return false;
 
 	// Check if you have the power in store
 	if(this.m_iPowerStored >= power)
 	{
-		// If you do, transfer
-		this.m_iPowerStored -= power / 100;
+		// Fulfil the request
+		m_kPathfinder.m_kRequestResult.addAmount(this, power);
+		
+		// Deduct power and set transfer status
+		this.m_iPowerStored -= power;
 		this.m_bPowerTransfering = true;
 		
 		// Let them know you've transferred it
 		return true;
 	}
-	
-	// Not enough in store!
-	return false;
+	else
+	{
+		// Transfer the remaining power stored
+		m_kPathfinder.m_kRequestResult.addAmount(this, this.m_iPowerStored);
+		
+		// Transfer last of the power and set transfer status
+		this.m_iPowerStored = 0;
+		this.m_bPowerTransfering = true;
+		
+		// Let them know you've transferred it
+		return true;
+	}
 }
 
 Structure.prototype.checkMetal = function(metal)
 {
+	// Check we have any metal stored
+	if(this.m_iMetalStored <= 0)
+		return false;
+	
 	// Check if we have enough resources
 	if(this.m_iMetalStored > metal)
 	{
+		// Fulfil the request
+		m_kPathfinder.m_kRequestResult.m_iAmount += metal;
+		
+		// Deduct metal taken
 		this.m_iMetalStored -= metal;
+		
 		return true;
 	}
-	
-	// Not enough metal
-	return false;
+	else
+	{
+		// Fulfil the request
+		m_kPathfinder.m_kRequestResult.m_iAmount += this.m_iMetalStored;
+		
+		// Deduct metal taken
+		this.m_iMetalStored = 0;
+		
+		return true;
+	}
 }
 
 Structure.prototype.updateTeam = function()
@@ -854,7 +920,7 @@ Structure.prototype.updateTeam = function()
 	if(this.onRequest(new Request(this, 2, 0)))
 	{		
 		// Found one!
-		this.m_iTeam = m_kPathfinder.m_kRequestResult.m_kStructure.m_iTeam;
+		this.m_iTeam = m_kPathfinder.m_kRequestResult.m_liStructure[0].m_iTeam;
 	}
 	else
 	{		
