@@ -52,29 +52,6 @@ ShieldWall.prototype.update = function()
 {	
 	// Call base update
 	Structure.prototype.update.call(this);
-	
-	// Reset all components
-	this.m_liComponents = new Array();
-	this.m_liComponents.push(new HexHull(this, 0, 0, 0.15));
-	
-	// Loop through all siblings
-	for(var i = 0; i < this.m_liSiblings.length; i++)
-	{
-		// If a sibling is also a shield wall...
-		if(this.m_liSiblings[i].m_iType == 420)
-		{			
-			// Draw power from the grid
-			if(Structure.prototype.onRequest.call(this, new Request(this, 0, 5)))
-			{
-				// Add a shield wall component stretching from yourself to the other wall
-				this.m_liComponents.push(new ShieldLine(this, 0, 0, 1, this.m_liSiblings[i].m_liPos[0], this.m_liSiblings[i].m_liPos[1]));	
-			}
-		}
-	}
-	
-	// Update all components... this mostly just sets the position
-	for(var i = 0; i < this.m_liComponents.length; i++)
-		this.m_liComponents[i].update();	
 }
 
 ShieldWall.prototype.draw = function()
@@ -85,16 +62,41 @@ ShieldWall.prototype.draw = function()
 	Structure.prototype.draw.call(this);
 }
 
+ShieldWall.prototype.onPlace = function()
+{
+	// Call base function
+	var _result = Structure.prototype.onPlace.call(this);
+	
+	// Loop through all siblings
+	for(var i = 0; i < this.m_liSiblings.length; i++)
+	{
+		// If a sibling is also a shield wall...
+		if(this.m_liSiblings[i].m_iType == 420)
+		{			
+			// Add a shield wall component stretching from yourself to the other wall
+			this.m_liComponents.push(new ShieldLine(this, 0, 0, 1, this.m_liSiblings[i].m_liPos[0], this.m_liSiblings[i].m_liPos[1]));	
+		}
+	}
+	
+	return _result;
+}
+
 // HELPERS
+
+ShieldWall.prototype.onRequest = function(request)
+{	
+	return Structure.prototype.onRequest.call(this, request);
+}
 
 ShieldWall.prototype.onHitDrain = function(damage)
 {	
-	if(Structure.prototype.onRequest.call(this, new Request(this, 0, 1)))
+	if(Structure.prototype.onRequest.call(this, new Request(this, 0, 5)))
 	{
-		m_kLog.addStaticItem("Draining");	
 	}
 	else
 	{
-		m_kLog.addStaticItem("NOT DRAINING!");	
+		m_kLog.addStaticItem("Not enough power!");	
+		
+		m_kLog.addStaticItem(m_kPathfinder.m_kRequestResult.m_iAmount);	
 	}
 }

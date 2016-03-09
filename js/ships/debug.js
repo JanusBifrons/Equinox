@@ -61,7 +61,7 @@ function Debug(x, y, moveX, moveY, owner)
 	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
 	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
 	_beams.push(_beam1);
-	_beams.push(_beam2);
+	//_beams.push(_beam2);
 	
 	var _cannons = new Array();
 	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);

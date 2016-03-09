@@ -5,8 +5,9 @@ function CollisionManager()
 
 CollisionManager.prototype.checkCollisions = function(quadTree, ships, structures, asteroids, objects)
 {
-	//this.populateQuadTree(ships, structures, asteroids, objects);
+	// THINGS WHICH MOVE VS EVERYTHING
 	
+	// Objects
 	for(var i = 0; i < objects.length; i++)
 	{		
 		_objectPos = {
@@ -39,6 +40,51 @@ CollisionManager.prototype.checkCollisions = function(quadTree, ships, structure
 		}
 	}
 	
+	// Ships
+	for(var i = 0; i < ships.length; i++)
+	{		
+		for(var j = 0; j < ships[i].m_liShields.length; j++)
+		{
+			var _shield = ships[i].m_liShields[j];
+			
+			_shipPos = {
+				x: _shield.pos.x - _shield.r, 
+				y: _shield.pos.y - _shield.r,
+				width: _shield.r * 2,
+				height: _shield.r * 2
+			};
+				
+			// Fetch elements
+			var _elements = quadTree.retrieve(_shipPos);
+			
+			for(var k = 0; k < _elements.length; k++)
+			{	
+				// SHIP!
+				if(_elements[k].type == 0)
+				{
+					this.shipToShip(ships[i], _elements[k].object);
+				}
+		
+				// STRUCTURE!
+				if(_elements[k].type == 1)
+					this.shipToStructure(ships[i], _elements[k].object);
+				
+				// ASTEROID!
+				if(_elements[k].type == 2)
+					this.shipToAsteroid(ships[i], _elements[k].object);
+				
+				// OBJECT!
+				if(_elements[k].type == 3)
+					this.shipToObject(ships[i], _elements[k].object);
+			}
+		}
+	}
+}
+
+CollisionManager.prototype.checkWeapons = function(quadTree, ships, structures, asteroids, objects)
+{	
+	// THINGS WHICH HAVE WEAPONS (including anything which fires, such as mining lasers)
+
 	// ! IMPORTANT! // 
 	
 	// NONE of this code takes into account the range of the weapons which might result
@@ -62,28 +108,39 @@ CollisionManager.prototype.checkCollisions = function(quadTree, ships, structure
 			// Fetch elements
 			var _elements = quadTree.retrieve(_shipPos);
 			
-				
-			m_kLog.addStaticItem("Elements: " + _elements.length, 255, 255, 255);
-			
 			for(var k = 0; k < _elements.length; k++)
 			{	
 				// SHIP!
 				if(_elements[k].type == 0)
 				{
-					this.shipToShip(ships[i], _elements[k].object);
+					this.shipWeaponsToShip(ships[i], _elements[k].object);
 				}
 		
 				// STRUCTURE!
 				if(_elements[k].type == 1)
-					this.shipToStructure(ships[i], _elements[k].object);
+					this.shipWeaponsToStructure(ships[i], _elements[k].object);
 				
 				// ASTEROID!
 				if(_elements[k].type == 2)
-					this.shipToAsteroid(ships[i], _elements[k].object);
+				{
+					// Disabled for now
+					
+					// This will need to be reenabled to use mining lasers!
+					
+					//this.shipToAsteroid(ships[i], _elements[k].object);
+				}
 				
 				// OBJECT!
 				if(_elements[k].type == 3)
-					this.shipToObject(ships[i], _elements[k].object);
+				{
+					// Disabled for now
+					
+					// Will need to be reenabled to use mining lasers on scrap
+					
+					// Or to shoot mines or any object in space!
+					
+					//this.shipToObject(ships[i], _elements[k].object);
+				}
 			}
 		}
 	}
@@ -109,15 +166,15 @@ CollisionManager.prototype.checkCollisions = function(quadTree, ships, structure
 			{	
 				// SHIP!
 				if(_elements[k].type == 0)
-					this.structureToShip(structures[i], _elements[k].object);
+					this.structureWeaponsToShip(structures[i], _elements[k].object);
 				
 				// STRUCTURE!
 				if(_elements[k].type == 1)
-					this.structureToStructure(structures[i], _elements[k].object);
+					this.structureWeaponsToStructure(structures[i], _elements[k].object);
 				
 				// ASTEROID!
 				if(_elements[k].type == 2)
-					this.structureToAsteroid(structures[i], _elements[k].object);
+					this.structureWeaponsToAsteroid(structures[i], _elements[k].object);
 			}
 		}
 	}
@@ -185,7 +242,7 @@ CollisionManager.prototype.objectToShip = function(object, ship)
 	}
 }
 
-CollisionManager.prototype.structureToAsteroid = function(structure, asteroid)
+CollisionManager.prototype.structureWeaponsToAsteroid = function(structure, asteroid)
 {
 	// Retreive list of all active weapons
 	var _weapons = structure.activeWeapons();
@@ -195,7 +252,7 @@ CollisionManager.prototype.structureToAsteroid = function(structure, asteroid)
 			_weapons[i].onHit(asteroid);
 }
 
-CollisionManager.prototype.structureToStructure = function(structure, otherStructure)
+CollisionManager.prototype.structureWeaponsToStructure = function(structure, otherStructure)
 {
 	// Don't shoot yourself dummy!
 	if(structure.m_iID == otherStructure.m_iID)
@@ -210,7 +267,7 @@ CollisionManager.prototype.structureToStructure = function(structure, otherStruc
 				_weapons[i].onHit(otherStructure);
 }
 
-CollisionManager.prototype.structureToShip = function(structure, ship)
+CollisionManager.prototype.structureWeaponsToShip = function(structure, ship)
 {
 	// Physical collisions are handled by the ships
 	// Only need to handle weapons vs ships
@@ -251,12 +308,12 @@ CollisionManager.prototype.shipToObject = function(ship, object)
 	}
 }
 
-CollisionManager.prototype.shipToShip = function(ship, otherShip)
-{
+CollisionManager.prototype.shipWeaponsToShip = function(ship, otherShip)
+{	
 	// Dont hit yourself dummy...
 	if(ship.m_iID == otherShip.m_iID)
 		return;
-	
+
 	// Retreive list of all active weapons
 	var _weapons = ship.activeWeapons();
 	
@@ -274,6 +331,13 @@ CollisionManager.prototype.shipToShip = function(ship, otherShip)
 				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, otherShip.m_liComponents[j].m_cdCollision))
 					_weapons[i].onHit(otherShip);
 	}
+}
+
+CollisionManager.prototype.shipToShip = function(ship, otherShip)
+{
+	// Dont hit yourself dummy...
+	if(ship.m_iID == otherShip.m_iID)
+		return;
 		
 	if(ship.m_iTeam == otherShip.m_iTeam)
 	{
@@ -334,8 +398,8 @@ CollisionManager.prototype.shipToAsteroid = function(ship, asteroid)
 	}
 }
 
-CollisionManager.prototype.shipToStructure = function(ship, structure)
-{	
+CollisionManager.prototype.shipWeaponsToStructure = function(ship, structure)
+{
 	// Retreive list of all active weapons
 	var _weapons = ship.activeWeapons();
 	
@@ -353,6 +417,10 @@ CollisionManager.prototype.shipToStructure = function(ship, structure)
 				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liComponents[j].m_cdCollision))
 					_weapons[i].onHit(structure.m_liComponents[j]);
 	}
+}
+
+CollisionManager.prototype.shipToStructure = function(ship, structure)
+{	
 		
 	if(ship.m_iTeam == structure.m_iTeam)
 	{

@@ -53,13 +53,24 @@ ShieldLine.prototype.update = function()
 {
 	// Call base update
 	StructureComponent.prototype.update.call(this);
-	
-	// Collision Detection
-	this.m_liPoints = new Array();
-	this.m_liPoints.push(new V(this.m_liDirection[1], -this.m_liDirection[0]));
-	this.m_liPoints.push(new V(-this.m_liDirection[1], this.m_liDirection[0]));
-	this.m_liPoints.push(new V(this.m_liTarget[0] + -(this.m_liDirection[1]), this.m_liTarget[1] + this.m_liDirection[0]));
-	this.m_liPoints.push(new V(this.m_liTarget[0] + this.m_liDirection[1], this.m_liTarget[1] + -(this.m_liDirection[0])));
+		
+	if(this.m_kOwner.onRequest(new Request(this.m_kOwner, 0, 1)))
+	{
+		// Collision Detection
+		this.m_liPoints = new Array();
+		this.m_liPoints.push(new V(this.m_liDirection[1], -this.m_liDirection[0]));
+		this.m_liPoints.push(new V(-this.m_liDirection[1], this.m_liDirection[0]));
+		this.m_liPoints.push(new V(this.m_liTarget[0] + -(this.m_liDirection[1]), this.m_liTarget[1] + this.m_liDirection[0]));
+		this.m_liPoints.push(new V(this.m_liTarget[0] + this.m_liDirection[1], this.m_liTarget[1] + -(this.m_liDirection[0])));	
+	}
+	else
+	{
+		m_kLog.addStaticItem("Shield Line Component is NOT draining power!");
+		
+		// Collision Detection
+		this.m_liPoints = new Array();
+		this.m_liPoints.push(new V(0, 0));
+	}
 	
 	// Scale the points
 	StructureComponent.prototype.scale.call(this);
@@ -70,6 +81,8 @@ ShieldLine.prototype.update = function()
 	// Rotate and translate
 	this.m_cdCollision.rotate(this.m_iRotation);
 	this.m_cdCollision.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	return;
 }
 
 ShieldLine.prototype.draw = function()
