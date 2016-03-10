@@ -293,17 +293,15 @@ Ship.prototype.drawUI = function()
 	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
 	var _hullPercent = (this.m_iHull / this.m_iHullCap);
 	
-	var _step = this.m_iRadius * 0.14;
-	
-	this.drawStatBar(_shieldPercent, 0, 'blue');
-	this.drawStatBar(_armourPercent, _step, 'grey');
-	this.drawStatBar(_hullPercent, _step * 2, 'brown');
+	this.drawStatBar(_hullPercent, 0, 'brown', true);
+	this.drawStatBar(_armourPercent, 0, 'grey', false);
+	this.drawStatBar(_shieldPercent, 0, 'blue', false);
 	
 	// Restore the context back to how it was before!
 	m_kContext.restore();
 }
 
-Ship.prototype.drawStatBar = function(percent, offset, colour)
+Ship.prototype.drawStatBar = function(percent, offset, colour, background)
 {
 	var _x = -this.m_iRadius;
 	var _y = this.m_iRadius;
@@ -312,15 +310,17 @@ Ship.prototype.drawStatBar = function(percent, offset, colour)
 	
 	_y += offset;
 	
-		
 	m_kContext.lineWidth = 0.1;
 	
-	// Border and Background
-	m_kContext.fillStyle = concatenate(255, 255, 255, 127);;
-	m_kContext.fillRect(_x, _y, _width, _height);
+	if(background)
+	{
+		// Border and Background
+		m_kContext.fillStyle = concatenate(255, 255, 255, 127);;
+		m_kContext.fillRect(_x, _y, _width, _height);
 	
-	m_kContext.fillStyle = 'black';
-	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), _width * 0.99, _height - (_y * 0.02));
+		m_kContext.fillStyle = 'black';
+		m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), _width * 0.99, _height - (_y * 0.02));	
+	}
 	
 	m_kContext.fillStyle = colour;
 	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), (_width * 0.99) * percent, _height - (_y * 0.02));
