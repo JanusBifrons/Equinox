@@ -31,6 +31,7 @@ function Scrap(sector, component, moveX, moveY)
 	
 	// Switch
 	this.m_bIsMoving = true;
+	this.m_bDrawUI = false;
 }
 
 Scrap.prototype.update = function()
@@ -58,9 +59,72 @@ Scrap.prototype.update = function()
 Scrap.prototype.draw = function()
 {
 	this.m_kComponent.draw();
+	
+	if(this.m_bDrawUI)
+	{
+		this.drawUI();
+	}
+	
+	this.m_bDrawUI = false;
 }
 
 // HEHLPERS
+
+// I hate this name, but nevermind... drawStats is already taken!
+Scrap.prototype.drawUI = function()
+{
+	m_kLog.addItem("This will take a little more effort to work...", m_fElapsedTime, 255, 255, 255);
+	
+	return;
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 1;
+	
+	// Top Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Top Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
 
 Scrap.prototype.capMove = function()
 {

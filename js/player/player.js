@@ -42,6 +42,7 @@ function Player(district, sector, x, y)
 	
 	// User Interface
 	this.m_liUI = new Array();
+	this.m_liSelectedObjects = new Array();
 	
 	//this.createUI();
 	
@@ -86,6 +87,8 @@ Player.prototype.draw = function()
 	for(var i = 0; i < this.m_liUI.length; i++)
 		this.m_liUI[i].draw();
 	
+	this.drawSelected();
+	
 	// Draw UI items from the ship
 	this.m_kShip.drawStats();
 	this.m_kShip.drawWeaponList();
@@ -118,9 +121,50 @@ Player.prototype.onLeftClick = function()
 			}	
 		}
 	}
+	else
+	{
+		// Create X/Y coords in world space for mouse position
+		var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+		var _quadTree = this.m_kSector.m_kQuadTree;
+
+		// Check if mouse is over a game object and should select this ship
+		m_kCollisionManager.checkMouse(_worldPos, true, _quadTree);
+	}
 }
 
 // HELPERS
+
+Player.prototype.drawSelected = function(object)
+{
+	// Draw selected objects
+	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
+	{
+		var _object = this.m_liSelectedObjects[i];
+		
+		var _scale = 0.25;
+		var _scale = 50 / _object.m_iRadius;
+		var _padding = (m_kCanvas.width * 0.01) * _scale;
+		
+		var _transX = (m_kCanvas.width - _object.m_iRadius) * _scale;
+		var _transY = _object.m_iRadius * _scale;
+		
+		_transX -= _object.m_liPos[0] * _scale;
+		_transY -= _object.m_liPos[1] * _scale;
+		
+		// Save context!
+		m_kContext.save();
+		
+		// Translate to center// Translate to center
+		m_kContext.translate(m_kCanvas.width - ((_object.m_iRadius * _scale) + 10), 10 + (_object.m_iRadius * _scale) + (110 * i));
+		m_kContext.translate(-(_object.m_liPos[0] * _scale), -(_object.m_liPos[1] * _scale));
+		m_kContext.scale(_scale, _scale);
+		
+		_object.draw();
+		
+		// Restore the context back to how it was before!
+		m_kContext.restore();
+	}
+}
 
 Player.prototype.updateCameraPos = function()
 {
@@ -226,7 +270,7 @@ Player.prototype.updateInput = function()
 	var _quadTree = this.m_kSector.m_kQuadTree;
 
 	// Check if mouse is over a game object
-	m_kCollisionManager.checkMouse(_worldPos, _quadTree);
+	m_kCollisionManager.checkMouse(_worldPos, false, _quadTree);
 
 	// RIGHT ARROW
 	if(isKeyDown(39) || isKeyDown(68))
@@ -320,6 +364,14 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
+		
+		// Unselect all objects
+		for(var i = 0; i < this.m_liSelectedObjects.length; i++)
+		{
+			this.m_liSelectedObjects[i].m_bIsSelected = false;
+		}
+		
+		this.m_liSelectedObjects.length = 0;
 	}
 	
 	// MOUSE CLICK

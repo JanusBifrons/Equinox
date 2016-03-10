@@ -3,7 +3,7 @@ function CollisionManager()
 	this.m_kResponse = new SAT.Response();
 }
 
-CollisionManager.prototype.checkMouse = function(mousePos, quadTree)
+CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTree)
 {
 	var _mousePos = {
 		x: mousePos.x,
@@ -12,8 +12,10 @@ CollisionManager.prototype.checkMouse = function(mousePos, quadTree)
 		height: 5
 	};
 	
+	// Collision circle for the mouse position in world space
 	var _mouseCircle = new C(new V(mousePos.x, mousePos.y), 5);
 	
+	// Elements in this section of the quad tree
 	var _elements = quadTree.retrieve(_mousePos);
 	
 	for(var i = 0; i < _elements.length; i++)
@@ -29,7 +31,13 @@ CollisionManager.prototype.checkMouse = function(mousePos, quadTree)
 				{
 					// Make it draw stats!
 					_ship.m_bDrawUI = true;
-					return;
+					
+					if(mouseClicked)
+					{
+						_ship.m_bIsSelected = true;
+						
+						m_kPlayer.m_liSelectedObjects.push(_ship);
+					}
 				}
 			}
 		}
@@ -45,7 +53,46 @@ CollisionManager.prototype.checkMouse = function(mousePos, quadTree)
 				{
 					// Make it draw stats!
 					_structure.m_bDrawUI = true;
+					
+					if(mouseClicked)
+					{
+						_structure.m_bIsSelected = true;
+						
+						m_kPlayer.m_liSelectedObjects.push(_structure);
+					}
 				}
+			}
+		}
+		
+		// ASTEROID!
+		if(_elements[i].type == 2)
+		{
+			var _asteroid = _elements[i].object;
+			
+			if(this.polygonCircleCollisionDetection(_asteroid.m_cdCollision, _mouseCircle))
+			{
+				_asteroid.m_bDrawUI = true;
+				
+				if(mouseClicked)
+				{
+					_asteroid.m_bIsSelected = true;
+					
+					m_kPlayer.m_liSelectedObjects.push(_asteroid);
+				}
+			}
+		}
+		
+		// Objects don't work yet
+		continue;
+		
+		// OBJECTS!
+		if(_elements[i].type == 3)
+		{
+			var _object = _elements[i].object;
+			
+			if(this.polygonCircleCollisionDetection(_object.m_cdCollision, _mouseCircle))
+			{
+				_object.m_bDrawUI = true;
 			}
 		}
 	}

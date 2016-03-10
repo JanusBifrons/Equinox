@@ -75,6 +75,7 @@ function Ship()
 	this.m_liHull = new Array();
 	
 	// Drawing
+	this.m_bIsSelected = false;
 	this.m_bDrawUI = false;
 	this.m_bDrawShield = false;
 	this.m_iR = 0;
@@ -121,12 +122,6 @@ Ship.prototype.update = function()
 			this.m_liMove[0] -= Math.cos(_direction) * this.m_iAccel;
 			this.m_liMove[1] -= Math.sin(_direction) * this.m_iAccel;
 		}
-
-		// Friction
-		//this.m_liMove[0] *= 0.95;
-		//this.m_liMove[1] *= 0.95;
-		//this.m_liMove[0] *= 0.995;
-		//this.m_liMove[1] *= 0.995;
 	}
 	
 	// Update position based on speed
@@ -231,7 +226,7 @@ Ship.prototype.draw = function()
 	for(var i = 0; i < this.m_liComponents.length; i++)
 		this.m_liComponents[i].draw();
 	
-	if(this.m_bDrawUI)
+	if(this.m_bDrawUI || this.m_bIsSelected)
 	{
 		this.drawUI();
 	}
@@ -293,6 +288,7 @@ Ship.prototype.drawUI = function()
 	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
 	var _hullPercent = (this.m_iHull / this.m_iHullCap);
 	
+	// Draw health bars
 	this.drawStatBar(_hullPercent, 0, 'brown', true);
 	this.drawStatBar(_armourPercent, 0, 'grey', false);
 	this.drawStatBar(_shieldPercent, 0, 'blue', false);

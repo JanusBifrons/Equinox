@@ -27,13 +27,13 @@ function Structure()
 	this.m_iHullRegen = 0;
 	
 	// Switches
+	this.m_bIsSelected = false
 	this.m_bDrawUI = false;
 	this.m_bIsPlaced = false;
 	this.m_bIsConstructed = false;
 	this.m_bDrawStats = false;
 	this.m_bIsAlive = true;
 	this.m_bDelete = false;
-	this.m_bIsSelected = false;
 	
 	// Placement switches
 	this.m_bCollideShips = true;
@@ -190,17 +190,6 @@ Structure.prototype.update = function()
 
 Structure.prototype.draw = function()
 {		
-	if(this.m_bIsSelected)
-	{
-		m_kContext.fillStyle = "white";
-		m_kContext.strokeStyle = "white";
-		m_kContext.lineWidth = 0.5;
-		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 100, 0, 2 * Math.PI);
-		m_kContext.stroke();
-		m_kContext.closePath();
-	}
-
 	// If this isn't placed draw a range circle
 	if(!this.m_bIsPlaced)
 	{
@@ -326,7 +315,7 @@ Structure.prototype.draw = function()
 	// Reset colours to default
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
 	
-	if(this.m_bDrawUI)
+	if(this.m_bDrawUI || this.m_bIsSelected)
 	{
 		this.drawUI();
 	}
@@ -401,11 +390,10 @@ Structure.prototype.drawStatBar = function(percent, offset, colour, background)
 	var _x = -this.m_iRadius;
 	var _y = this.m_iRadius;
 	var _width = this.m_iRadius * 2;
-	var _height = this.m_iRadius * 0.15;
+	var _height = this.m_iRadius * 0.2;
 	
 	_y += offset;
 	
-		
 	m_kContext.lineWidth = 0.1;
 	
 	if(background)
