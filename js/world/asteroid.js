@@ -8,6 +8,9 @@ function Asteroid(x, y, radius)
 	
 	this.m_iID = guid();
 	
+	this.m_bDrawUI = false;
+	this.m_bIsSelected = false;
+	
 	// Contains the points of the asteroid for collision detection
 	this.m_liPoints = new Array();
 	
@@ -36,6 +39,13 @@ Asteroid.prototype.draw = function()
 	
 	m_kContext.closePath();
 	m_kContext.fill();		
+	
+	if(this.m_bDrawUI || this.m_bIsSelected)
+	{
+		this.drawUI();
+	}
+	
+	this.m_bDrawUI = false;
 }
 
 // EVENTS
@@ -52,6 +62,59 @@ Asteroid.prototype.onTractor = function(x, y)
 
 // HELPERS
 
+// I hate this name, but nevermind... drawStats is already taken!
+Asteroid.prototype.drawUI = function()
+{
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 1;
+	
+	// Top Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Top Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
 Asteroid.prototype.generateAsteroid = function()
 {	
 	var _numberOfVerts = (Math.random() * 6) + 10;
@@ -67,8 +130,8 @@ Asteroid.prototype.generateAsteroid = function()
 	
 	for(var i = 0; i < _randomPoints.length; i++)
 	{
-		var _x = this.m_liPos[0] + (this.m_iRadius * Math.cos(_randomPoints[i]));
-		var _y = this.m_liPos[1] + (this.m_iRadius * Math.sin(_randomPoints[i]));
+		var _x = this.m_liPos[0] + ((this.m_iRadius - 10) * Math.cos(_randomPoints[i]));
+		var _y = this.m_liPos[1] + ((this.m_iRadius - 10) * Math.sin(_randomPoints[i]));
 		
 		this.m_liPoints.push(new V(_x, _y));
 	}

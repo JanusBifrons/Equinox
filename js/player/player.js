@@ -42,6 +42,7 @@ function Player(district, sector, x, y)
 	
 	// User Interface
 	this.m_liUI = new Array();
+	this.m_liSelectedObjects = new Array();
 	
 	//this.createUI();
 	
@@ -86,6 +87,8 @@ Player.prototype.draw = function()
 	for(var i = 0; i < this.m_liUI.length; i++)
 		this.m_liUI[i].draw();
 	
+	this.drawSelected();
+	
 	// Draw UI items from the ship
 	this.m_kShip.drawStats();
 	this.m_kShip.drawWeaponList();
@@ -101,34 +104,8 @@ Player.prototype.onLeftClick = function()
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 5);
 	
-	// Flag to prevent you from placing a structure whilst you're also selecting a new one to place...
-	var _selected = false;
-	
-	// Cycle through all UI elements to check if player has clicked a button
-	for(var i = 0; i < this.m_liUI.length; i++)
-	{
-		// Check for collision
-		if(m_kCollisionManager.polygonCircleCollisionDetection(this.m_liUI[i].m_kButtonCollision, _mouseCircle))
-		{
-			// YOU TOUCHED THE BUTTON!
-			this.m_liUI[i].onClick();
-			
-			// Save the index so that we can place multiple instances of the same type of structure
-			this.m_iStructureIndex = i;
-			
-			// Create a new structure based on the index, this allows for multiple placement
-			this.m_kStructure = this.structureFromIndex(this.m_iStructureIndex);
-			
-			// Flag player as now placing the structure
-			this.m_bPlacingStructure = true;
-			
-			// Switch flag - structure has been selected
-			_selected = true;
-		}
-	}
-	
 	// If you're currently placing a structure AND you've not selected something
-	if(this.m_bPlacingStructure && !_selected)
+	if(this.m_bPlacingStructure)
 	{	
 		// Check if structure CAN be placed
 		if(this.m_kSector.structurePlacementCheck(this.m_kStructure))
@@ -144,9 +121,50 @@ Player.prototype.onLeftClick = function()
 			}	
 		}
 	}
+	else
+	{
+		// Create X/Y coords in world space for mouse position
+		var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+		var _quadTree = this.m_kSector.m_kQuadTree;
+
+		// Check if mouse is over a game object and should select this ship
+		m_kCollisionManager.checkMouse(_worldPos, true, _quadTree);
+	}
 }
 
 // HELPERS
+
+Player.prototype.drawSelected = function(object)
+{
+	// Draw selected objects
+	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
+	{
+		var _object = this.m_liSelectedObjects[i];
+		
+		var _scale = 0.25;
+		var _scale = 50 / _object.m_iRadius;
+		var _padding = (m_kCanvas.width * 0.01) * _scale;
+		
+		var _transX = (m_kCanvas.width - _object.m_iRadius) * _scale;
+		var _transY = _object.m_iRadius * _scale;
+		
+		_transX -= _object.m_liPos[0] * _scale;
+		_transY -= _object.m_liPos[1] * _scale;
+		
+		// Save context!
+		m_kContext.save();
+		
+		// Translate to center// Translate to center
+		m_kContext.translate(m_kCanvas.width - ((_object.m_iRadius * _scale) + 10), 10 + (_object.m_iRadius * _scale) + (110 * i));
+		m_kContext.translate(-(_object.m_liPos[0] * _scale), -(_object.m_liPos[1] * _scale));
+		m_kContext.scale(_scale, _scale);
+		
+		_object.draw();
+		
+		// Restore the context back to how it was before!
+		m_kContext.restore();
+	}
+}
 
 Player.prototype.updateCameraPos = function()
 {
@@ -246,6 +264,13 @@ Player.prototype.setHyperTarget = function(target)
 Player.prototype.updateInput = function()
 {		
 	this.m_iInertiaTimer -= m_fElapsedTime;
+	
+	// Create X/Y coords in world space for mouse position
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+	var _quadTree = this.m_kSector.m_kQuadTree;
+
+	// Check if mouse is over a game object
+	m_kCollisionManager.checkMouse(_worldPos, false, _quadTree);
 
 	// RIGHT ARROW
 	if(isKeyDown(39) || isKeyDown(68))
@@ -339,9 +364,15 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
+		
+		// Unselect all objects
+		for(var i = 0; i < this.m_liSelectedObjects.length; i++)
+		{
+			this.m_liSelectedObjects[i].m_bIsSelected = false;
+		}
+		
+		this.m_liSelectedObjects.length = 0;
 	}
-	
-	var _selected = false;
 	
 	// MOUSE CLICK
 	if(isMousePressed())
@@ -481,47 +512,6 @@ Player.prototype.updateInput = function()
 		this.m_kStructure = new Repair(getMouseX(), getMouseY());
 		this.m_iStructureIndex = 9;
 	}
-}
-
-Player.prototype.createUI = function()
-{
-	var _width = 75;
-	var _height = 75;
-	var _x = window.innerWidth - (_width * 1.1);
-	var _y = 0 + (_height * 0.1);
-	var _step = _height * 1.1;
-	
-	this.createConstructUIElement(_x, _y, new Connector(0,0), "Connector", 3);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Solar(0,0), "Solar", 0.09);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Extractor(0,0), "Extractor", 0.35);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Respawn(0,0), "Respawn", 0.5);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Teleporter(0,0), "Teleporter", 0.25);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Battery(0,0), "Battery", 0.35);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new BeamTurret(0,0), "Beam", 0.65);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new CannonTurret(0,0), "Cannon", 0.3);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new TractorTurret(0,0), "Tractor", 0.5);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Repair(0,0), "Repair", 0.25);
-	_y += _step;	
-	this.createConstructUIElement(_x, _y, new Storage(0,0), "Storage", 0.1);
-	
-	//_y += _step;
-	
-	// Doesn't need a step!	
-	this.createConstructUIElement(_x - 80, _y, new Beacon(0,0), "Beacon", 0.1);
-}
-
-Player.prototype.createConstructUIElement = function(x, y, structure, title, scale)
-{
-	this.m_liUI.push(new UIConstruction(x, y, 75, 75, structure, title, scale));
 }
 
 Player.prototype.structureFromIndex = function(index)

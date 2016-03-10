@@ -3,6 +3,101 @@ function CollisionManager()
 	this.m_kResponse = new SAT.Response();
 }
 
+CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTree)
+{
+	var _mousePos = {
+		x: mousePos.x,
+		y: mousePos.y, 
+		width: 5,
+		height: 5
+	};
+	
+	// Collision circle for the mouse position in world space
+	var _mouseCircle = new C(new V(mousePos.x, mousePos.y), 5);
+	
+	// Elements in this section of the quad tree
+	var _elements = quadTree.retrieve(_mousePos);
+	
+	for(var i = 0; i < _elements.length; i++)
+	{
+		// SHIP!
+		if(_elements[i].type == 0)
+		{			
+			var _ship = _elements[i].object;
+			
+			for(var k = 0; k < _ship.m_liShields.length; k++)
+			{
+				if(this.circleCircleCollisionDetection(_ship.m_liShields[k], _mouseCircle))
+				{
+					// Make it draw stats!
+					_ship.m_bDrawUI = true;
+					
+					if(mouseClicked)
+					{
+						_ship.m_bIsSelected = true;
+						
+						m_kPlayer.m_liSelectedObjects.push(_ship);
+					}
+				}
+			}
+		}
+		
+		// STRUCTURE!
+		if(_elements[i].type == 1)
+		{			
+			var _structure = _elements[i].object;
+			
+			for(var k = 0; k < _structure.m_liShields.length; k++)
+			{
+				if(this.circleCircleCollisionDetection(_structure.m_liShields[k], _mouseCircle))
+				{
+					// Make it draw stats!
+					_structure.m_bDrawUI = true;
+					
+					if(mouseClicked)
+					{
+						_structure.m_bIsSelected = true;
+						
+						m_kPlayer.m_liSelectedObjects.push(_structure);
+					}
+				}
+			}
+		}
+		
+		// ASTEROID!
+		if(_elements[i].type == 2)
+		{
+			var _asteroid = _elements[i].object;
+			
+			if(this.polygonCircleCollisionDetection(_asteroid.m_cdCollision, _mouseCircle))
+			{
+				_asteroid.m_bDrawUI = true;
+				
+				if(mouseClicked)
+				{
+					_asteroid.m_bIsSelected = true;
+					
+					m_kPlayer.m_liSelectedObjects.push(_asteroid);
+				}
+			}
+		}
+		
+		// Objects don't work yet
+		continue;
+		
+		// OBJECTS!
+		if(_elements[i].type == 3)
+		{
+			var _object = _elements[i].object;
+			
+			if(this.polygonCircleCollisionDetection(_object.m_cdCollision, _mouseCircle))
+			{
+				_object.m_bDrawUI = true;
+			}
+		}
+	}
+}
+
 CollisionManager.prototype.checkCollisions = function(quadTree, ships, structures, asteroids, objects)
 {
 	// THINGS WHICH MOVE VS EVERYTHING

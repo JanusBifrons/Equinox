@@ -27,12 +27,13 @@ function Structure()
 	this.m_iHullRegen = 0;
 	
 	// Switches
+	this.m_bIsSelected = false
+	this.m_bDrawUI = false;
 	this.m_bIsPlaced = false;
 	this.m_bIsConstructed = false;
 	this.m_bDrawStats = false;
 	this.m_bIsAlive = true;
 	this.m_bDelete = false;
-	this.m_bIsSelected = false;
 	
 	// Placement switches
 	this.m_bCollideShips = true;
@@ -189,17 +190,6 @@ Structure.prototype.update = function()
 
 Structure.prototype.draw = function()
 {		
-	if(this.m_bIsSelected)
-	{
-		m_kContext.fillStyle = "white";
-		m_kContext.strokeStyle = "white";
-		m_kContext.lineWidth = 0.5;
-		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], 100, 0, 2 * Math.PI);
-		m_kContext.stroke();
-		m_kContext.closePath();
-	}
-
 	// If this isn't placed draw a range circle
 	if(!this.m_bIsPlaced)
 	{
@@ -324,6 +314,100 @@ Structure.prototype.draw = function()
 	
 	// Reset colours to default
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
+	
+	if(this.m_bDrawUI || this.m_bIsSelected)
+	{
+		this.drawUI();
+	}
+	
+	this.m_bDrawUI = false;
+}
+
+// I hate this name, but nevermind... drawStats is already taken!
+Structure.prototype.drawUI = function()
+{
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 1;
+	
+	// Top Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Top Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Left
+	m_kContext.beginPath();
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Bottom Right
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
+	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
+	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Percents
+	var _shieldPercent = (this.m_iShields / this.m_iShieldCap);
+	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
+	var _hullPercent = (this.m_iHull / this.m_iHullCap);
+	
+	this.drawStatBar(_hullPercent, 0, 'brown', true);
+	this.drawStatBar(_armourPercent, 0, 'grey', false);
+	this.drawStatBar(_shieldPercent, 0, 'blue', false);
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
+Structure.prototype.drawStatBar = function(percent, offset, colour, background)
+{
+	var _x = -this.m_iRadius;
+	var _y = this.m_iRadius;
+	var _width = this.m_iRadius * 2;
+	var _height = this.m_iRadius * 0.2;
+	
+	_y += offset;
+	
+	m_kContext.lineWidth = 0.1;
+	
+	if(background)
+	{
+		// Border and Background
+		m_kContext.fillStyle = concatenate(255, 255, 255, 127);;
+		m_kContext.fillRect(_x, _y, _width, _height);
+	
+		m_kContext.fillStyle = 'black';
+		m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), _width * 0.99, _height - (_y * 0.02));	
+	}
+	
+	m_kContext.fillStyle = colour;
+	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), (_width * 0.99) * percent, _height - (_y * 0.02));
 }
 
 Structure.prototype.drawConnections = function()
