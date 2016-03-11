@@ -10,10 +10,6 @@ function Structure()
 	this.m_iRadius = 10;
 	this.m_iRotation = 0;
 	
-	// Level
-	this.m_iLevel = 1;
-	this.m_iExp = 0;
-	
 	// Stats
 	this.m_iShieldRegenCap = 0;
 	this.m_iShieldRegen = 0; // seconds (mili)
@@ -104,6 +100,9 @@ function Structure()
 
 Structure.prototype.update = function()
 {	
+	// Update hit timer
+	this.m_iTimeSinceLastHit += m_fElapsedTime;
+
 	// Not all structures have or need a team!
 	if(this.m_bNeedsTeam)
 	{
@@ -172,17 +171,8 @@ Structure.prototype.update = function()
 		}
 	}
 	
-	// Always draw stats if low health
-	if(this.m_iHull < (this.m_iHullCap * 0.25))
-	{
-		this.m_bDrawStats = true;
-	}
-	
 	// Reset switch
 	this.m_bPowerTransfering = false;
-	
-	// Hides or draws the health stats
-	this.updateDrawTimer();
 	
 	// Regenerates stats
 	this.regenStats();
@@ -209,45 +199,8 @@ Structure.prototype.draw = function()
 		this.drawStatRing(this.m_iMetalBuilt, this.m_iMetalRequired, this.m_iRadius + 5, "orange");
 	}
 	
-	if(this.m_iTimeSinceLastHit > 0)
-	{
-		_alpha = 1 - (this.m_iTimeSinceLastHit / 5000);
-	}
-	
-	if(_alpha < 0)
-		_alpha = 0;
-	
-	m_kContext.globalAlpha = _alpha;
-
-	// Draw Structure Shield
-	m_kContext.fillStyle = "blue";
-	m_kContext.strokeStyle = "blue";
-
-	// Draw shields if they're up/exist
-	if(this.m_iShields > 0)
-	{
-		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], this.m_iRadius, 0, 2 * Math.PI);
-		m_kContext.fill();
-		m_kContext.closePath();
-	}
-	
-	// Alpha the structure if it isn't fully built!	
-	var _alpha = 0.6 + (0.4 * (this.m_iMetalBuilt / this.m_iMetalRequired));
-	
-	if(!this.m_bIsConstructed)
-	{
-		m_kContext.globalAlpha = _alpha;
-	}
-	else
-	{
-		m_kContext.globalAlpha = 1;
-	}
-	
-		
-	// Draw components
-	for(var i = 0; i < this.m_liComponents.length; i++)
-		this.m_liComponents[i].draw();
+	// Draw the main components of the structure (shield and body components
+	this.drawBody();
 	
 	// Loop through all weapons
 	for(var i = 0; i < this.m_liWeapons.length; i++)
@@ -289,6 +242,18 @@ Structure.prototype.draw = function()
 		m_kContext.closePath();
 	}
 	
+	// Reset colours to default
+	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
+	
+	// Draw UI if this structure is selected or highlighted
+	if(this.m_bDrawUI || this.m_bIsSelected)
+		this.drawUI();
+	
+	this.m_bDrawUI = false;
+}
+
+Structure.prototype.drawBody = function()
+{	
 	if(this.m_iTimeSinceLastHit > 0)
 		_alpha = 1 - (this.m_iTimeSinceLastHit / 5000);
 	
@@ -296,31 +261,32 @@ Structure.prototype.draw = function()
 		_alpha = 0;
 	
 	m_kContext.globalAlpha = _alpha;
-	
-	// Draw stat bars
-	//this.drawStatRing(this.m_iPowerStored, this.m_iPowerStoreMax, this.m_iRadius + 5, "yellow", 1);
-	//this.drawStatRing(this.m_iMetalStored, this.m_iMetalStoredMax, this.m_iRadius + 5, "orange", 1);
-	
-	if(this.m_bDrawStats)
-	{		
-		m_kContext.lineWidth = 0.0;
-		this.drawStatRing(this.m_iHull, this.m_iHullCap, this.m_iRadius + 10, "darkgray", _alpha);
-		this.drawStatRing(this.m_iArmour, this.m_iArmourCap, this.m_iRadius + 16, "gray", _alpha);
-		this.drawStatRing(this.m_iShields, this.m_iShieldCap, this.m_iRadius + 22, "blue", _alpha);
-	}
-	
-	// Reset alpha
-	m_kContext.globalAlpha = 1.0;
-	
-	// Reset colours to default
-	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
-	
-	if(this.m_bDrawUI || this.m_bIsSelected)
+
+	// Draw Structure Shield
+	m_kContext.fillStyle = "blue";
+	m_kContext.strokeStyle = "blue";
+
+	// Draw shields if they're up/exist
+	if(this.m_iShields > 0)
 	{
-		this.drawUI();
+		m_kContext.beginPath();
+		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], this.m_iRadius, 0, 2 * Math.PI);
+		m_kContext.fill();
+		m_kContext.closePath();
 	}
 	
-	this.m_bDrawUI = false;
+	// Alpha the structure if it isn't fully built!	
+	var _alpha = 0.6 + (0.4 * (this.m_iMetalBuilt / this.m_iMetalRequired));
+	
+	// Draw with alpha is not constructed
+	if(!this.m_bIsConstructed)
+		m_kContext.globalAlpha = _alpha;
+	else
+		m_kContext.globalAlpha = 1;
+	
+	// Draw components
+	for(var i = 0; i < this.m_liComponents.length; i++)
+		this.m_liComponents[i].draw();
 }
 
 // I hate this name, but nevermind... drawStats is already taken!
@@ -332,43 +298,45 @@ Structure.prototype.drawUI = function()
 	// Translate to center
 	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
 	
+	var _drawDistance = this.m_iRadius * 1.2;
+	
 	m_kContext.strokeStyle = 'white';	
 	m_kContext.fillStyle = 'white';
 	m_kContext.lineWidth = 1;
 	
 	// Top Left
 	m_kContext.beginPath();
-	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
-	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.moveTo(-_drawDistance, -_drawDistance);
+	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), -_drawDistance);
+	m_kContext.moveTo(-_drawDistance, -_drawDistance);
+	m_kContext.lineTo(-_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Top Right
 	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
-	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.moveTo(_drawDistance, -_drawDistance);
+	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), -_drawDistance);
+	m_kContext.moveTo(_drawDistance, -_drawDistance);
+	m_kContext.lineTo(_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Bottom Left
 	m_kContext.beginPath();
-	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
-	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.moveTo(-_drawDistance, _drawDistance);
+	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), _drawDistance);
+	m_kContext.moveTo(-_drawDistance, _drawDistance);
+	m_kContext.lineTo(-_drawDistance, _drawDistance - (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Bottom Right
 	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
-	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.moveTo(_drawDistance, _drawDistance);
+	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), _drawDistance);
+	m_kContext.moveTo(_drawDistance, _drawDistance);
+	m_kContext.lineTo(_drawDistance, _drawDistance - (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
@@ -377,20 +345,23 @@ Structure.prototype.drawUI = function()
 	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
 	var _hullPercent = (this.m_iHull / this.m_iHullCap);
 	
-	this.drawStatBar(_hullPercent, 0, 'brown', true);
-	this.drawStatBar(_armourPercent, 0, 'grey', false);
-	this.drawStatBar(_shieldPercent, 0, 'blue', false);
+	if(!this.m_bIsSelected)
+	{
+		this.drawStatBar(_drawDistance, _hullPercent, 0, 'brown', true);
+		this.drawStatBar(_drawDistance, _armourPercent, 0, 'grey', false);
+		this.drawStatBar(_drawDistance, _shieldPercent, 0, 'blue', false);
+	}
 	
 	// Restore the context back to how it was before!
 	m_kContext.restore();
 }
 
-Structure.prototype.drawStatBar = function(percent, offset, colour, background)
+Structure.prototype.drawStatBar = function(drawDistance, percent, offset, colour, background)
 {
-	var _x = -this.m_iRadius;
-	var _y = this.m_iRadius;
-	var _width = this.m_iRadius * 2;
-	var _height = this.m_iRadius * 0.2;
+	var _x = -drawDistance;
+	var _y = drawDistance;
+	var _width = drawDistance * 2;
+	var _height = drawDistance * 0.2;
 	
 	_y += offset;
 	
@@ -601,6 +572,9 @@ Structure.prototype.onDestroy = function()
 		
 		_node.removeRoute(this);
 	}
+	
+	// Notify player in case this structure was targetted by the player!
+	m_kPlayer.onObjectDeath(this.m_iID);
 }
 
 Structure.prototype.onCollision = function(ship)
@@ -784,20 +758,6 @@ Structure.prototype.checkRequest = function(request)
 	}
 	
 	return false;
-}
-
-Structure.prototype.updateDrawTimer = function()
-{
-	if(this.m_iTimeSinceLastHit < 5000)
-	{
-		this.m_iTimeSinceLastHit += m_fElapsedTime;
-		
-		this.m_bDrawStats = true;
-	}
-	else
-	{
-		this.m_bDrawStats = false;
-	}
 }
 
 Structure.prototype.resetVariables = function()
