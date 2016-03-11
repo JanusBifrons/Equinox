@@ -26,19 +26,7 @@ Asteroid.prototype.update = function(moveX, moveY)
 
 Asteroid.prototype.draw = function()
 {	
-	m_kContext.lineWidth = 5;	
-	m_kContext.fillStyle = "grey";
-	
-	m_kContext.beginPath();
-	
-	// Draw Structure
-	for(var i = 0; i < this.m_cdCollision.points.length; i++)
-	{
-		m_kContext.lineTo(this.m_cdCollision.points[i].x, this.m_cdCollision.points[i].y);	
-	}
-	
-	m_kContext.closePath();
-	m_kContext.fill();		
+	this.drawBody();
 	
 	if(this.m_bDrawUI || this.m_bIsSelected)
 	{
@@ -61,6 +49,23 @@ Asteroid.prototype.onTractor = function(x, y)
 }
 
 // HELPERS
+
+Asteroid.prototype.drawBody = function()
+{
+	m_kContext.lineWidth = 5;	
+	m_kContext.fillStyle = "grey";
+	
+	m_kContext.beginPath();
+	
+	// Draw Structure
+	for(var i = 0; i < this.m_cdCollision.points.length; i++)
+	{
+		m_kContext.lineTo(this.m_cdCollision.points[i].x, this.m_cdCollision.points[i].y);	
+	}
+	
+	m_kContext.closePath();
+	m_kContext.fill();		
+}
 
 // I hate this name, but nevermind... drawStats is already taken!
 Asteroid.prototype.drawUI = function()

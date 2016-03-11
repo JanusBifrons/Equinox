@@ -117,13 +117,11 @@ MetalBar.prototype.draw = function()
 	m_kContext.moveTo(-10, 50);	
 	m_kContext.lineTo(10, 50);	
 	m_kContext.lineTo(10, 50 - (100 * (_metal / 100)));	
-	m_kContext.lineTo(-10, 50- (100 * (_metal / 100)));
+	m_kContext.lineTo(-10, 50 - (100 * (_metal / 100)));
 	
 	m_kContext.closePath();
 	m_kContext.stroke();	
 	m_kContext.fill();
-	
-	
 	
 	// Restore the context back to how it was before!
 	m_kContext.restore();
