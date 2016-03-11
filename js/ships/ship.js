@@ -189,6 +189,18 @@ Ship.prototype.draw = function()
 		}
 	}
 	
+	this.drawBody();
+	
+	if(this.m_bDrawUI || this.m_bIsSelected)
+	{
+		this.drawUI();
+	}
+	
+	this.m_bDrawUI = false;
+}
+
+Ship.prototype.drawBody = function()
+{
 	var _shieldPercent = (this.m_iShields / this.m_iShieldCap) * 100;
 	
 	// Draw shields
@@ -225,13 +237,6 @@ Ship.prototype.draw = function()
 	// Draw components
 	for(var i = 0; i < this.m_liComponents.length; i++)
 		this.m_liComponents[i].draw();
-	
-	if(this.m_bDrawUI || this.m_bIsSelected)
-	{
-		this.drawUI();
-	}
-	
-	this.m_bDrawUI = false;
 }
 
 // I hate this name, but nevermind... drawStats is already taken!
@@ -637,6 +642,9 @@ Ship.prototype.onDeath = function(reason)
 			m_kLog.addItem("Ship was destroyed by weapons fire!", 2500, 255, 255, 255);
 			break;
 	}
+	
+	// Notify player in case this ship was targetted by the player!
+	m_kPlayer.onObjectDeath(this.m_iID);
 }
 
 Ship.prototype.onRespawn = function(x, y)

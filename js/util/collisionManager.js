@@ -32,7 +32,8 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 					// Make it draw stats!
 					_ship.m_bDrawUI = true;
 					
-					if(mouseClicked)
+					// If mouse was clicked and you're not already selected
+					if(mouseClicked && !_ship.m_bIsSelected)
 					{
 						_ship.m_bIsSelected = true;
 						
@@ -54,7 +55,8 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 					// Make it draw stats!
 					_structure.m_bDrawUI = true;
 					
-					if(mouseClicked)
+					// If mouse was clicked and you're not already selected
+					if(mouseClicked && !_structure.m_bIsSelected)
 					{
 						_structure.m_bIsSelected = true;
 						
@@ -63,6 +65,10 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 				}
 			}
 		}
+		
+				
+		// Asteroids and Objects don't work yet
+		continue;
 		
 		// ASTEROID!
 		if(_elements[i].type == 2)
@@ -73,7 +79,8 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 			{
 				_asteroid.m_bDrawUI = true;
 				
-				if(mouseClicked)
+				// If mouse was clicked and you're not already selected
+				if(mouseClicked && !_asteroid.m_bIsSelected)
 				{
 					_asteroid.m_bIsSelected = true;
 					
@@ -81,9 +88,6 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 				}
 			}
 		}
-		
-		// Objects don't work yet
-		continue;
 		
 		// OBJECTS!
 		if(_elements[i].type == 3)

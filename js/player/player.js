@@ -99,6 +99,22 @@ Player.prototype.draw = function()
 
 // EVENTS
 
+Player.prototype.onObjectDeath = function(id)
+{
+	var _index = -1;
+	
+	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
+	{
+		if(this.m_liSelectedObjects[i].m_iID == id)
+		{
+			_index = i;
+		}
+	}
+	
+	if(_index > -1)
+		this.m_liSelectedObjects.splice(_index, 1);
+}
+
 Player.prototype.onLeftClick = function()
 {
 	// Collision point for the mouse position IN SCREEN SPACE
@@ -141,30 +157,131 @@ Player.prototype.drawSelected = function(object)
 	{
 		var _object = this.m_liSelectedObjects[i];
 		
-		var _scale = 0.25;
-		var _scale = 50 / _object.m_iRadius;
-		var _padding = (m_kCanvas.width * 0.01) * _scale;
+		var _size = 50;
 		
-		var _transX = (m_kCanvas.width - _object.m_iRadius) * _scale;
-		var _transY = _object.m_iRadius * _scale;
+		this.drawUIBox(_size * 2, _object, i);
 		
-		_transX -= _object.m_liPos[0] * _scale;
-		_transY -= _object.m_liPos[1] * _scale;
-		
-		// Save context!
-		m_kContext.save();
-		
-		// Translate to center// Translate to center
-		m_kContext.translate(m_kCanvas.width - ((_object.m_iRadius * _scale) + 10), 10 + (_object.m_iRadius * _scale) + (110 * i));
-		m_kContext.translate(-(_object.m_liPos[0] * _scale), -(_object.m_liPos[1] * _scale));
-		m_kContext.scale(_scale, _scale);
-		
-		_object.draw();
-		
-		// Restore the context back to how it was before!
-		m_kContext.restore();
+		this.drawObject(_size, _object, i);
 	}
 }
+
+Player.prototype.drawObjectStat = function(size, current, total, colour)
+{
+	var _percent = current / total;
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Border and background
+	m_kContext.fillRect(0, 0, size, 10);
+	
+	m_kContext.beginPath();
+	m_kContext.rect(0, 0, size, 10);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	m_kContext.fillStyle = colour;
+	
+	// Percent
+	m_kContext.fillRect(0, 0, size * _percent, 10);
+}
+
+Player.prototype.drawUIBox = function(size, object, offset)
+{
+	var _scale = size / object.m_iRadius;
+	var _padding = 20;
+	var _step = 50;
+	
+	var _x = m_kCanvas.width - (size + _padding);
+	
+	var _y = _padding + (size * offset);
+	_y +=  (_padding * offset);
+	_y += _step * offset;
+	
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center// Translate to center
+	m_kContext.translate(_x, _y);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Background
+	m_kContext.fillRect(0, 0, size, size);
+	m_kContext.beginPath();
+	m_kContext.rect(0, 0, size, size);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	m_kContext.translate(0, size + (_padding * 0.5));
+	this.drawObjectStat(size, object.m_iShields, object.m_iShieldCap, 'blue');
+	m_kContext.translate(0, _padding * 0.7);
+	this.drawObjectStat(size, object.m_iArmour, object.m_iArmourCap, 'grey');
+	m_kContext.translate(0, _padding * 0.7);
+	this.drawObjectStat(size, object.m_iHull, object.m_iHullCap, 'brown');
+	
+	var _distance = calculateDistance(this.m_kShip.m_liPos, object.m_liPos);
+	_distance = Math.floor(_distance);
+	
+	if(_distance > 4999)
+	{
+		_distance = Math.floor(_distance / 1000);
+		_distance = _distance.toString() + " KM";
+	}
+	else
+	{
+		_distance = _distance.toString() + " M";
+	}
+	
+	// Font size, type and colour
+	m_kContext.font="15px Verdana";
+	m_kContext.fillStyle = "white";
+	
+	m_kContext.translate(0, _padding * 1.4);
+	m_kContext.fillText(_distance, 0, 0);
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
+// This code is a goddamn nightmare
+// ! IMPORTANT !
+// Remember this is SCALED. So if you're trying to copy or compare 
+// the code to the drawUIBox above then keep that in mind as it is
+// absolutely critical!
+// At the moment this is basically just hacked to work, I strongly
+// advice against messing around with this unless you are prepared to
+// rewrite it...
+Player.prototype.drawObject = function(size, object, offset)
+{
+	var _scale = size / object.m_iRadius;
+	var _padding = 20;
+	var _step = 170;
+	
+	var _x = m_kCanvas.width - (object.m_iRadius * _scale);
+	_x -= _padding;
+	
+	var _y = (object.m_iRadius * _scale);
+	_y += _padding;
+	_y += _step * offset;
+	
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center// Translate to center
+	m_kContext.translate(_x, _y);
+	m_kContext.translate(-(object.m_liPos[0] * _scale), -(object.m_liPos[1] * _scale));
+	m_kContext.scale(_scale, _scale);
+	
+	object.drawBody();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
 
 Player.prototype.updateCameraPos = function()
 {

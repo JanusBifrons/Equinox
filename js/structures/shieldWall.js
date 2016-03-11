@@ -13,7 +13,7 @@ function ShieldWall(x, y)
 	this.m_liPos = new Array();
 	this.m_liPos[0] = x;
 	this.m_liPos[1] = y;
-	this.m_iRadius = 6;
+	this.m_iRadius = 25;
 	
 	this.m_iMaxConnections = 3;
 	
