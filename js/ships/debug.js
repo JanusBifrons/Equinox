@@ -1,19 +1,19 @@
 Debug.prototype = new Ship();
 Debug.prototype.constructor = Debug;
 
-function Debug(x, y, moveX, moveY, owner)
-{	
+function Debug(x, y, moveX, moveY, owner, sector, team)
+{		
+	// ID
 	this.m_kOwner = owner;
-	
-	this.m_kSector = this.m_kOwner.m_kSector;
-	
-	// Generate a new GUID
+	this.m_kSector = sector;
+	this.m_iTeam = team;
 	this.m_iID = guid();
 	
 	// These must be reinitialized
 	// because Javascript is crazy...
 	this.m_liWeapons = new Array();
 	this.m_liShields = new Array();
+	this.m_liTargets = new Array();
 	
 	// Movement Variables
 	this.m_liPos = new Array();
@@ -56,9 +56,6 @@ function Debug(x, y, moveX, moveY, owner)
 	this.m_bIsHypering = false;
 	this.m_iHyperCharge = 0;
 	this.m_iHyperChargeMax = 5000; // Milliseconds
-	
-	//ID
-	this.m_iTeam = this.m_kOwner.m_iTeam;
 	
 	this.m_kCargoHold = new Cargo(this, 5);
 	this.m_kCargoHold.store(11);
