@@ -57,28 +57,15 @@ function Debug(x, y, moveX, moveY, owner)
 	this.m_iHyperCharge = 0;
 	this.m_iHyperChargeMax = 5000; // Milliseconds
 	
-	var _beams = new Array();
-	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
-	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
-	_beams.push(_beam1);
-	//_beams.push(_beam2);
-	
-	var _cannons = new Array();
-	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);
-	var _cannon2 = new LightCannon(this, -12, 18, 0, 0);
-	_cannons.push(_cannon1);
-	_cannons.push(_cannon2);
-	
-	var _construction = new Array();
-	var _construction1 = new Construction(this, 20, 0, 0, 0);
-	_construction.push(_construction1);
-	
-	this.m_liWeapons.push(_beams);
-	this.m_liWeapons.push(_cannons);
-	this.m_liWeapons.push(_construction);
-	
 	//ID
 	this.m_iTeam = this.m_kOwner.m_iTeam;
+	
+	this.m_kCargoHold = new Cargo(this, 5);
+	this.m_kCargoHold.store(11);
+	this.m_kCargoHold.store(12);
+	this.m_kCargoHold.store(12);
+	
+	this.createWeapons();
 	
 	this.createComponents();
 	
@@ -102,6 +89,29 @@ Debug.prototype.draw = function()
 	m_kContext.closePath();	
 }
 
+Debug.prototype.createWeapons = function()
+{
+	var _beams = new Array();
+	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
+	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
+	_beams.push(_beam1);
+	//_beams.push(_beam2);
+	
+	var _cannons = new Array();
+	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);
+	var _cannon2 = new LightCannon(this, -12, 18, 0, 0);
+	_cannons.push(_cannon1);
+	_cannons.push(_cannon2);
+	
+	var _construction = new Array();
+	var _construction1 = new Construction(this, 20, 0, 0, 0);
+	_construction.push(_construction1);
+	
+	this.m_liWeapons.push(_beams);
+	this.m_liWeapons.push(_cannons);
+	this.m_liWeapons.push(_construction);
+}
+
 Debug.prototype.createComponents = function()
 {
 	// Ship graphics
@@ -122,6 +132,4 @@ Debug.prototype.createComponents = function()
 	
 	this.m_liComponents.push(new LeftPad(this, -15, 0, 1.5));
 	this.m_liComponents.push(new RightPad(this, -15, 0, 1.5));
-	
-	
 }

@@ -93,8 +93,14 @@ Player.prototype.draw = function()
 	this.m_kShip.drawStats();
 	this.m_kShip.drawWeaponList();
 	
+	// Draw Cargo!
+	if(this.m_kShip.m_bDrawCargo)
+	{
+		this.m_kShip.m_kCargoHold.draw();
+	}
+	
 	// Draw Exp Bar
-	this.drawExpBar();
+	//this.drawExpBar();
 }
 
 // EVENTS
@@ -149,80 +155,70 @@ Player.prototype.onLeftClick = function()
 }
 
 // HELPERS
-
 Player.prototype.drawSelected = function(object)
 {
+	//var _size = 100;
+	var _size = 125;
+	var _padding = 20;
+	var _step = 100;
+	
+	// Set start X and Y
+	var _x = m_kCanvas.width - (_size + _padding);
+	var _y = _padding;
+	
 	// Draw selected objects
 	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
 	{
+		// Make rows so the targets dont fall off the bottom of the screen
+		if(_y > (m_kCanvas.height * 0.9))
+		{
+			_x -= _size + _padding;
+			_y = _padding;
+		}
+		
+		// Reference to object for readability
 		var _object = this.m_liSelectedObjects[i];
 		
-		var _size = 50;
+		// Draw background and border
+		this.drawUIBox(_x, _y, _size, _object, i);
 		
-		this.drawUIBox(_size * 2, _object, i);
+		// Draw object itself
+		this.drawObject(_x, _y, _size / 2, _object, 10);	// Size is halved as it is compared to radius which is obviously doubled to get the width
 		
-		this.drawObject(_size, _object, i);
+		// Add the height so the next target isn't overlapping
+		_y += _size;
+		
+		// Add a little padding so the stats aren't touching the preview
+		_y += _padding * 0.5;
+		
+		// Draw shield 
+		this.drawObjectStat(_x, _y, _size, _object.m_iShields, _object.m_iShieldCap, 'blue');
+		
+		// Add a little padding so the stats aren't touching each other
+		_y += _padding * 0.7;
+		
+		// Draw armour
+		this.drawObjectStat(_x, _y, _size, _object.m_iArmour, _object.m_iArmourCap, 'grey');
+		
+		// Add a little padding so the stats aren't touching each other
+		_y += _padding * 0.7;
+		
+		// Draw hull
+		this.drawObjectStat(_x, _y, _size, _object.m_iHull, _object.m_iHullCap, 'brown');
+		
+		// Add a little padding to the stats dont touch the distance
+		_y += _padding * 1.4;
+		
+		// Draw the distance to this target
+		this.drawDistance(_x, _y, _object);
+		
+		// Add padding to next target!
+		_y += _padding * 0.5;
 	}
 }
 
-Player.prototype.drawObjectStat = function(size, current, total, colour)
+Player.prototype.drawDistance = function(x, y, object)
 {
-	var _percent = current / total;
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'black';
-	m_kContext.lineWidth = 1;
-	
-	// Border and background
-	m_kContext.fillRect(0, 0, size, 10);
-	
-	m_kContext.beginPath();
-	m_kContext.rect(0, 0, size, 10);
-	m_kContext.closePath();
-	m_kContext.stroke();
-	
-	m_kContext.fillStyle = colour;
-	
-	// Percent
-	m_kContext.fillRect(0, 0, size * _percent, 10);
-}
-
-Player.prototype.drawUIBox = function(size, object, offset)
-{
-	var _scale = size / object.m_iRadius;
-	var _padding = 20;
-	var _step = 50;
-	
-	var _x = m_kCanvas.width - (size + _padding);
-	
-	var _y = _padding + (size * offset);
-	_y +=  (_padding * offset);
-	_y += _step * offset;
-	
-	// Save context!
-	m_kContext.save();
-	
-	// Translate to center// Translate to center
-	m_kContext.translate(_x, _y);
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'black';
-	m_kContext.lineWidth = 1;
-	
-	// Background
-	m_kContext.fillRect(0, 0, size, size);
-	m_kContext.beginPath();
-	m_kContext.rect(0, 0, size, size);
-	m_kContext.closePath();
-	m_kContext.stroke();
-	
-	m_kContext.translate(0, size + (_padding * 0.5));
-	this.drawObjectStat(size, object.m_iShields, object.m_iShieldCap, 'blue');
-	m_kContext.translate(0, _padding * 0.7);
-	this.drawObjectStat(size, object.m_iArmour, object.m_iArmourCap, 'grey');
-	m_kContext.translate(0, _padding * 0.7);
-	this.drawObjectStat(size, object.m_iHull, object.m_iHullCap, 'brown');
-	
 	var _distance = calculateDistance(this.m_kShip.m_liPos, object.m_liPos);
 	_distance = Math.floor(_distance);
 	
@@ -240,39 +236,24 @@ Player.prototype.drawUIBox = function(size, object, offset)
 	m_kContext.font="15px Verdana";
 	m_kContext.fillStyle = "white";
 	
-	m_kContext.translate(0, _padding * 1.4);
-	m_kContext.fillText(_distance, 0, 0);
-	
-	// Restore the context back to how it was before!
-	m_kContext.restore();
+	m_kContext.fillText(_distance, x, y);
 }
 
-// This code is a goddamn nightmare
-// ! IMPORTANT !
-// Remember this is SCALED. So if you're trying to copy or compare 
-// the code to the drawUIBox above then keep that in mind as it is
-// absolutely critical!
-// At the moment this is basically just hacked to work, I strongly
-// advice against messing around with this unless you are prepared to
-// rewrite it...
-Player.prototype.drawObject = function(size, object, offset)
+Player.prototype.drawObject = function(x, y, size, object, padding)
 {
-	var _scale = size / object.m_iRadius;
-	var _padding = 20;
-	var _step = 170;
-	
-	var _x = m_kCanvas.width - (object.m_iRadius * _scale);
-	_x -= _padding;
-	
-	var _y = (object.m_iRadius * _scale);
-	_y += _padding;
-	_y += _step * offset;
+	var _scale = (size - padding) / object.m_iRadius;
 	
 	// Save context!
 	m_kContext.save();
 	
+	x += padding;
+	y += padding;
+	
+	x += object.m_iRadius * _scale;
+	y += object.m_iRadius * _scale;
+	
 	// Translate to center// Translate to center
-	m_kContext.translate(_x, _y);
+	m_kContext.translate(x, y);
 	m_kContext.translate(-(object.m_liPos[0] * _scale), -(object.m_liPos[1] * _scale));
 	m_kContext.scale(_scale, _scale);
 	
@@ -282,6 +263,50 @@ Player.prototype.drawObject = function(size, object, offset)
 	m_kContext.restore();
 }
 
+Player.prototype.drawObjectStat = function(x, y, size, current, total, colour)
+{
+	var _percent = current / total;
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Border and background
+	m_kContext.fillRect(x, y, size, 10);
+	
+	m_kContext.beginPath();
+	m_kContext.rect(x, y, size, 10);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	m_kContext.fillStyle = colour;
+	
+	// Percent
+	m_kContext.fillRect(x, y, size * _percent, 10);
+}
+
+Player.prototype.drawUIBox = function(x, y, size, object)
+{	
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center// Translate to center
+	m_kContext.translate(x, y);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Background
+	m_kContext.fillRect(0, 0, size, size);
+	m_kContext.beginPath();
+	m_kContext.rect(0, 0, size, size);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
 
 Player.prototype.updateCameraPos = function()
 {
@@ -530,6 +555,28 @@ Player.prototype.updateInput = function()
 		this.m_kStructure.m_iRotation -= 0.1
 		
 		this.m_kStructure.m_iRotation = wrapAngle(this.m_kStructure.m_iRotation);
+	}
+	
+	// C KEY
+	if(isKeyDown(67))
+	{
+		if(this.m_iInertiaTimer <= 0)
+		{
+			if(!this.m_kShip.m_bDrawCargo)
+			{
+				this.m_kShip.m_bDrawCargo = true;
+				
+				// This should be a generic variable
+				this.m_iInertiaTimer = this.m_iInteriaTimerMax;
+			}
+			else
+			{
+				this.m_kShip.m_bDrawCargo = false;
+				
+				// This should be a generic variable
+				this.m_iInertiaTimer = this.m_iInteriaTimerMax;
+			}	
+		}
 	}
 	
 	// 0 KEY
