@@ -169,6 +169,9 @@ Weapon.prototype.updateOffsets = function()
 
 Weapon.prototype.fireOnTargets = function()
 {	
+	// Disabled
+	return;
+
 	var _targets = this.m_kOwner.m_liTargets;
 	var _closest = this.m_iRange;
 	var _distance = 0;
