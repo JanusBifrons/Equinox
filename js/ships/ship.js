@@ -69,6 +69,10 @@ function Ship()
 	// Ship Parts
 	this.m_liComponents = new Array();
 	
+	// Ship cargo
+	this.m_bDrawCargo = false;
+	this.m_kCargoHold = new Cargo(this, 0);
+	
 	// Collision Detection
 	this.m_iTimeSinceLastHit = 5001;
 	this.m_liShields = new Array();
@@ -248,43 +252,45 @@ Ship.prototype.drawUI = function()
 	// Translate to center
 	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
 	
+	var _drawDistance = this.m_iRadius * 1.2;
+	
 	m_kContext.strokeStyle = 'white';	
 	m_kContext.fillStyle = 'white';
 	m_kContext.lineWidth = 1;
 	
 	// Top Left
 	m_kContext.beginPath();
-	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), -this.m_iRadius);
-	m_kContext.moveTo(-this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.moveTo(-_drawDistance, -_drawDistance);
+	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), -_drawDistance);
+	m_kContext.moveTo(-_drawDistance, -_drawDistance);
+	m_kContext.lineTo(-_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Top Right
 	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), -this.m_iRadius);
-	m_kContext.moveTo(this.m_iRadius, -this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius, -this.m_iRadius  + (this.m_iRadius * 0.5));
+	m_kContext.moveTo(_drawDistance, -_drawDistance);
+	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), -_drawDistance);
+	m_kContext.moveTo(_drawDistance, -_drawDistance);
+	m_kContext.lineTo(_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Bottom Left
 	m_kContext.beginPath();
-	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius + (this.m_iRadius * 0.5), this.m_iRadius);
-	m_kContext.moveTo(-this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(-this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.moveTo(-_drawDistance, _drawDistance);
+	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), _drawDistance);
+	m_kContext.moveTo(-_drawDistance, _drawDistance);
+	m_kContext.lineTo(-_drawDistance, _drawDistance - (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
 	// Bottom Right
 	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius - (this.m_iRadius * 0.5), this.m_iRadius);
-	m_kContext.moveTo(this.m_iRadius, this.m_iRadius);
-	m_kContext.lineTo(this.m_iRadius, this.m_iRadius  - (this.m_iRadius * 0.5));
+	m_kContext.moveTo(_drawDistance, _drawDistance);
+	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), _drawDistance);
+	m_kContext.moveTo(_drawDistance, _drawDistance);
+	m_kContext.lineTo(_drawDistance, _drawDistance - (_drawDistance * 0.5));
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	
@@ -293,21 +299,23 @@ Ship.prototype.drawUI = function()
 	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
 	var _hullPercent = (this.m_iHull / this.m_iHullCap);
 	
-	// Draw health bars
-	this.drawStatBar(_hullPercent, 0, 'brown', true);
-	this.drawStatBar(_armourPercent, 0, 'grey', false);
-	this.drawStatBar(_shieldPercent, 0, 'blue', false);
+	if(!this.m_bIsSelected)
+	{
+		this.drawStatBar(_drawDistance, _hullPercent, 0, 'brown', true);
+		this.drawStatBar(_drawDistance, _armourPercent, 0, 'grey', false);
+		this.drawStatBar(_drawDistance, _shieldPercent, 0, 'blue', false);
+	}
 	
 	// Restore the context back to how it was before!
 	m_kContext.restore();
 }
 
-Ship.prototype.drawStatBar = function(percent, offset, colour, background)
+Ship.prototype.drawStatBar = function(drawDistance, percent, offset, colour, background)
 {
-	var _x = -this.m_iRadius;
-	var _y = this.m_iRadius;
-	var _width = this.m_iRadius * 2;
-	var _height = this.m_iRadius * 0.15;
+	var _x = -drawDistance;
+	var _y = drawDistance;
+	var _width = drawDistance * 2;
+	var _height = drawDistance * 0.2;
 	
 	_y += offset;
 	
