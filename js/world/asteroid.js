@@ -1,5 +1,7 @@
 function Asteroid(x, y, radius)
 {
+	this.m_eObjectType = "Asteroid";
+	
 	this.m_liPos = new Array();
 	this.m_liPos[0] = x;
 	this.m_liPos[1] = y;

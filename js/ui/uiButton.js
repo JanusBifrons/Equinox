@@ -1,4 +1,4 @@
-function UIButton(owner, id, x, y, width, height, icon, r, g, b)
+function UIButton(owner, id, x, y, width, height, hasIcon, icon, r, g, b)
 {	
 	this.m_kOwner = owner;
 	this.m_iID = id;
@@ -12,7 +12,12 @@ function UIButton(owner, id, x, y, width, height, icon, r, g, b)
 	
 	this.m_cdCollision = new P(new V(0, 0), [new V(x, y), new V(x + width, y), new V(x + width, y + height), new V(x, y + height)]);
 	
-	this.m_kIcon = document.getElementById(icon);
+	this.m_bHasIcon = hasIcon;
+	
+	if(this.m_bHasIcon)
+	{
+		this.m_kIcon = document.getElementById(icon);
+	}
 	
 	// Drawing
 	this.m_iR = r;
@@ -54,7 +59,10 @@ UIButton.prototype.draw = function()
 	var _y = this.m_liPos[1] - (this.m_iHeight / 2);
 	_y += (this.m_iHeight * 0.1);
 	
-	m_kContext.drawImage(this.m_kIcon, _x, _y, this.m_iWidth * 0.8, this.m_iHeight * 0.8);
+	if(this.m_bHasIcon)
+	{
+		m_kContext.drawImage(this.m_kIcon, _x, _y, this.m_iWidth * 0.8, this.m_iHeight * 0.8);
+	}
 }
 
 // EVENTS

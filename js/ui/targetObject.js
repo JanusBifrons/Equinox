@@ -6,11 +6,21 @@ function TargetObject(owner, object, isLocked)
 	this.m_iLockTime = calculateDistance(this.m_kOwner.m_liPos, this.m_kTarget.m_liPos);
 	this.m_iLockProgress = 0;
 	this.m_bIsLocked = isLocked;
+	
+	this.m_bIsPrimary = false;
+	this.m_iPrimaryTimer = 0;
+	
+	this.m_kButton;
 }
 
 TargetObject.prototype.update = function()
 {
 	this.m_iLockProgress += m_fElapsedTime;
+	
+	this.m_iPrimaryTimer += m_fElapsedTime;
+	
+	if(this.m_iPrimaryTimer > 2000)
+		this.m_iPrimaryTimer = 0;
 	
 	if(this.m_iLockProgress >= this.m_iLockTime)
 		this.m_bIsLocked = true;
@@ -18,11 +28,16 @@ TargetObject.prototype.update = function()
 
 TargetObject.prototype.draw = function(x, y, size, padding)
 {
+	this.m_kButton = new UIButton(this, 0, x, y, size, size, false);
+	
 	// Draw background and border
 	this.drawBackground(x, y, size);
 	
 	// Draw the target... size is halved because it is compared to radius
 	this.drawTarget(x, y,  size / 2, 10);
+	
+	if(this.m_bIsPrimary)
+		this.drawHighlight(x, y, size);
 	
 	// Adjust down
 	y += size;
@@ -33,11 +48,6 @@ TargetObject.prototype.draw = function(x, y, size, padding)
 		// Target not locked...
 		
 		var _percent = this.m_iLockProgress / this.m_iLockTime;
-		
-				
-		m_kLog.addStaticItem(_percent);
-		m_kLog.addStaticItem(this.m_iLockProgress);
-		m_kLog.addStaticItem(this.m_iLockTime);
 
 		m_kContext.strokeStyle = 'white';	
 		m_kContext.fillStyle = 'black';
@@ -78,7 +88,62 @@ TargetObject.prototype.draw = function(x, y, size, padding)
 	return y;
 }
 
+// EVENTS
+
+TargetObject.prototype.onMouseClick = function(mouse)
+{
+	if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_kButton.m_cdCollision))
+	{			
+		this.m_kOwner.setPrimaryTarget(this);
+	}
+}
+
 // HELPERS
+
+TargetObject.prototype.drawHighlight = function(x, y, size)
+{
+	var _percent = this.m_iPrimaryTimer / 2000;
+	
+	// Save context!
+	m_kContext.save();
+	
+	m_kContext.translate(x + (size / 2), y + (size / 2));
+	
+	m_kContext.rotate((Math.PI * 2) * _percent);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 5;
+	
+	var _length = size / 8;
+	
+	m_kContext.beginPath();
+	m_kContext.moveTo(size / 2, 0);
+	m_kContext.lineTo((size / 2) + _length, 0);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	m_kContext.beginPath();
+	m_kContext.moveTo(-(size / 2), 0);
+	m_kContext.lineTo(-(size / 2) - _length, 0);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	m_kContext.beginPath();
+	m_kContext.moveTo(0, -(size / 2));
+	m_kContext.lineTo(0, -(size / 2) - _length);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	m_kContext.beginPath();
+	m_kContext.moveTo(0, (size / 2));
+	m_kContext.lineTo(0, (size / 2) + _length);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
 
 TargetObject.prototype.drawInfoBar = function(x, y, size, current, total, colour)
 {

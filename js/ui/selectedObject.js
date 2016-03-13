@@ -32,22 +32,17 @@ SelectedObject.prototype.createButtons = function(x, y, size, padding)
 	// Clear previous list
 	this.m_liButtons.length = 0;	
 	
-	// Add test button
-	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, 'targetIcon'));
+	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, true, 'targetIcon'));
 	x += size;
 	x += padding;
 	
-	this.m_liButtons.push(new UIButton(this, 1, x, y, size, size, 'swapIcon'));
+	this.m_liButtons.push(new UIButton(this, 1, x, y, size, size, true, 'swapIcon'));
 	x += size;
 	x += padding;
 	
-	return;
-	
-	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, 'targetIcon'));
+	this.m_liButtons.push(new UIButton(this, 2, x, y, size, size, true, 'boxIcon'));
 	x += size;
 	x += padding;
-	
-	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, 'targetIcon'));
 }
 
 SelectedObject.prototype.drawBackground = function(x, y, height, width)
@@ -76,7 +71,7 @@ SelectedObject.prototype.drawBackground = function(x, y, height, width)
 // EVENTS
 
 SelectedObject.prototype.onMouseClick = function(mouse)
-{
+{	
 	for(var i = 0; i < this.m_liButtons.length; i++)
 	{
 		if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_liButtons[i].m_cdCollision))
@@ -103,7 +98,11 @@ SelectedObject.prototype.onClick = function(id)
 		case 1:
 			if(this.m_kSelected.m_kTarget.m_eObjectType == "Ship")
 			{
-				this.m_kOwner.onChangeShip(this.m_kSelected.m_kTarget);
+				this.m_kOwner.onShipChange(this.m_kSelected.m_kTarget);
 			}
+			
+		case 2:
+			this.m_kOwner.onOpenCargo(this.m_kSelected.m_kTarget);
+			
 	}
 }

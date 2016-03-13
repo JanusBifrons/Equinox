@@ -89,9 +89,6 @@ function Ship()
 
 Ship.prototype.update = function()
 {	
-	m_kLog.addStaticItem(this.m_iID);
-	m_kLog.addStaticItem(this.m_liTargets.length);
-
 	// Update targets
 	for(var i = 0; i < this.m_liTargets.length; i++)
 		this.m_liTargets[i].update();
@@ -453,6 +450,24 @@ Ship.prototype.onRespawn = function(x, y)
 }
 
 // HELPERS
+Ship.prototype.setPrimaryTarget = function(target)
+{
+	var _targets = this.m_liTargets;
+	
+	for(var i = 0; i < _targets.length; i++)
+	{
+		if(_targets[i].m_kTarget.m_iID == target.m_kTarget.m_iID)
+		{
+			_targets[i].m_bIsPrimary = true;
+		}
+		else
+		{
+			_targets[i].m_bIsPrimary = false;
+		}
+	}
+	
+	this.m_kOwner.selectObject(target.m_kTarget);
+}
 
 Ship.prototype.drawTargets = function(x, y, size, padding)
 {
