@@ -44,6 +44,7 @@ function Player(district, sector, x, y)
 	// User Interface
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
 	this.m_liSelectedObjects = new Array();
+	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
 	
 	//this.createUI();
 	
@@ -52,6 +53,9 @@ function Player(district, sector, x, y)
 
 Player.prototype.update = function()
 {	
+	// Update sector overview
+	this.m_kSectorOverview.update();
+
 	// Update Camera Pos
 	this.updateCameraPos();
 
@@ -86,7 +90,7 @@ Player.prototype.draw = function()
 	
 	m_kContext.globalAlpha = 0.75;
 	
-	// Target all targets
+	// Target targets, selected objects and overview
 	this.drawUI();
 	
 	m_kContext.globalAlpha = 1;
@@ -104,6 +108,11 @@ Player.prototype.draw = function()
 }
 
 // EVENTS
+
+Player.prototype.onOpenCargo = function(object)
+{
+	m_kLog.addItem("This code hasn't been written yet!", 1000, 255, 0, 0);
+}
 
 Player.prototype.onShipChange = function(ship)
 {
@@ -130,6 +139,15 @@ Player.prototype.onLeftClick = function()
 {
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 5);
+	
+	this.m_kSectorOverview.onMouseClick(_mouseCircle);
+	
+	var _shipTargets = this.m_kShip.m_liTargets;
+	
+	for(var i = 0; i < _shipTargets.length; i++)
+	{
+		_shipTargets[i].onMouseClick(_mouseCircle);
+	}
 	
 	// Check against UI elements
 	if(this.m_kSelectedObject.onMouseClick(_mouseCircle))
@@ -193,6 +211,10 @@ Player.prototype.drawUI = function()
 	var _y = _padding;
 	
 	this.m_kSelectedObject.draw(_x, _y, _height, _width, _padding, _size);
+	
+	var _adjustedY = _y + _height + _padding;
+	
+	this.m_kSectorOverview.draw(_x, _adjustedY, _height, _width, _padding);
 	
 	_x = m_kCanvas.width - (_width + _size + _padding + _padding);
 	
@@ -399,14 +421,6 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
-		
-		// Unselect all objects
-		for(var i = 0; i < this.m_liSelectedObjects.length; i++)
-		{
-			this.m_liSelectedObjects[i].m_bIsSelected = false;
-		}
-		
-		this.m_liSelectedObjects.length = 0;
 	}
 	
 	// MOUSE CLICK
