@@ -3,6 +3,8 @@ function Structure()
 	this.m_sDebug = "This is a structure class.";
 	this.m_sName = "Structure (Mistake!)";
 	
+	this.m_eObjectType = "Structure";
+	
 	// Stats
 	this.m_liPos = new Array();
 	this.m_liPos[0] = 0;

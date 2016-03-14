@@ -1,12 +1,25 @@
-function UIButton(name, x, y, width, height, r, g, b)
-{
-	this.m_sName = name;
-	
+function UIButton(owner, id, x, y, width, height, hasIcon, icon, r, g, b)
+{	
+	this.m_kOwner = owner;
+	this.m_iID = id;
+
 	this.m_liPos = new Array();
 	this.m_liPos[0] = x + (width / 2);
 	this.m_liPos[1] = y + (height / 2);
 	
-	this.m_kButtonCollision = new P(new V(0, 0), [new V(x, y), new V(x + width, y), new V(x + width, y + height), new V(x, y + height)]);
+	this.m_iWidth = width;
+	this.m_iHeight = height;
+	
+	this.m_cdCollision = new P(new V(0, 0), [new V(x, y), new V(x + width, y), new V(x + width, y + height), new V(x, y + height)]);
+	
+	this.m_bHasIcon = hasIcon;
+	
+	if(this.m_bHasIcon)
+	{
+		this.m_kIcon = document.getElementById(icon);
+	}
+	
+	this.m_bIsMouseOver = false;
 	
 	// Drawing
 	this.m_iR = r;
@@ -27,14 +40,22 @@ UIButton.prototype.draw = function()
 		
 	m_kContext.strokeStyle = "white";
 	m_kContext.fillStyle = this.m_cColour;
-	m_kContext.globalAlpha = 1;
+	
+	if(this.m_bIsMouseOver)
+	{
+		m_kContext.globalAlpha = 1;
+	}
+	else
+	{
+		m_kContext.globalAlpha = 0.75;
+	}
 	
 	m_kContext.beginPath();
 	
-	for(var i = 0; i < this.m_kButtonCollision.points.length; i++)
+	for(var i = 0; i < this.m_cdCollision.points.length; i++)
 	{
-		_x = this.m_kButtonCollision.points[i].x;
-		_y = this.m_kButtonCollision.points[i].y;
+		var _x = this.m_cdCollision.points[i].x;
+		var _y = this.m_cdCollision.points[i].y;
 		
 		m_kContext.lineTo(_x, _y);	
 	}
@@ -42,20 +63,28 @@ UIButton.prototype.draw = function()
 	m_kContext.closePath();
 	m_kContext.fill();	
 	
-	// Set the font variables
-	m_kContext.font="10px Verdana";
-	m_kContext.fillStyle = "black";
+	var _x = this.m_liPos[0] - (this.m_iWidth / 2);
+	_x += (this.m_iWidth * 0.1);
 	
-	// Calculate the width so we can centre it
-	var _textWidth = m_kContext.measureText(this.m_sName).width / 2;
+	var _y = this.m_liPos[1] - (this.m_iHeight / 2);
+	_y += (this.m_iHeight * 0.1);
 	
-	// Draw the text
-	m_kContext.fillText(this.m_sName, this.m_liPos[0] -_textWidth, this.m_liPos[1] + 3);
+	if(this.m_bHasIcon)
+	{
+		m_kContext.drawImage(this.m_kIcon, _x, _y, this.m_iWidth * 0.8, this.m_iHeight * 0.8);
+	}
 }
 
 // EVENTS
 
+UIButton.prototype.onMouseOver = function()
+{
+	this.m_cColour = 'grey';
+}
+
 UIButton.prototype.onClick = function()
 {	
-	//this.m_cColour = concatenate(255, 0, 0, 255);
+	this.m_kOwner.onClick(this.m_iID);
+
+	this.m_cColour = 'darkgrey';
 }

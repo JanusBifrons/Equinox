@@ -126,11 +126,11 @@ Log.prototype.draw = function()
 	// Font size and type
 	m_kContext.font="16px Verdana";
 	
-	m_kContext.fillText("Objectives", _x, _y);
+	//m_kContext.fillText("Objectives", _x, _y);
 	
 	_y += 15;
 	
-	m_kContext.fillText("----------", _x, _y);
+	//m_kContext.fillText("----------", _x, _y);
 	
 	_y += 15;
 	

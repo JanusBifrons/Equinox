@@ -29,20 +29,21 @@ function Player(district, sector, x, y)
 	this.m_liCamera[1] = 0;
 	this.m_liCameraDesired[0] = 0;
 	this.m_liCameraDesired[1] = 0;
+	this.m_iCameraSpeed = 0.5;
 
 	// Initialize players ship
-	this.m_kShip = new Debug(x, y, 0, 0, this);
+	this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
 	//this.m_kShip = new Asylum(x, y, 0, 0, this);
 	//this.m_kShip = new Tyrant(x, y, 0, 0, this);
-	////this.m_kShip = new Havok(x, y, 0, 0, this);
+	//this.m_kShip = new Havok(x, y, 0, 0, this);
 	
 	// This is compensation for my terrible input code which is buggy
 	this.m_iInteriaTimerMax = 1000;
 	this.m_iInertiaTimer = this.m_iInteriaTimerMax;
 	
 	// User Interface
-	this.m_liUI = new Array();
-	this.m_liSelectedObjects = new Array();
+	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
+	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
 	
 	//this.createUI();
 	
@@ -51,6 +52,12 @@ function Player(district, sector, x, y)
 
 Player.prototype.update = function()
 {	
+	// Update sector overview
+	this.m_kSectorOverview.update();
+	
+	// Update selected
+	this.m_kSelectedObject.update();
+
 	// Update Camera Pos
 	this.updateCameraPos();
 
@@ -83,11 +90,10 @@ Player.prototype.draw = function()
 	
 	// SCREEN SPACE
 	
-	// Draw UI elements
-	for(var i = 0; i < this.m_liUI.length; i++)
-		this.m_liUI[i].draw();
+	// Target targets, selected objects and overview
+	this.drawUI();
 	
-	this.drawSelected();
+	m_kContext.globalAlpha = 1;
 	
 	// Draw UI items from the ship
 	this.m_kShip.drawStats();
@@ -95,9 +101,7 @@ Player.prototype.draw = function()
 	
 	// Draw Cargo!
 	if(this.m_kShip.m_bDrawCargo)
-	{
 		this.m_kShip.m_kCargoHold.draw();
-	}
 	
 	// Draw Exp Bar
 	//this.drawExpBar();
@@ -105,26 +109,40 @@ Player.prototype.draw = function()
 
 // EVENTS
 
-Player.prototype.onObjectDeath = function(id)
+Player.prototype.onOpenCargo = function(object)
 {
-	var _index = -1;
-	
-	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
-	{
-		if(this.m_liSelectedObjects[i].m_iID == id)
-		{
-			_index = i;
-		}
-	}
-	
-	if(_index > -1)
-		this.m_liSelectedObjects.splice(_index, 1);
+	m_kLog.addItem("This code hasn't been written yet!", 1000, 255, 0, 0);
+}
+
+Player.prototype.onShipChange = function(ship)
+{
+	this.m_kShip = ship;
 }
 
 Player.prototype.onLeftClick = function()
 {
 	// Collision point for the mouse position IN SCREEN SPACE
-	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 5);
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+	
+	this.m_kSectorOverview.onMouseClick(_mouseCircle);
+	
+	var _shipTargets = this.m_kShip.m_liTargets;
+	
+	for(var i = 0; i < _shipTargets.length; i++)
+	{
+		_shipTargets[i].onMouseClick(_mouseCircle);
+	}
+	
+	// Check against UI elements
+	if(this.m_kSelectedObject.onMouseClick(_mouseCircle))
+	{		
+		// Cancel structure
+		this.m_bPlacingStructure = false;
+	
+		// Don't accidentally select something or highlight something
+		// or accidentally place a structure
+		return;
+	}
 	
 	// If you're currently placing a structure AND you've not selected something
 	if(this.m_bPlacingStructure)
@@ -155,177 +173,58 @@ Player.prototype.onLeftClick = function()
 }
 
 // HELPERS
-Player.prototype.drawSelected = function(object)
+
+Player.prototype.selectObject = function(object)
 {
-	//var _size = 100;
-	var _size = 125;
-	var _padding = 20;
-	var _step = 100;
+	// Unselect old object
+	this.m_kSelectedObject.m_kSelected.m_kTarget.m_bIsSelected = false;
 	
-	// Set start X and Y
-	var _x = m_kCanvas.width - (_size + _padding);
+	// Select new object
+	this.m_kSelectedObject = new SelectedObject(this, object);
+	this.m_kSelectedObject.m_kSelected.m_kTarget.m_bIsSelected = true;	// Dat nesting...
+}
+
+Player.prototype.drawUI = function()
+{
+	var _width = 400;
+	var _height = 200;
+	var _size = 100;
+	var _padding = 20;
+	
+	var _x = m_kCanvas.width - (_width + _padding);
 	var _y = _padding;
 	
-	// Draw selected objects
-	for(var i = 0; i < this.m_liSelectedObjects.length; i++)
-	{
-		// Make rows so the targets dont fall off the bottom of the screen
-		if(_y > (m_kCanvas.height * 0.9))
-		{
-			_x -= _size + _padding;
-			_y = _padding;
-		}
-		
-		// Reference to object for readability
-		var _object = this.m_liSelectedObjects[i];
-		
-		// Draw background and border
-		this.drawUIBox(_x, _y, _size, _object, i);
-		
-		// Draw object itself
-		this.drawObject(_x, _y, _size / 2, _object, 10);	// Size is halved as it is compared to radius which is obviously doubled to get the width
-		
-		// Add the height so the next target isn't overlapping
-		_y += _size;
-		
-		// Add a little padding so the stats aren't touching the preview
-		_y += _padding * 0.5;
-		
-		// Draw shield 
-		this.drawObjectStat(_x, _y, _size, _object.m_iShields, _object.m_iShieldCap, 'blue');
-		
-		// Add a little padding so the stats aren't touching each other
-		_y += _padding * 0.7;
-		
-		// Draw armour
-		this.drawObjectStat(_x, _y, _size, _object.m_iArmour, _object.m_iArmourCap, 'grey');
-		
-		// Add a little padding so the stats aren't touching each other
-		_y += _padding * 0.7;
-		
-		// Draw hull
-		this.drawObjectStat(_x, _y, _size, _object.m_iHull, _object.m_iHullCap, 'brown');
-		
-		// Add a little padding to the stats dont touch the distance
-		_y += _padding * 1.4;
-		
-		// Draw the distance to this target
-		this.drawDistance(_x, _y, _object);
-		
-		// Add padding to next target!
-		_y += _padding * 0.5;
-	}
-}
-
-Player.prototype.drawDistance = function(x, y, object)
-{
-	var _distance = calculateDistance(this.m_kShip.m_liPos, object.m_liPos);
-	_distance = Math.floor(_distance);
+	this.m_kSelectedObject.draw(_x, _y, _height, _width, _padding, _size);
 	
-	if(_distance > 4999)
-	{
-		_distance = Math.floor(_distance / 1000);
-		_distance = _distance.toString() + " KM";
-	}
-	else
-	{
-		_distance = _distance.toString() + " M";
-	}
+	var _adjustedY = _y + _height + _padding;
 	
-	// Font size, type and colour
-	m_kContext.font="15px Verdana";
-	m_kContext.fillStyle = "white";
+	this.m_kSectorOverview.draw(_x, _adjustedY, _height, _width, _padding);
 	
-	m_kContext.fillText(_distance, x, y);
-}
-
-Player.prototype.drawObject = function(x, y, size, object, padding)
-{
-	var _scale = (size - padding) / object.m_iRadius;
+	_x = m_kCanvas.width - (_width + _size + _padding + _padding);
 	
-	// Save context!
-	m_kContext.save();
-	
-	x += padding;
-	y += padding;
-	
-	x += object.m_iRadius * _scale;
-	y += object.m_iRadius * _scale;
-	
-	// Translate to center// Translate to center
-	m_kContext.translate(x, y);
-	m_kContext.translate(-(object.m_liPos[0] * _scale), -(object.m_liPos[1] * _scale));
-	m_kContext.scale(_scale, _scale);
-	
-	object.drawBody();
-	
-	// Restore the context back to how it was before!
-	m_kContext.restore();
-}
-
-Player.prototype.drawObjectStat = function(x, y, size, current, total, colour)
-{
-	var _percent = current / total;
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'black';
-	m_kContext.lineWidth = 1;
-	
-	// Border and background
-	m_kContext.fillRect(x, y, size, 10);
-	
-	m_kContext.beginPath();
-	m_kContext.rect(x, y, size, 10);
-	m_kContext.closePath();
-	m_kContext.stroke();
-	
-	m_kContext.fillStyle = colour;
-	
-	// Percent
-	m_kContext.fillRect(x, y, size * _percent, 10);
-}
-
-Player.prototype.drawUIBox = function(x, y, size, object)
-{	
-	// Save context!
-	m_kContext.save();
-	
-	// Translate to center// Translate to center
-	m_kContext.translate(x, y);
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'black';
-	m_kContext.lineWidth = 1;
-	
-	// Background
-	m_kContext.fillRect(0, 0, size, size);
-	m_kContext.beginPath();
-	m_kContext.rect(0, 0, size, size);
-	m_kContext.closePath();
-	m_kContext.stroke();
-	
-	// Restore the context back to how it was before!
-	m_kContext.restore();
+	this.m_kShip.drawTargets(_x, _y, _size, _padding);
 }
 
 Player.prototype.updateCameraPos = function()
-{
-	var _speed = 1;
-	var _distance = calculateDistance(this.m_liCamera, this.m_liCameraDesired);
-	
+{		
 	// Update camera position
 	if(this.m_kShip.m_bIsAlive)
 	{
 		this.m_liCameraDesired[0] = this.m_kShip.m_liPos[0];
 		this.m_liCameraDesired[1] = this.m_kShip.m_liPos[1];
 		
+		var _distance = calculateDistance(this.m_liCamera, this.m_liCameraDesired);
+		
 		if(_distance < 100)
 		{
-			_speed = 0.5;
+			if(this.m_iCameraSpeed < 0.5)
+			{
+				this.m_iCameraSpeed += 0.005;
+			}
 		}
 		else
 		{
-			_speed = 0.1;
+			this.m_iCameraSpeed = 0.05;
 		}
 	}
 	else
@@ -333,14 +232,14 @@ Player.prototype.updateCameraPos = function()
 		this.m_liCameraDesired[0] = 0;
 		this.m_liCameraDesired[1] = 0;
 		
-		_speed = 0.01;
+		this.m_iCameraSpeed = 0.01;
 	}
 	
 	var _x = this.m_liCamera[0] - this.m_liCameraDesired[0];
 	var _y = this.m_liCamera[1] - this.m_liCameraDesired[1];
 	
-	this.m_liCamera[0] -= (_x * _speed);
-	this.m_liCamera[1] -= (_y * _speed);
+	this.m_liCamera[0] -= (_x * this.m_iCameraSpeed);
+	this.m_liCamera[1] -= (_y * this.m_iCameraSpeed);
 }
 
 Player.prototype.updateStructurePlacement = function()
@@ -413,6 +312,28 @@ Player.prototype.updateInput = function()
 
 	// Check if mouse is over a game object
 	m_kCollisionManager.checkMouse(_worldPos, false, _quadTree);
+	
+	// Collision point for the mouse position IN SCREEN SPACE
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+		
+	// MOUSE CLICK
+	if(isMousePressed())
+	{	
+		this.onLeftClick();
+	}
+	else
+	{
+		this.m_kSectorOverview.onMouseOver(_mouseCircle);
+		
+		this.m_kSelectedObject.onMouseOver(_mouseCircle);
+	
+		var _shipTargets = this.m_kShip.m_liTargets;
+	
+		for(var i = 0; i < _shipTargets.length; i++)
+		{
+			_shipTargets[i].onMouseOver(_mouseCircle);
+		}
+	}
 
 	// RIGHT ARROW
 	if(isKeyDown(39) || isKeyDown(68))
@@ -506,20 +427,6 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
-		
-		// Unselect all objects
-		for(var i = 0; i < this.m_liSelectedObjects.length; i++)
-		{
-			this.m_liSelectedObjects[i].m_bIsSelected = false;
-		}
-		
-		this.m_liSelectedObjects.length = 0;
-	}
-	
-	// MOUSE CLICK
-	if(isMousePressed())
-	{	
-		this.onLeftClick();
 	}
 	
 	// X Key

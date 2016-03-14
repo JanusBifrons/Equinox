@@ -1,12 +1,12 @@
 function Ship()
 {
 	this.m_sDebug = "This is a ship class.";
+	this.m_eObjectType = "Ship";
 	
 	this.m_kOwner;
-	
 	this.m_kSector;
-	
-	this.m_iID = guid();
+	this.m_iID = 0;
+	this.m_iTeam = 0; // Neutral
 	
 	// Life stats
 	this.m_bIsAlive = true;
@@ -63,9 +63,6 @@ function Ship()
 	this.m_iHyperCharge = 0;
 	this.m_iHyperChargeMax = 0; // Milliseconds
 	
-	// ID
-	this.m_iTeam = 0; // Neutral
-	
 	// Ship Parts
 	this.m_liComponents = new Array();
 	
@@ -92,6 +89,9 @@ function Ship()
 
 Ship.prototype.update = function()
 {	
+	// Update targets
+	this.updateTargets();
+
 	// Update team based on owner and set colour
 	this.updateTeam();
 	
@@ -201,6 +201,303 @@ Ship.prototype.draw = function()
 	}
 	
 	this.m_bDrawUI = false;
+	
+}
+
+// EVENTS
+
+Ship.prototype.onTarget = function(object)
+{
+	// Check to see if object is already a target!
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		if(this.m_liTargets[i].m_kTarget.m_iID == object.m_iID)
+		{
+			return;
+		}
+	}
+	
+	this.m_liTargets.push(new TargetObject(this, object, false));
+}
+
+Ship.prototype.onTractor = function(x, y)
+{	
+	this.m_liMove[0] *= 0.99;
+	this.m_liMove[1] *= 0.99;
+
+	var _x = this.m_liPos[0] - x;
+	var _y = this.m_liPos[1] - y;
+	
+	var _direction = Math.atan2(-_y, -_x) + Math.PI;
+	
+	this.m_liMove[0] -= Math.cos(_direction) * (this.m_iAccel * 2);
+	this.m_liMove[1] -= Math.sin(_direction) * (this.m_iAccel * 2);
+}
+
+Ship.prototype.onRepair = function(metal)
+{	
+	// Work out what percentage of the whole this bit was
+	var _percent = (metal / this.m_iMetalRequired);
+	
+	// If the hull isnt full, add that percentage to it
+	if(this.m_iHull < this.m_iHullCap)
+	{		
+		this.m_iHull += (this.m_iHullCap * _percent);
+	}
+	else if(this.m_iArmour < this.m_iArmourCap)
+	{
+		// If the armour isnt full, add that percentage to it
+		this.m_iArmour += (this.m_iArmourCap * _percent);
+	}
+}
+
+Ship.prototype.onRecharge = function(power)
+{
+	this.m_iPowerStored += power;
+}
+
+Ship.prototype.onTeleport = function(x, y)
+{
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
+}
+
+Ship.prototype.onExplosion = function(x, y, size)
+{	
+	var _x = this.m_liPos[0] - x;
+	var _y = this.m_liPos[1] - y;
+	
+	var _push = new Array();
+	_push[0] = _x;
+	_push[1] = _y;
+	
+	var _distance = calculateMagnitude(_push);
+	_push = unitVector(_push);
+	_push[0] *= size / 50;
+	_push[1] *= size / 50;
+	
+	var _power = 1;
+	
+	if(_distance < size)
+	{
+		_power = 1 - (_distance / size);
+		
+		_push[0] *= _power;
+		_push[1] *= _power;
+	
+		this.m_liMove[0] += _push[0];
+		this.m_liMove[1] += _push[1];
+	}
+}
+
+Ship.prototype.onHit = function(damage)
+{	
+	// Check if hit is on shields or player	
+	if(this.m_iShields > 0)
+	{
+		// Impacts on shields
+		this.m_iShields -= damage;	
+		
+		// Reset shield regen timer
+		this.m_iShieldRegen = this.m_iShieldRegenCap;
+	}
+	else if(this.m_iArmour > 0)
+	{
+		// Impact on the armour
+		this.m_iArmour -= damage;
+		
+		// Reset shield regen timer
+		this.m_iShieldRegen = this.m_iShieldRegenCap;
+	}
+	else
+	{
+		// Impact on the health
+		this.m_iHull -= damage;
+		
+		// Reset shield regen timer
+		this.m_iShieldRegen = this.m_iShieldRegenCap;
+		
+		// Check if player is alive!
+		if(this.m_iHull <= 0)
+		{
+			this.onDeath(0);
+		
+			return true; // Player died!
+		}
+	}
+	
+	return false; // Player lives on
+}
+
+Ship.prototype.onConstruct = function()
+{
+	// HOLDER FUNCTION UNTIL LATER!
+}
+
+Ship.prototype.onFire = function()
+{
+	// Do nothing if ship is destroyed
+	if(!this.m_bIsAlive)
+		return;
+	
+	// Retreive selected weapon set
+	var _weapons = this.m_liWeapons[this.m_iWeaponSelected];
+	
+	// Loop through all weapons in set
+	for(var j = 0; j < _weapons.length; j++)
+	{
+		// FIRE!!
+		_weapons[j].onFire();
+	}
+}
+
+Ship.prototype.onHyperCharge = function()
+{
+	this.m_bIsHypering = true;
+}
+
+Ship.prototype.onHyper = function()
+{
+	// Reset charge
+	this.m_iHyperCharge = 0;
+	
+	// Remove ship from the sector they just left
+	this.m_kSector.removeShip(this);
+			
+	// Let the district handle informing the new sector
+	this.m_kSector.m_kDistrict.onHyper(this);
+	
+	// Set hypering to false so we know we aren't charging
+	this.m_bIsHypering = false;
+}
+
+Ship.prototype.onHyperEnd = function(sector)
+{
+	this.m_kSector = sector;
+}
+
+Ship.prototype.onEnterSector = function(structures, asteroids)
+{	
+}
+
+Ship.prototype.onCollision = function(vector)
+{	
+	this.m_iTimeSinceLastHit = 0;
+
+	this.m_liPos[0] += (vector.x);
+	this.m_liPos[1] += (vector.y);
+	
+	this.m_liMove[0] += (vector.x * 1.5);
+	this.m_liMove[1] += (vector.y * 1.5);
+}
+
+Ship.prototype.onDeath = function(reason)
+{	
+	// Edge case - player already dead!
+	if(!this.m_bIsAlive)
+		return;
+		
+	// Destroy player
+	this.m_bIsAlive = false;
+	
+	// Ask for respawn
+	//this.m_kSector.requestRespawn(this);
+	
+	this.m_kSector.createScrap(this);
+	
+	// Cause an explosion!
+	m_kCollisionManager.onExplosion(this, this.m_kSector.m_liShips);
+	
+	// Announce to console why you died
+	switch(reason)
+	{
+		case 0:
+			m_kLog.addItem("Ship was destroyed by weapons fire!", 2500, 255, 255, 255);
+			break;
+	}
+}
+
+Ship.prototype.onRespawn = function(x, y)
+{
+	m_kLog.addItem("Attempting to respawn ship!", 1000, 255, 255, 255);
+	
+	this.createComponents();
+	
+	// Respawn at a random position on the map
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
+	this.m_liMove[0] = 0;
+	this.m_liMove[1] = 0;
+	this.m_iRotation = 0;
+	
+	// Set to alive
+	this.m_bIsAlive = true;
+	this.m_bIsRespawning = false;
+	
+	// Reset all stats
+	this.m_iHull = this.m_iHullCap;
+	this.m_iArmour = this.m_iArmourCap;
+	this.m_iShields = this.m_iShieldCap;
+	this.m_iPowerStored = this.m_iPowerCap;
+	this.m_iShieldRegen = this.m_iShieldRegenCap;
+	
+	// Add yourself back to the sector!
+	this.m_kSector.m_liShips.push(this);
+}
+
+// HELPERS
+
+Ship.prototype.updateTargets = function()
+{
+	var _index = -1;
+	
+	// Update targets
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		this.m_liTargets[i].update();
+		
+		if(!this.m_liTargets[i].m_kTarget.m_bIsAlive)
+		{
+			_index = i;
+		}
+	}
+	
+	if(_index > -1)
+		this.m_liTargets.splice(_index, 1);
+}
+
+Ship.prototype.setPrimaryTarget = function(target)
+{
+	var _targets = this.m_liTargets;
+	
+	for(var i = 0; i < _targets.length; i++)
+	{
+		if(_targets[i].m_kTarget.m_iID == target.m_kTarget.m_iID)
+		{
+			_targets[i].m_bIsPrimary = true;
+		}
+		else
+		{
+			_targets[i].m_bIsPrimary = false;
+		}
+	}
+	
+	this.m_kOwner.selectObject(target.m_kTarget);
+}
+
+Ship.prototype.drawTargets = function(x, y, size, padding)
+{
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		// Make rows so the targets dont fall off the bottom of the screen
+		if(y > (m_kCanvas.height * 0.9))
+		{
+			x -= size + padding;
+			y = padding;
+		}
+		
+		y = this.m_liTargets[i].draw(x, y, size, padding);
+	}
 }
 
 Ship.prototype.drawBody = function()
@@ -453,238 +750,6 @@ Ship.prototype.drawWeaponList = function()
 	m_kContext.font = "8px Verdana";
 }
 
-// EVENTS
-
-Ship.prototype.onTractor = function(x, y)
-{	
-	this.m_liMove[0] *= 0.99;
-	this.m_liMove[1] *= 0.99;
-
-	var _x = this.m_liPos[0] - x;
-	var _y = this.m_liPos[1] - y;
-	
-	var _direction = Math.atan2(-_y, -_x) + Math.PI;
-	
-	this.m_liMove[0] -= Math.cos(_direction) * (this.m_iAccel * 2);
-	this.m_liMove[1] -= Math.sin(_direction) * (this.m_iAccel * 2);
-}
-
-Ship.prototype.onRepair = function(metal)
-{	
-	// Work out what percentage of the whole this bit was
-	var _percent = (metal / this.m_iMetalRequired);
-	
-	// If the hull isnt full, add that percentage to it
-	if(this.m_iHull < this.m_iHullCap)
-	{		
-		this.m_iHull += (this.m_iHullCap * _percent);
-	}
-	else if(this.m_iArmour < this.m_iArmourCap)
-	{
-		// If the armour isnt full, add that percentage to it
-		this.m_iArmour += (this.m_iArmourCap * _percent);
-	}
-}
-
-Ship.prototype.onRecharge = function(power)
-{
-	this.m_iPowerStored += power;
-}
-
-Ship.prototype.onTeleport = function(x, y)
-{
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-}
-
-Ship.prototype.onExplosion = function(x, y, size)
-{	
-	var _x = this.m_liPos[0] - x;
-	var _y = this.m_liPos[1] - y;
-	
-	var _push = new Array();
-	_push[0] = _x;
-	_push[1] = _y;
-	
-	var _distance = calculateMagnitude(_push);
-	_push = unitVector(_push);
-	_push[0] *= size / 50;
-	_push[1] *= size / 50;
-	
-	var _power = 1;
-	
-	if(_distance < size)
-	{
-		_power = 1 - (_distance / size);
-		
-		_push[0] *= _power;
-		_push[1] *= _power;
-	
-		this.m_liMove[0] += _push[0];
-		this.m_liMove[1] += _push[1];
-	}
-}
-
-Ship.prototype.onHit = function(damage)
-{	
-	// Check if hit is on shields or player	
-	if(this.m_iShields > 0)
-	{
-		// Impacts on shields
-		this.m_iShields -= damage;	
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-	}
-	else if(this.m_iArmour > 0)
-	{
-		// Impact on the armour
-		this.m_iArmour -= damage;
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-	}
-	else
-	{
-		// Impact on the health
-		this.m_iHull -= damage;
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-		
-		// Check if player is alive!
-		if(this.m_iHull <= 0)
-		{
-			this.onDeath(0);
-		
-			return true; // Player died!
-		}
-	}
-	
-	return false; // Player lives on
-}
-
-Ship.prototype.onConstruct = function()
-{
-	// HOLDER FUNCTION UNTIL LATER!
-}
-
-Ship.prototype.onFire = function()
-{
-	// Do nothing if ship is destroyed
-	if(!this.m_bIsAlive)
-		return;
-	
-	// Retreive selected weapon set
-	var _weapons = this.m_liWeapons[this.m_iWeaponSelected];
-	
-	// Loop through all weapons in set
-	for(var j = 0; j < _weapons.length; j++)
-	{
-		// FIRE!!
-		_weapons[j].onFire();
-	}
-}
-
-Ship.prototype.onHyperCharge = function()
-{
-	this.m_bIsHypering = true;
-}
-
-Ship.prototype.onHyper = function()
-{
-	// Reset charge
-	this.m_iHyperCharge = 0;
-	
-	// Remove ship from the sector they just left
-	this.m_kOwner.m_kSector.removeShip(this);
-			
-	// Let the district handle informing the new sector
-	this.m_kOwner.m_kDistrict.onHyper(this);
-	
-	// Set hypering to false so we know we aren't charging
-	this.m_bIsHypering = false;
-}
-
-Ship.prototype.onHyperEnd = function(sector)
-{
-	this.m_kOwner.m_kSector = sector;
-}
-
-Ship.prototype.onEnterSector = function(structures, asteroids)
-{	
-}
-
-Ship.prototype.onCollision = function(vector)
-{	
-	this.m_iTimeSinceLastHit = 0;
-
-	this.m_liPos[0] += (vector.x);
-	this.m_liPos[1] += (vector.y);
-	
-	this.m_liMove[0] += (vector.x * 1.5);
-	this.m_liMove[1] += (vector.y * 1.5);
-}
-
-Ship.prototype.onDeath = function(reason)
-{	
-	// Edge case - player already dead!
-	if(!this.m_bIsAlive)
-		return;
-		
-	// Destroy player
-	this.m_bIsAlive = false;
-	
-	// Ask for respawn
-	this.m_kOwner.m_kSector.requestRespawn(this);
-	
-	this.m_kOwner.m_kSector.createScrap(this);
-	
-	// Cause an explosion!
-	m_kCollisionManager.onExplosion(this, this.m_kSector.m_liShips);
-	
-	// Announce to console why you died
-	switch(reason)
-	{
-		case 0:
-			m_kLog.addItem("Ship was destroyed by weapons fire!", 2500, 255, 255, 255);
-			break;
-	}
-	
-	// Notify player in case this ship was targetted by the player!
-	m_kPlayer.onObjectDeath(this.m_iID);
-}
-
-Ship.prototype.onRespawn = function(x, y)
-{
-	m_kLog.addItem("Attempting to respawn ship!", 1000, 255, 255, 255);
-	
-	this.createComponents();
-	
-	// Respawn at a random position on the map
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-	this.m_liMove[0] = 0;
-	this.m_liMove[1] = 0;
-	this.m_iRotation = 0;
-	
-	// Set to alive
-	this.m_bIsAlive = true;
-	this.m_bIsRespawning = false;
-	
-	// Reset all stats
-	this.m_iHull = this.m_iHullCap;
-	this.m_iArmour = this.m_iArmourCap;
-	this.m_iShields = this.m_iShieldCap;
-	this.m_iPowerStored = this.m_iPowerCap;
-	this.m_iShieldRegen = this.m_iShieldRegenCap;
-	
-	// Add yourself back to the sector!
-	this.m_kOwner.m_kSector.m_liShips.push(this);
-}
-
-// HELPERS
-
 Ship.prototype.createComponents = function()
 {
 	// This is a holder and is always overwritten!
@@ -707,7 +772,7 @@ Ship.prototype.updateTimer = function()
 Ship.prototype.updateTeam = function()
 {
 	// Set team based on team the owner is!
-	this.m_iTeam = this.m_kOwner.m_iTeam;
+	this.m_iTeam = this.m_iTeam;
 
 	// Set colour based on team
 	if(this.m_iTeam == 1)
