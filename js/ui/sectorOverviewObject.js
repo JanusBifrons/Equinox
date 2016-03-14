@@ -3,10 +3,9 @@ function SectorOverviewObject(owner, object)
 	this.m_kOwner = owner;
 
 	this.m_kObject = object;
+	this.m_iDistanceActual = calculateDistance(this.m_kOwner.m_kShip.m_liPos, object.m_liPos)
 	
-	var _distance = calculateDistance(this.m_kOwner.m_kShip.m_liPos, object.m_liPos);
-	
-	_distance = Math.floor(_distance);
+	var _distance = Math.floor(this.m_iDistanceActual);
 	
 	if(_distance > 4999)
 	{
@@ -21,16 +20,16 @@ function SectorOverviewObject(owner, object)
 	this.m_iDistance = _distance;
 }
 
-SectorOverviewObject.prototype.draw = function(x, y, width, height)
+SectorOverviewObject.prototype.draw = function(x, y, width, height, segments)
 {	
-	this.drawBackground(x, y, width, height);
+	this.drawSegments(x, y, width, height, segments);
 	
-	this.drawInfo(x, y, width, height);
+	this.drawInfo(x, y, width, height, segments);
 }
 
 // HELPERS
 
-SectorOverviewObject.prototype.drawInfo = function(x, y, width, height)
+SectorOverviewObject.prototype.drawInfo = function(x, y, width, height, segments)
 {
 	// Font size, type and colour
 	m_kContext.font="15px Verdana";
@@ -38,12 +37,20 @@ SectorOverviewObject.prototype.drawInfo = function(x, y, width, height)
 	
 	y += 15;
 	
-	m_kContext.fillText(this.m_iDistance, x + (width * 0.105), y);
+	var _x = 0;
 	
-	m_kContext.fillText(this.m_kObject.m_eObjectType, x + (width * 0.31), y);
+	_x = x + (width * segments[0]);
+	_x += (width * 0.005);
+	
+	m_kContext.fillText(this.m_iDistance, _x, y);
+	
+	_x = x + (width * segments[1]);
+	_x += (width * 0.005);
+	
+	m_kContext.fillText(this.m_kObject.m_eObjectType, _x, y);
 }
 
-SectorOverviewObject.prototype.drawBackground = function(x, y, width, height)
+SectorOverviewObject.prototype.drawSegments = function(x, y, width, height, segments)
 {	
 	// Save context!
 	m_kContext.save();
@@ -51,33 +58,19 @@ SectorOverviewObject.prototype.drawBackground = function(x, y, width, height)
 	// Translate to center// Translate to center
 	m_kContext.translate(x, y);
 	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'white';
-	m_kContext.lineWidth = 1;
-	
-	// Background
-	m_kContext.fillRect(0, 0, width, height);
-	m_kContext.beginPath();
-	m_kContext.rect(0, 0, width, height);
-	m_kContext.closePath();
-	m_kContext.stroke();
-	
 	m_kContext.strokeStyle = 'black';	
 	m_kContext.fillStyle = 'white';
 	m_kContext.lineWidth = 1;
 	
-	var _step1 = width * 0.1;
-	var _step2 = width * 0.3;
-	var _step3 = width * 0.75;
-	
-	// Seperator
 	m_kContext.beginPath();
-	m_kContext.moveTo(_step1, 0);
-	m_kContext.lineTo(_step1, height);
-	m_kContext.moveTo(_step2, 0);
-	m_kContext.lineTo(_step2, height);
-	m_kContext.moveTo(_step3, 0);
-	m_kContext.lineTo(_step3, height);
+	
+	for(var i = 0; i < segments.length; i++)
+	{
+		
+		m_kContext.moveTo(width * segments[i], 0);
+		m_kContext.lineTo(width * segments[i], height);
+	}
+	
 	m_kContext.closePath();	
 	m_kContext.stroke();
 	

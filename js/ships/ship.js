@@ -90,8 +90,7 @@ function Ship()
 Ship.prototype.update = function()
 {	
 	// Update targets
-	for(var i = 0; i < this.m_liTargets.length; i++)
-		this.m_liTargets[i].update();
+	this.updateTargets();
 
 	// Update team based on owner and set colour
 	this.updateTeam();
@@ -416,9 +415,6 @@ Ship.prototype.onDeath = function(reason)
 			m_kLog.addItem("Ship was destroyed by weapons fire!", 2500, 255, 255, 255);
 			break;
 	}
-	
-	// Notify player in case this ship was targetted by the player!
-	m_kPlayer.onObjectDeath(this.m_iID);
 }
 
 Ship.prototype.onRespawn = function(x, y)
@@ -450,6 +446,26 @@ Ship.prototype.onRespawn = function(x, y)
 }
 
 // HELPERS
+
+Ship.prototype.updateTargets = function()
+{
+	var _index = -1;
+	
+	// Update targets
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		this.m_liTargets[i].update();
+		
+		if(!this.m_liTargets[i].m_kTarget.m_bIsAlive)
+		{
+			_index = i;
+		}
+	}
+	
+	if(_index > -1)
+		this.m_liTargets.splice(_index, 1);
+}
+
 Ship.prototype.setPrimaryTarget = function(target)
 {
 	var _targets = this.m_liTargets;

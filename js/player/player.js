@@ -43,7 +43,6 @@ function Player(district, sector, x, y)
 	
 	// User Interface
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
-	this.m_liSelectedObjects = new Array();
 	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
 	
 	//this.createUI();
@@ -55,6 +54,9 @@ Player.prototype.update = function()
 {	
 	// Update sector overview
 	this.m_kSectorOverview.update();
+	
+	// Update selected
+	this.m_kSelectedObject.update();
 
 	// Update Camera Pos
 	this.updateCameraPos();
@@ -88,8 +90,6 @@ Player.prototype.draw = function()
 	
 	// SCREEN SPACE
 	
-	m_kContext.globalAlpha = 0.75;
-	
 	// Target targets, selected objects and overview
 	this.drawUI();
 	
@@ -119,26 +119,10 @@ Player.prototype.onShipChange = function(ship)
 	this.m_kShip = ship;
 }
 
-Player.prototype.onObjectDeath = function(id)
-{
-	var _index = -1;
-	
-	for(var i = 0; i < this.m_liTargetedObjects.length; i++)
-	{
-		if(this.m_liTargetedObjects[i].m_iID == id)
-		{
-			_index = i;
-		}
-	}
-	
-	if(_index > -1)
-		this.m_liTargetedObjects.splice(_index, 1);
-}
-
 Player.prototype.onLeftClick = function()
 {
 	// Collision point for the mouse position IN SCREEN SPACE
-	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 5);
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 	
 	this.m_kSectorOverview.onMouseClick(_mouseCircle);
 	
@@ -328,6 +312,28 @@ Player.prototype.updateInput = function()
 
 	// Check if mouse is over a game object
 	m_kCollisionManager.checkMouse(_worldPos, false, _quadTree);
+	
+	// Collision point for the mouse position IN SCREEN SPACE
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+		
+	// MOUSE CLICK
+	if(isMousePressed())
+	{	
+		this.onLeftClick();
+	}
+	else
+	{
+		this.m_kSectorOverview.onMouseOver(_mouseCircle);
+		
+		this.m_kSelectedObject.onMouseOver(_mouseCircle);
+	
+		var _shipTargets = this.m_kShip.m_liTargets;
+	
+		for(var i = 0; i < _shipTargets.length; i++)
+		{
+			_shipTargets[i].onMouseOver(_mouseCircle);
+		}
+	}
 
 	// RIGHT ARROW
 	if(isKeyDown(39) || isKeyDown(68))
@@ -421,12 +427,6 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
-	}
-	
-	// MOUSE CLICK
-	if(isMousePressed())
-	{	
-		this.onLeftClick();
 	}
 	
 	// X Key

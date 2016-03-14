@@ -19,6 +19,8 @@ function UIButton(owner, id, x, y, width, height, hasIcon, icon, r, g, b)
 		this.m_kIcon = document.getElementById(icon);
 	}
 	
+	this.m_bIsMouseOver = false;
+	
 	// Drawing
 	this.m_iR = r;
 	this.m_iG = g;
@@ -38,7 +40,15 @@ UIButton.prototype.draw = function()
 		
 	m_kContext.strokeStyle = "white";
 	m_kContext.fillStyle = this.m_cColour;
-	m_kContext.globalAlpha = 1;
+	
+	if(this.m_bIsMouseOver)
+	{
+		m_kContext.globalAlpha = 1;
+	}
+	else
+	{
+		m_kContext.globalAlpha = 0.75;
+	}
 	
 	m_kContext.beginPath();
 	
@@ -67,9 +77,14 @@ UIButton.prototype.draw = function()
 
 // EVENTS
 
+UIButton.prototype.onMouseOver = function()
+{
+	this.m_cColour = 'grey';
+}
+
 UIButton.prototype.onClick = function()
 {	
 	this.m_kOwner.onClick(this.m_iID);
 
-	this.m_cColour = concatenate(255, 0, 0, 255);
+	this.m_cColour = 'darkgrey';
 }
