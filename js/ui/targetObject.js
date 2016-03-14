@@ -65,6 +65,8 @@ TargetObject.prototype.draw = function(x, y, size, padding)
 		
 		// Percent
 		m_kContext.fillRect(x, y, size * _percent, 10);
+		
+		y += padding * 0.5;
 	}
 	else
 	{				
@@ -89,6 +91,11 @@ TargetObject.prototype.draw = function(x, y, size, padding)
 }
 
 // EVENTS
+
+TargetObject.prototype.onMouseOver = function(mouse)
+{
+	// Do nothing
+}
 
 TargetObject.prototype.onMouseClick = function(mouse)
 {

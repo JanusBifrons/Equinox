@@ -4,17 +4,30 @@ function SelectedObject(owner, object)
 	this.m_kSelected = new TargetObject(owner.m_kShip, object, true);
 	
 	this.m_liButtons = new Array();
+	
+	this.m_liPos = new Array();
+	this.m_liPos[0] = 0;
+	this.m_liPos[1] = 0;
+	this.m_iSize = 0;
+	this.m_iPadding = 0;
 }
 
 SelectedObject.prototype.update = function()
 {
 	this.m_kSelected.update();
+	
+	this.createButtons(this.m_liPos[0] + (this.m_iPadding * 2) + this.m_iSize, this.m_liPos[1] + this.m_iPadding, this.m_iSize / 2, this.m_iPadding / 2);
 }
 
 SelectedObject.prototype.draw = function(x, y, height, width, padding, size)
 {
-	//this.createButtons(x + padding + size + padding, y + padding + size + (padding * 0.5), 50, 5); // This one draws it next to the stat bars
-	this.createButtons(x + padding + size + padding, y + padding, 50, 5);
+	m_kContext.globalAlpha = 0.75;
+	
+	// This is required to create the buttons
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
+	this.m_iSize = size;
+	this.m_iPadding = padding;
 	
 	this.drawBackground(x, y, height, width);
 	
@@ -22,6 +35,8 @@ SelectedObject.prototype.draw = function(x, y, height, width, padding, size)
 	
 	for(var i = 0; i < this.m_liButtons.length; i++)
 		this.m_liButtons[i].draw();
+	
+	m_kContext.globalAlpha = 1;
 }
 
 // HELPERS
@@ -32,15 +47,15 @@ SelectedObject.prototype.createButtons = function(x, y, size, padding)
 	// Clear previous list
 	this.m_liButtons.length = 0;	
 	
-	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, true, 'targetIcon'));
+	this.m_liButtons.push(new UIButton(this, 0, x, y, size, size, true, 'targetIcon', 255, 255, 255));
 	x += size;
 	x += padding;
 	
-	this.m_liButtons.push(new UIButton(this, 1, x, y, size, size, true, 'swapIcon'));
+	this.m_liButtons.push(new UIButton(this, 1, x, y, size, size, true, 'swapIcon', 255, 255, 255));
 	x += size;
 	x += padding;
 	
-	this.m_liButtons.push(new UIButton(this, 2, x, y, size, size, true, 'boxIcon'));
+	this.m_liButtons.push(new UIButton(this, 2, x, y, size, size, true, 'boxIcon', 255, 255, 255));
 	x += size;
 	x += padding;
 }
@@ -70,13 +85,24 @@ SelectedObject.prototype.drawBackground = function(x, y, height, width)
 
 // EVENTS
 
-SelectedObject.prototype.onMouseClick = function(mouse)
+SelectedObject.prototype.onMouseOver = function(mouse)
 {	
 	for(var i = 0; i < this.m_liButtons.length; i++)
 	{
 		if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_liButtons[i].m_cdCollision))
 		{			
-			this.onClick(this.m_liButtons[i].m_iID);
+			this.m_liButtons[i].onMouseOver();
+		}
+	}
+}
+
+SelectedObject.prototype.onMouseClick = function(mouse)
+{	
+	for(var i = 0; i < this.m_liButtons.length; i++)
+	{
+		if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_liButtons[i].m_cdCollision))
+		{	
+			this.m_liButtons[i].onClick();
 			
 			return true;
 		}

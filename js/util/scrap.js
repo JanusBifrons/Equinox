@@ -1,5 +1,7 @@
 function Scrap(sector, component, moveX, moveY)
 {
+	this.m_eObjectType = "Scrap";
+	
 	this.m_kSector = sector;
 	
 	this.m_kComponent = component;
@@ -58,7 +60,7 @@ Scrap.prototype.update = function()
 
 Scrap.prototype.draw = function()
 {
-	this.m_kComponent.draw();
+	this.drawBody();
 	
 	if(this.m_bDrawUI)
 	{
@@ -69,6 +71,11 @@ Scrap.prototype.draw = function()
 }
 
 // HEHLPERS
+
+Scrap.prototype.drawBody = function()
+{
+	this.m_kComponent.draw();
+}
 
 // I hate this name, but nevermind... drawStats is already taken!
 Scrap.prototype.drawUI = function()
