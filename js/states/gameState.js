@@ -28,7 +28,7 @@ function GameState()
 	// Add ships to the sector and spawn it
 	this.m_kSectorA.addShip(m_kPlayer.m_kShip);
 	
-	this.m_kSectorA.addShip(new Debug(-800, 0, 0, 0, null, this.m_kSectorA, 1));
+	//this.m_kSectorA.addShip(new Debug(-800, 0, 0, 0, null, this.m_kSectorA, 1));
 }
 
 GameState.prototype.update = function()

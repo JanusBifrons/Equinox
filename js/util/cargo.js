@@ -30,13 +30,18 @@ Cargo.prototype.draw = function()
 	_y += (_height * 0.1);
 	
 	this.drawCapacityBar(_x, _y, _width, _height * 0.075);
+	
+	this.drawContents(_x, _y, _width, _height);
 }
 
 // HELPERS
 
 Cargo.prototype.drawContents = function(x, y, width, height)
 {
-	
+	for(var i = 0; i < this.m_liStored.length; i++)
+	{
+		
+	}
 }
 
 Cargo.prototype.drawCapacityBar = function(x, y, width, height)

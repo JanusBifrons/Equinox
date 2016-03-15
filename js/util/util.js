@@ -242,8 +242,8 @@ function drawGrid()
 	var _thick = 1.0;
 	var _thin = 0.5;
 
-	var x = (Math.round(m_kPlayer.m_kShip.m_liPos[0] / _size) * _size) - (_size * (_gridSize / 2));
-	var y = (Math.round(m_kPlayer.m_kShip.m_liPos[1] / _size) * _size) - (_size * (_gridSize / 2));
+	var x = (Math.round(m_kPlayer.m_liCamera[0] / _size) * _size) - (_size * (_gridSize / 2));
+	var y = (Math.round(m_kPlayer.m_liCamera[1] / _size) * _size) - (_size * (_gridSize / 2));
 	var smallX = 0;
 	var smallY = 0;
 	

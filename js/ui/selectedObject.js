@@ -58,6 +58,10 @@ SelectedObject.prototype.createButtons = function(x, y, size, padding)
 	this.m_liButtons.push(new UIButton(this, 2, x, y, size, size, true, 'boxIcon', 255, 255, 255));
 	x += size;
 	x += padding;
+	
+	this.m_liButtons.push(new UIButton(this, 3, x, y, size, size, true, 'collectIcon', 255, 255, 255));
+	x += size;
+	x += padding;
 }
 
 SelectedObject.prototype.drawBackground = function(x, y, height, width)
@@ -129,6 +133,10 @@ SelectedObject.prototype.onClick = function(id)
 			
 		case 2:
 			this.m_kOwner.onOpenCargo(this.m_kSelected.m_kTarget);
+			break;
 			
+		case 3:
+			this.m_kOwner.onStore(this.m_kSelected.m_kTarget);
+			break;
 	}
 }
