@@ -24,6 +24,11 @@ function ShipComponent()
 	// Scale
 	this.m_fScale = 1.0;
 	
+	// Center
+	this.m_liCenter = new Array();
+	this.m_liCenter[0] = 0;
+	this.m_liCenter[1] = 0;
+	
 	// Graphics
 	this.m_liPoints = new Array();
 	this.m_cPrimaryColour = concatenate(255, 255, 255, 255);
@@ -38,6 +43,22 @@ ShipComponent.prototype.update = function()
 	this.updateColours();
 	
 	this.updateOffsets();
+	
+	this.createPoints();
+	
+	// Scale the points
+	this.scale();
+	
+	// Calculate and adjust to dyanmic center
+	this.calculateCenter(this);
+	this.adjustCenter(this);
+	
+	// Set collision bounds
+	this.m_cdCollision = new P(new V(0, 0), this.m_liPoints);
+
+	// Rotate and translate
+	this.m_cdCollision.rotate(this.m_iRotation);
+	this.m_cdCollision.translate(this.m_liPos[0], this.m_liPos[1]);
 }
 
 ShipComponent.prototype.draw = function()
@@ -58,6 +79,89 @@ ShipComponent.prototype.draw = function()
 }
 
 // HELPERS
+
+ShipComponent.prototype.initialize = function(owner, offsetX, offsetY, scale)
+{
+	this.m_kOwner = owner;
+	
+	this.m_liOffset = new Array();
+	this.m_liOffset[0] = offsetX;
+	this.m_liOffset[1] = offsetY;
+	this.m_iDistance = calculateMagnitude(this.m_liOffset);
+	
+	this.m_iPositionOffset = Math.atan2(-this.m_liOffset[1], -this.m_liOffset[0]) + Math.PI;
+	this.m_iPositionOffset += this.m_kOwner.m_iRotation;
+	
+	this.m_liPos = new Array();
+	this.m_liPos[0] = this.m_kOwner.m_liPos[0] + (this.m_iDistance * Math.cos(this.m_iPositionOffset));
+	this.m_liPos[1] = this.m_kOwner.m_liPos[1] + (this.m_iDistance * Math.sin(this.m_iPositionOffset));
+	
+	this.m_iRotation = this.m_kOwner.m_iRotation;
+	
+	this.m_fScale = scale;
+}
+
+ShipComponent.prototype.startDraw = function()
+{
+	// Save context!
+	m_kContext.save();
+	
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	// Rotate to players angle
+	m_kContext.rotate(this.m_iRotation);
+	
+	// Translate to center
+	m_kContext.translate(-this.m_liCenter[0], -this.m_liCenter[1]);
+	
+	// Scale
+	m_kContext.scale(this.m_fScale, this.m_fScale);
+}
+
+ShipComponent.prototype.endDraw = function()
+{
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
+// This function is abstract
+ShipComponent.prototype.createPoints = function()
+{
+}
+
+ShipComponent.prototype.calculateCenter = function()
+{
+	var _x = 0;
+	var _y = 0;
+	
+	for(var i = 0; i < this.m_liPoints.length; i++)
+	{
+		_x += this.m_liPoints[i].x;
+		_y += this.m_liPoints[i].y;
+	}
+	
+	this.m_liCenter[0] = _x / this.m_liPoints.length;
+	this.m_liCenter[1] = _y / this.m_liPoints.length;
+}
+
+ShipComponent.prototype.adjustCenter = function()
+{
+	var _adjustedPoints = new Array();
+	
+	for(var i = 0; i < this.m_liPoints.length; i++)
+	{
+		_adjustedPoints.push(new V(this.m_liPoints[i].x - this.m_liCenter[0], this.m_liPoints[i].y - this.m_liCenter[1]));
+	}
+	
+	// Clear points list
+	this.m_liPoints.length = 0;
+	
+	// Reinput list from scratch
+	for(var i = 0; i < _adjustedPoints.length; i++)
+	{
+		this.m_liPoints.push(_adjustedPoints[i]);
+	}
+}
 
 ShipComponent.prototype.scale = function()
 {

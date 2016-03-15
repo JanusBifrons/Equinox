@@ -574,9 +574,6 @@ Structure.prototype.onDestroy = function()
 		
 		_node.removeRoute(this);
 	}
-	
-	// Notify player in case this structure was targetted by the player!
-	m_kPlayer.onObjectDeath(this.m_iID);
 }
 
 Structure.prototype.onCollision = function(ship)

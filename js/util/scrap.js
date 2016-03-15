@@ -23,11 +23,15 @@ function Scrap(sector, component, moveX, moveY)
 	
 	// For cross compatability (unused currently)
 	this.m_bDelete = false;
+	this.m_bIsAlive = true;
 	
 	this.m_iRotation = component.m_iRotation + component.m_iRotationOffset;
 	this.m_iRotationMove = component.m_kOwner.m_iRotationSpeed * 0.25;	// Unused ATM
 	
-	this.m_kComponent.m_kOwner = this; // I'm your daddy now
+	// Reinitialize
+	this.m_kComponent.initialize(this, 0, 0, this.m_kComponent.m_fScale);
+	
+	this.m_iRadius = 50;
 	
 	this.m_cdCollision = this.m_kComponent.m_cdCollision;
 	
@@ -70,7 +74,7 @@ Scrap.prototype.draw = function()
 	this.m_bDrawUI = false;
 }
 
-// HEHLPERS
+// HELPERS
 
 Scrap.prototype.drawBody = function()
 {
@@ -80,9 +84,6 @@ Scrap.prototype.drawBody = function()
 // I hate this name, but nevermind... drawStats is already taken!
 Scrap.prototype.drawUI = function()
 {
-	m_kLog.addItem("This will take a little more effort to work...", m_fElapsedTime, 255, 255, 255);
-	
-	return;
 	// Save context!
 	m_kContext.save();
 	
@@ -166,6 +167,11 @@ Scrap.prototype.capMove = function()
 	
 
 // EVENTS
+
+Scrap.prototype.onMouseClick = function(mouse)
+{
+	
+}
 
 Scrap.prototype.onCollision = function(vector)
 {	
