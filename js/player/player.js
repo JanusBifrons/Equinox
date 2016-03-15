@@ -45,8 +45,6 @@ function Player(district, sector, x, y)
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
 	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
 	
-	//this.createUI();
-	
 	console.log("Player initialised successfully.");
 }
 
@@ -109,6 +107,11 @@ Player.prototype.draw = function()
 
 // EVENTS
 
+Player.prototype.onStore = function(object)
+{
+	this.m_kShip.m_kCargoHold.store(object);
+}
+
 Player.prototype.onOpenCargo = function(object)
 {
 	m_kLog.addItem("This code hasn't been written yet!", 1000, 255, 0, 0);
@@ -121,10 +124,15 @@ Player.prototype.onShipChange = function(ship)
 
 Player.prototype.onLeftClick = function()
 {
+	this.m_bIsDragging = true;
+	
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 	
-	this.m_kSectorOverview.onMouseClick(_mouseCircle);
+	if(this.m_kSectorOverview.onMouseClick(_mouseCircle))
+	{
+		return;
+	}
 	
 	var _shipTargets = this.m_kShip.m_liTargets;
 	
@@ -517,71 +525,12 @@ Player.prototype.updateInput = function()
 		this.m_iStructureIndex = 2;
 	}
 	
-	// Temporarily disable all other structures
-	return;
-	
-	// 3 KEY
-	if(isKeyDown(51))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new Extractor(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 2;
-	}
-	
 	// 4 KEY
 	if(isKeyDown(52))
 	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new Respawn(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 3
-	}
-	
-	// 5 KEY
-	if(isKeyDown(53))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new Teleporter(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 4;
-	}
-	
-	// 6 KEY
-	if(isKeyDown(54))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new Battery(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 5;
-	}
-	
-	// 7 KEY
-	if(isKeyDown(55))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new BeamTurret(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 6;
-	}
-	
-	// 8 KEY
-	if(isKeyDown(56))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new CannonTurret(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 7;
-	}
-	
-	// 9 KEY
-	if(isKeyDown(57))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new TractorTurret(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 8;
-	}
-	
-	// - KEY
-	if(isKeyDown(189))
-	{
-		this.m_bPlacingStructure = true;
-		this.m_kStructure = new Repair(getMouseX(), getMouseY());
-		this.m_iStructureIndex = 9;
+		//this.m_bPlacingStructure = true;
+		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
+		//this.m_iStructureIndex = 3
 	}
 }
 
