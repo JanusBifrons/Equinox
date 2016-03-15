@@ -1,25 +1,25 @@
-Cockpit.prototype = new ShipComponent();
+Cockpit.prototype = new Component();
 Cockpit.prototype.constructor = Cockpit;
 
 function Cockpit(owner, offsetX, offsetY, scale)
 {
 	// Call base initialize
-	ShipComponent.prototype.initialize.call(this, owner, offsetX, offsetY, scale);
+	Component.prototype.initialize.call(this, owner, offsetX, offsetY, scale, false);
 }
 
 Cockpit.prototype.update = function()
 {
 	// Call base update
-	ShipComponent.prototype.update.call(this);
+	Component.prototype.update.call(this);
 }
 
 Cockpit.prototype.draw = function()
 {
 	// Call base draw
-	ShipComponent.prototype.draw.call(this);
+	Component.prototype.draw.call(this);
 	
 	// Initialises the draw and rotates/scales/centers the view
-	ShipComponent.prototype.startDraw.call(this);
+	Component.prototype.startDraw.call(this);
 	
 	m_kContext.fillStyle = this.m_cSecondaryColour;
 	
@@ -81,7 +81,7 @@ Cockpit.prototype.draw = function()
 	m_kContext.fill();
 
 	// Restores the context
-	ShipComponent.prototype.endDraw.call(this);
+	Component.prototype.endDraw.call(this);
 }
 
 Cockpit.prototype.createPoints = function()

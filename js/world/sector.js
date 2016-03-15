@@ -259,24 +259,6 @@ Sector.prototype.createHomeSector = function()
 	_control.onConstruct(1000);
 	this.addStructure(_control);		
 	
-	// Spawn connector for respawn pad
-	var _connector = new Connector(-350, -350);
-	_connector.m_kSector = this;
-	_connector.update();
-	_connector.onPlace();
-	_connector.onConstruct(1000);
-	_connector.onConstruct(1000);
-	this.addStructure(_connector);
-	
-	// Spawn respawn pad
-	var _respawn = new Respawn(-500, -350);
-	_respawn.m_kSector = this;
-	_respawn.update();
-	_respawn.onPlace();
-	_respawn.onConstruct(1000);
-	_respawn.onConstruct(1000);
-	this.addStructure(_respawn);
-	
 	this.m_kAsteroidManager.generateAsteroidField(1200, 1200, 1000, 8);
 }
 
@@ -582,14 +564,14 @@ Sector.prototype.createScrap = function(object)
 {	
 	var _move = this.generateDrift();
 	
-	m_kLog.addItem("Move X: " + _move[0], 10000, 255, 255, 255);
-	m_kLog.addItem("Move Y: " + _move[1], 10000, 255, 255, 255);
+	//m_kLog.addItem("Move X: " + _move[0], 10000, 255, 255, 255);
+	//m_kLog.addItem("Move Y: " + _move[1], 10000, 255, 255, 255);
 	
-	m_kLog.addItem("Player Move X: " + object.m_liMove[0], 10000, 255, 255, 255);
-	m_kLog.addItem("Player Move Y: " + object.m_liMove[0], 10000, 255, 255, 255);
+	//m_kLog.addItem("Player Move X: " + object.m_liMove[0], 10000, 255, 255, 255);
+	//m_kLog.addItem("Player Move Y: " + object.m_liMove[0], 10000, 255, 255, 255);
 	
-	m_kLog.addItem("Final Move X: " + (object.m_liMove[0] + _move[0]), 10000, 255, 255, 255);
-	m_kLog.addItem("Final Move Y: " + (object.m_liMove[1] + _move[1]), 10000, 255, 255, 255);
+	//m_kLog.addItem("Final Move X: " + (object.m_liMove[0] + _move[0]), 10000, 255, 255, 255);
+	//m_kLog.addItem("Final Move Y: " + (object.m_liMove[1] + _move[1]), 10000, 255, 255, 255);
 
 	// Don't know if this is a structure or a ship, shouldn't matter!
 	for(var i = 0; i < object.m_liComponents.length; i++)

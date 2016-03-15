@@ -1,25 +1,27 @@
-LeftWing.prototype = new ShipComponent();
-LeftWing.prototype.constructor = LeftWing;
+Wing.prototype = new Component();
+Wing.prototype.constructor = Wing;
 
-function LeftWing(owner, offsetX, offsetY, scale)
+function Wing(owner, offsetX, offsetY, scale, mirror)
 {
 	// Call base initialize
-	ShipComponent.prototype.initialize.call(this, owner, offsetX, offsetY, scale);
+	Component.prototype.initialize.call(this, owner, offsetX, offsetY, scale, mirror);
 }
 
-LeftWing.prototype.update = function()
+Wing.prototype.update = function()
 {
 	// Call base update
-	ShipComponent.prototype.update.call(this);
+	Component.prototype.update.call(this);
 }
 
-LeftWing.prototype.draw = function()
+Wing.prototype.draw = function()
 {
 	// Call base draw
-	ShipComponent.prototype.draw.call(this);
+	Component.prototype.draw.call(this);
 	
 	// Initialises the draw and rotates/scales/centers the view
-	ShipComponent.prototype.startDraw.call(this);
+	Component.prototype.startDraw.call(this);
+	
+	m_kLog.addStaticItem(this.m_bMirror);
 	
 	m_kContext.strokeStyle = 'black';	
 	m_kContext.fillStyle = this.m_cSecondaryColour;
@@ -57,10 +59,10 @@ LeftWing.prototype.draw = function()
 	m_kContext.closePath();	
 
 	// Restores the context
-	ShipComponent.prototype.endDraw.call(this);
+	Component.prototype.endDraw.call(this);
 }
 
-LeftWing.prototype.createPoints = function()
+Wing.prototype.createPoints = function()
 {
 	// Collision Detection
 	this.m_liPoints = new Array();

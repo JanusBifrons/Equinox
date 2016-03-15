@@ -14,6 +14,9 @@ function SelectedObject(owner, object)
 
 SelectedObject.prototype.update = function()
 {
+	if(!this.m_kSelected.m_kTarget.m_bIsAlive)
+		this.m_kSelected = new TargetObject(this.m_kOwner.m_kShip, this.m_kOwner.m_kShip, true);
+	
 	this.m_kSelected.update();
 	
 	this.createButtons(this.m_liPos[0] + (this.m_iPadding * 2) + this.m_iSize, this.m_liPos[1] + this.m_iPadding, this.m_iSize / 2, this.m_iPadding / 2);
