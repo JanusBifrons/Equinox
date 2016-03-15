@@ -79,11 +79,6 @@ Debug.prototype.draw = function()
 {			
 	// Call base draw
 	Ship.prototype.draw.call(this);
-	
-	m_kContext.beginPath();
-	//m_kContext.arc(this.m_liPos[0], this.m_liPos[1], this.m_iRadius, 0, 2 * Math.PI);
-	m_kContext.stroke();
-	m_kContext.closePath();	
 }
 
 Debug.prototype.createWeapons = function()
@@ -92,7 +87,7 @@ Debug.prototype.createWeapons = function()
 	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
 	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
 	_beams.push(_beam1);
-	//_beams.push(_beam2);
+	_beams.push(_beam2);
 	
 	var _cannons = new Array();
 	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);
@@ -114,19 +109,17 @@ Debug.prototype.createComponents = function()
 	// Ship graphics
 	this.m_liComponents = new Array();
 	
-	this.m_liComponents.push(new ShortPillar(this, 10, -10, 0.75));
-	this.m_liComponents.push(new ShortPillar(this, 10, 10, 0.75));
+	//this.m_liComponents.push(new ShortPillar(this, 10, -10, 0.75));
+	//this.m_liComponents.push(new ShortPillar(this, 10, 10, 0.75));
 	
-	this.m_liComponents.push(new LeftWing(this, -10, -10, 1));
-	this.m_liComponents.push(new RightWing(this, -10, 10, 1));
+	this.m_liComponents.push(new RearLeftWing(this, -35, -12, 1));
+	this.m_liComponents.push(new RearRightWing(this, -35, 12, 1));
 	
-	this.m_liComponents.push(new RearLeftWing(this, -10, 5, 1));
-	this.m_liComponents.push(new RearRightWing(this, -10, -5, 1));
+	this.m_liComponents.push(new LeftWing(this, -10, -20, 1.5));
+	this.m_liComponents.push(new RightWing(this, -10, 20, 1.5));
 	
-	this.m_liComponents.push(new Cockpit(this, 55, 0, 1.5));
+	this.m_liComponents.push(new Cockpit(this, 40, 0, 1.5));
 	
-	this.m_liComponents.push(new RoundEngine(this, -30, 22, 1.5, -(Math.PI / 2)));
-	
-	this.m_liComponents.push(new LeftPad(this, -15, 0, 1.5));
-	this.m_liComponents.push(new RightPad(this, -15, 0, 1.5));
+	this.m_liComponents.push(new LeftPad(this, 0, -8, 1.5));
+	this.m_liComponents.push(new RightPad(this, 0, 8, 1.5));
 }

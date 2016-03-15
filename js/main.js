@@ -84,7 +84,7 @@ function initMain()
 	// Zoom
 	m_iZoomDefault = 3000;
 	//m_iZoomDefault = 700;
-	//m_iZoomDefault = 500;
+	m_iZoomDefault = 500;
 	m_iZoom = m_iZoomDefault;
 	m_kCamera.zoomTo(m_iZoom);
 }

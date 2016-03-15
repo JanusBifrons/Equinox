@@ -19,6 +19,8 @@ function SectorOverview(owner, sector)
 	this.m_liSegments[0] = 0.1;
 	this.m_liSegments[1] = 0.35;
 	this.m_liSegments[2] = 0.75;
+	this.m_liSegments[3] = 0.85;
+	this.m_liSegments[4] = 0.95;
 	
 	// 0 = ASC 1 = DSC
 	this.m_iSortDistance = 0;

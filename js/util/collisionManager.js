@@ -66,14 +66,10 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 			{
 				_asteroid.m_bDrawUI = true;
 				
-
 				if(mouseClicked)
 					m_kPlayer.selectObject(_asteroid);
 			}
 		}
-				
-		// Objects don't work yet
-		continue;
 		
 		// OBJECTS!
 		if(_elements[i].type == 3)
@@ -83,6 +79,9 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 			if(this.polygonCircleCollisionDetection(_object.m_cdCollision, _mouseCircle))
 			{
 				_object.m_bDrawUI = true;
+				
+				if(mouseClicked)
+					m_kPlayer.selectObject(_object);
 			}
 		}
 	}
