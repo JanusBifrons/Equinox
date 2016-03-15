@@ -65,8 +65,5 @@ Solar.prototype.createComponents = function()
 {
 	this.m_liComponents = new Array();
 	
-	this.m_liComponents.push(new SolarPanelSmall(this, -50, -50, 0, 0.5));
-	
-	//this.m_liComponents.push(new EnergyBar(this, -50, 0, 2));
-	//this.m_liComponents.push(new MetalBar(this, 50, 0, 2));
+	this.m_liComponents.push(new SolarPanelSmall(this, 0, 0, 0.5));
 }

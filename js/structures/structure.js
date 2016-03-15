@@ -7,8 +7,11 @@ function Structure()
 	
 	// Stats
 	this.m_liPos = new Array();
+	this.m_liMove = new Array();
 	this.m_liPos[0] = 0;
 	this.m_liPos[1] = 0;
+	this.m_liMove[0] = 0;
+	this.m_liMove[1] = 0;
 	this.m_iRadius = 10;
 	this.m_iRotation = 0;
 	
@@ -561,7 +564,10 @@ Structure.prototype.onHit = function(damage)
 }
 
 Structure.prototype.onDestroy = function()
-{
+{	
+	// Disabled for now as it is buggy
+	//this.m_kSector.createScrap(this);
+	
 	// Cause an explosion!
 	m_kCollisionManager.onExplosion(this, this.m_kSector.m_liShips);
 	

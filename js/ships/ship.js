@@ -320,7 +320,7 @@ Ship.prototype.onHit = function(damage)
 		// Check if player is alive!
 		if(this.m_iHull <= 0)
 		{
-			this.onDeath(0);
+			this.onDestroy(0);
 		
 			return true; // Player died!
 		}
@@ -391,7 +391,7 @@ Ship.prototype.onCollision = function(vector)
 	this.m_liMove[1] += (vector.y * 1.5);
 }
 
-Ship.prototype.onDeath = function(reason)
+Ship.prototype.onDestroy = function(reason)
 {	
 	// Edge case - player already dead!
 	if(!this.m_bIsAlive)

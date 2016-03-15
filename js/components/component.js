@@ -1,4 +1,4 @@
-function ShipComponent()
+function Component()
 {
 	this.m_kOwner;
 	
@@ -20,6 +20,7 @@ function ShipComponent()
 	
 	// Switch
 	this.m_bCanScrap = true;
+	this.m_bMirror = false;
 	
 	// Scale
 	this.m_fScale = 1.0;
@@ -31,56 +32,14 @@ function ShipComponent()
 	
 	// Graphics
 	this.m_liPoints = new Array();
-	this.m_cPrimaryColour = concatenate(255, 255, 255, 255);
-	this.m_cSecondaryColour = concatenate(255, 255, 255, 255);
+	this.m_cPrimaryColour = concatenate(128, 128, 128, 255);
+	this.m_cSecondaryColour = concatenate(128, 128, 128, 255);
 	
 	// Collision Detection	
 	this.m_cdCollision = new SAT.Polygon(new SAT.Vector(0, 0), [new SAT.Vector(0, 0), new SAT.Vector(0, 0)]);
 }
 
-ShipComponent.prototype.update = function()
-{
-	this.updateColours();
-	
-	this.updateOffsets();
-	
-	this.createPoints();
-	
-	// Scale the points
-	this.scale();
-	
-	// Calculate and adjust to dyanmic center
-	this.calculateCenter(this);
-	this.adjustCenter(this);
-	
-	// Set collision bounds
-	this.m_cdCollision = new P(new V(0, 0), this.m_liPoints);
-
-	// Rotate and translate
-	this.m_cdCollision.rotate(this.m_iRotation);
-	this.m_cdCollision.translate(this.m_liPos[0], this.m_liPos[1]);
-}
-
-ShipComponent.prototype.draw = function()
-{
-	m_kContext.strokeStyle = 'black';	
-	m_kContext.fillStyle = this.m_cPrimaryColour;
-	m_kContext.lineWidth = 1;
-	
-	m_kContext.beginPath();
-	
-	// Draw Hull from collision points (this makes sure bugs are highly visible)
-	for(var i = 0; i < this.m_cdCollision.points.length; i++)
-		m_kContext.lineTo(this.m_cdCollision.points[i].x, this.m_cdCollision.points[i].y);	
-	
-	m_kContext.closePath();
-	m_kContext.stroke();	
-	m_kContext.fill();
-}
-
-// HELPERS
-
-ShipComponent.prototype.initialize = function(owner, offsetX, offsetY, scale)
+Component.prototype.initialize = function(owner, offsetX, offsetY, scale, mirror)
 {
 	this.m_kOwner = owner;
 	
@@ -99,9 +58,88 @@ ShipComponent.prototype.initialize = function(owner, offsetX, offsetY, scale)
 	this.m_iRotation = this.m_kOwner.m_iRotation;
 	
 	this.m_fScale = scale;
+	this.m_bMirror = mirror;
+	
+	// Center
+	this.m_liCenter = new Array();
+	this.m_liCenter[0] = 0;
+	this.m_liCenter[1] = 0;
 }
 
-ShipComponent.prototype.startDraw = function()
+Component.prototype.update = function()
+{
+	this.updateColours();
+	
+	this.updateOffsets();
+	
+	this.createPoints();
+	
+	if(this.m_bMirror)
+		this.mirrorPoints();
+	
+	// Scale the points
+	this.scale();
+	
+	// Calculate and adjust to dyanmic center
+	this.calculateCenter(this);
+	this.adjustCenter(this);
+	
+	// Set collision bounds
+	this.m_cdCollision = new P(new V(0, 0), this.m_liPoints);
+
+	// Rotate and translate
+	this.m_cdCollision.rotate(this.m_iRotation);
+	this.m_cdCollision.translate(this.m_liPos[0], this.m_liPos[1]);
+}
+
+Component.prototype.draw = function()
+{
+	m_kContext.strokeStyle = 'black';	
+	m_kContext.fillStyle = this.m_cPrimaryColour;
+	m_kContext.lineWidth = 1;
+	
+	m_kContext.beginPath();
+	
+	// Draw Hull from collision points (this makes sure bugs are highly visible)
+	for(var i = 0; i < this.m_cdCollision.points.length; i++)
+		m_kContext.lineTo(this.m_cdCollision.points[i].x, this.m_cdCollision.points[i].y);	
+	
+	m_kContext.closePath();
+	m_kContext.stroke();	
+	m_kContext.fill();
+}
+
+// EVENTS
+
+Component.prototype.onHit = function(damage)
+{	
+	this.m_kOwner.onHit(damage);
+}
+
+// HELPERS
+
+Component.prototype.mirrorPoints = function()
+{
+	var _mirrorPoints = new Array();
+	
+	for(var i = 0; i < this.m_liPoints.length; i++)
+	{
+		_mirrorPoints.push(new V(this.m_liPoints[i].x, this.m_liPoints[i].y * -1));
+	}
+	
+	// Clear points list
+	this.m_liPoints.length = 0;
+	
+	// Reinput list from scratch
+	for(var i = 0; i < _mirrorPoints.length; i++)
+	{
+		var _point = _mirrorPoints[i];
+		
+		this.m_liPoints.push(_point);
+	}
+}
+
+Component.prototype.startDraw = function()
 {
 	// Save context!
 	m_kContext.save();
@@ -113,38 +151,24 @@ ShipComponent.prototype.startDraw = function()
 	
 	// Translate to center
 	m_kContext.translate(-this.m_liCenter[0], -this.m_liCenter[1]);
+			
+	if(this.m_bMirror)
+	{
+		m_kContext.scale(1, -1);
+	}
 	
 	// Scale
 	m_kContext.scale(this.m_fScale, this.m_fScale);
 }
 
-ShipComponent.prototype.endDraw = function()
+Component.prototype.endDraw = function()
 {
 	// Restore the context back to how it was before!
 	m_kContext.restore();
 }
 
 // This function is abstract
-ShipComponent.prototype.createPoints = function()
-{
-}
-
-ShipComponent.prototype.calculateCenter = function()
-{
-	var _x = 0;
-	var _y = 0;
-	
-	for(var i = 0; i < this.m_liPoints.length; i++)
-	{
-		_x += this.m_liPoints[i].x;
-		_y += this.m_liPoints[i].y;
-	}
-	
-	this.m_liCenter[0] = _x / this.m_liPoints.length;
-	this.m_liCenter[1] = _y / this.m_liPoints.length;
-}
-
-ShipComponent.prototype.adjustCenter = function()
+Component.prototype.createPoints = function()
 {
 	var _adjustedPoints = new Array();
 	
@@ -163,7 +187,41 @@ ShipComponent.prototype.adjustCenter = function()
 	}
 }
 
-ShipComponent.prototype.scale = function()
+Component.prototype.calculateCenter = function()
+{
+	var _x = 0;
+	var _y = 0;
+	
+	for(var i = 0; i < this.m_liPoints.length; i++)
+	{
+		_x += this.m_liPoints[i].x;
+		_y += this.m_liPoints[i].y;
+	}
+	
+	this.m_liCenter[0] = _x / this.m_liPoints.length;
+	this.m_liCenter[1] = _y / this.m_liPoints.length;
+}
+
+Component.prototype.adjustCenter = function()
+{
+	var _adjustedPoints = new Array();
+	
+	for(var i = 0; i < this.m_liPoints.length; i++)
+	{
+		_adjustedPoints.push(new V(this.m_liPoints[i].x - this.m_liCenter[0], this.m_liPoints[i].y - this.m_liCenter[1]));
+	}
+	
+	// Clear points list
+	this.m_liPoints.length = 0;
+	
+	// Reinput list from scratch
+	for(var i = 0; i < _adjustedPoints.length; i++)
+	{
+		this.m_liPoints.push(_adjustedPoints[i]);
+	}
+}
+
+Component.prototype.scale = function()
 {
 	var _scaledPoints = new Array();
 	
@@ -182,7 +240,7 @@ ShipComponent.prototype.scale = function()
 	}
 }
 
-ShipComponent.prototype.updateColours = function()
+Component.prototype.updateColours = function()
 {
 	this.m_cPrimaryColour = concatenate(255, 255, 255, 255);
 	this.m_cSecondaryColour = concatenate(255, 255, 255, 255);
@@ -199,7 +257,7 @@ ShipComponent.prototype.updateColours = function()
 	}
 }
 
-ShipComponent.prototype.updateOffsets = function()
+Component.prototype.updateOffsets = function()
 {
 	// Update the position relative to the main ship 
 	this.m_iPositionOffset = Math.atan2(this.m_liOffset[1], this.m_liOffset[0]);	

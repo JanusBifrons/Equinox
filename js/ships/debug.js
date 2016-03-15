@@ -103,20 +103,17 @@ Debug.prototype.createWeapons = function()
 
 Debug.prototype.createComponents = function()
 {
-	// Ship graphics
-	this.m_liComponents = new Array();
+	// Ship components
+	this.m_liComponents = new Array();	
 	
-	//this.m_liComponents.push(new ShortPillar(this, 10, -10, 0.75));
-	//this.m_liComponents.push(new ShortPillar(this, 10, 10, 0.75));
+	this.m_liComponents.push(new RearWing(this, -30, -12, 1, false));
+	this.m_liComponents.push(new RearWing(this, -30, 12, 1, true));
 	
-	this.m_liComponents.push(new RearLeftWing(this, -35, -12, 1));
-	this.m_liComponents.push(new RearRightWing(this, -35, 12, 1));
-	
-	this.m_liComponents.push(new LeftWing(this, -10, -20, 1.5));
-	this.m_liComponents.push(new RightWing(this, -10, 20, 1.5));
+	this.m_liComponents.push(new Wing(this, -10, -20, 1, false));
+	this.m_liComponents.push(new Wing(this, -10, 20, 1, true));
 	
 	this.m_liComponents.push(new Cockpit(this, 40, 0, 1.5));
 	
-	this.m_liComponents.push(new LeftPad(this, 0, -8, 1.5));
-	this.m_liComponents.push(new RightPad(this, 0, 8, 1.5));
+	this.m_liComponents.push(new Pad(this, 0, -8, 1.5, false));
+	this.m_liComponents.push(new Pad(this, 0, 8, 1.5, true));
 }

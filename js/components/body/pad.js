@@ -1,25 +1,25 @@
-LeftPad.prototype = new ShipComponent();
-LeftPad.prototype.constructor = LeftPad;
+Pad.prototype = new Component();
+Pad.prototype.constructor = Pad;
 
-function LeftPad(owner, offsetX, offsetY, scale)
+function Pad(owner, offsetX, offsetY, scale, mirror)
 {
 	// Call base initialize
-	ShipComponent.prototype.initialize.call(this, owner, offsetX, offsetY, scale);
+	Component.prototype.initialize.call(this, owner, offsetX, offsetY, scale, mirror);
 }
 
-LeftPad.prototype.update = function()
+Pad.prototype.update = function()
 {
 	// Call base update
-	ShipComponent.prototype.update.call(this);
+	Component.prototype.update.call(this);
 }
 
-LeftPad.prototype.draw = function()
+Pad.prototype.draw = function()
 {
 	// Call base draw
-	ShipComponent.prototype.draw.call(this);
+	Component.prototype.draw.call(this);
 	
 	// Initialises the draw and rotates/scales/centers the view
-	ShipComponent.prototype.startDraw.call(this);
+	Component.prototype.startDraw.call(this);
 	
 	m_kContext.strokeStyle = 'black';	
 	m_kContext.fillStyle = this.m_cSecondaryColour;
@@ -37,10 +37,10 @@ LeftPad.prototype.draw = function()
 	m_kContext.fill();
 
 	// Restores the context
-	ShipComponent.prototype.endDraw.call(this);
+	Component.prototype.endDraw.call(this);
 }
 
-LeftPad.prototype.createPoints = function()
+Pad.prototype.createPoints = function()
 {
 	// Collision Detection
 	this.m_liPoints = new Array();
