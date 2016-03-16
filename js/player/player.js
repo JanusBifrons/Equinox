@@ -168,6 +168,10 @@ Player.prototype.onLeftClick = function()
 				this.m_kStructure = this.structureFromIndex(this.m_iStructureIndex);
 			}	
 		}
+		else
+		{
+			m_kLog.addItem("Cannot place structure here!", 5000, 255, 0, 0);
+		}
 	}
 	else
 	{
@@ -528,7 +532,9 @@ Player.prototype.updateInput = function()
 	// 4 KEY
 	if(isKeyDown(52))
 	{
-		//this.m_bPlacingStructure = true;
+		this.m_bPlacingStructure = true;
+		this.m_kStructure = new Assembler(getMouseX(), getMouseY());
+		
 		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
 		//this.m_iStructureIndex = 3
 	}

@@ -41,13 +41,18 @@ function Structure()
 	this.m_bCollideStructures = true;
 	this.m_bCollideAsteroids = true;
 	
+	// Needs
+	this.m_bNeedsTeam = false;
+	this.m_bNeedsPower = false;
+	this.m_bNeedsMetal = false;
+	
+	
 	// References
 	this.m_kSector;
 	
 	// ID
 	this.m_iID = 0;
 	this.m_iType = 0; // Debug
-	this.m_bNeedsTeam = false;
 	this.m_iTeam = 0; // Neutral
 	this.m_iTeamCheckTimer = 0; // seconds (mili)
 	this.m_iTeamCheckTimerMax = 5000; // seconds (mili)
@@ -101,6 +106,62 @@ function Structure()
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
 	
 	console.log("Initialized structure successfully.");
+}
+
+Structure.prototype.initialize = function(type, name, x, y, radius)
+{
+	// Initiailize arrays
+	this.m_liShields = new Array();
+	this.m_liComponents = new Array();
+	
+	// Initialize identifiers
+	this.m_iType = type;
+	this.m_sName = name;
+	this.m_iID = guid();
+
+	// Initialize location and size
+	this.m_liPos = new Array();
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
+	this.m_iRadius = radius;
+	
+	// Create visual and collision detection components
+	this.createComponents();
+}
+
+// Regen amounts are given in seconds and converted
+// The shield is a timer which regens once expired, the armour and hull are calculated per second
+Structure.prototype.initializeStats = function(shieldRegen, shieldCap, armourCap, armourRegen, hullCap, hullRegen)
+{
+	// Set shields
+	this.m_iShieldRegenCap = (shieldRegen * 1000);
+	this.m_iShieldCap = shieldCap;
+	
+	// Set armour
+	this.m_iArmourCap = armourCap;
+	this.m_iArmourRegen = armourCap / armourRegen;
+	
+	// Set hull
+	this.m_iHullCap = hullCap;
+	this.m_iHullRegen = hullCap / hullRegen;
+}
+
+Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated)
+{
+	// Initialize all resource variables
+	this.m_iCurrentDrain = 0;
+	this.m_iPowerStored = 0;
+	this.m_iPowerDrain = 0;
+	
+	this.m_iPowerStoreMax = powerStoreMax;
+	this.m_iPowerGenerated = powerGenerated;
+}
+
+Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMetal)
+{
+	this.m_bNeedsTeam = bNeedsTeam;
+	this.m_bNeedsPower = bNeedsPower;
+	this.m_bNeedsMetal = bNeedsMetal;
 }
 
 Structure.prototype.update = function()
@@ -204,7 +265,7 @@ Structure.prototype.draw = function()
 		this.drawStatRing(this.m_iMetalBuilt, this.m_iMetalRequired, this.m_iRadius + 5, "orange");
 	}
 	
-	// Draw the main components of the structure (shield and body components
+	// Draw the main components of the structure (shield and body components)
 	this.drawBody();
 	
 	// Loop through all weapons
@@ -251,7 +312,7 @@ Structure.prototype.draw = function()
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
 	
 	// Draw UI if this structure is selected or highlighted
-	if(this.m_bDrawUI || this.m_bIsSelected)
+	if(this.m_bDrawUI)
 		this.drawUI();
 	
 	this.m_bDrawUI = false;
@@ -638,7 +699,13 @@ Structure.prototype.onPlace = function()
 	return true;
 }
 
-// HELPER FUNCTIONS
+// HELPERS
+
+// ABSTRACT FUNCTION
+Structure.prototype.createComponents = function()
+{
+	
+}
 
 Structure.prototype.setConnectors = function()
 {	

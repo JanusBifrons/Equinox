@@ -259,6 +259,24 @@ Sector.prototype.createHomeSector = function()
 	_control.onConstruct(1000);
 	this.addStructure(_control);		
 	
+	// Spawn connector for assembler
+	var _connector = new Connector(-350, -350);
+	_connector.m_kSector = this;
+	_connector.update();
+	_connector.onPlace();
+	_connector.onConstruct(1000);
+	_connector.onConstruct(1000);
+	this.addStructure(_connector);
+	
+	// Spawn assembler
+	var _assembler = new Assembler(-1000, -350);
+	_assembler.m_kSector = this;
+	_assembler.update();
+	_assembler.onPlace();
+	_assembler.onConstruct(1000);
+	_assembler.onConstruct(1000);
+	this.addStructure(_assembler);	
+	
 	this.m_kAsteroidManager.generateAsteroidField(1200, 1200, 1000, 8);
 }
 
