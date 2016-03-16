@@ -27,6 +27,11 @@ var C;
 var V;
 var P;
 
+// Keyboard Input
+var m_liKeysDown;
+
+var m_kHammerTime;
+
 // Collision Detection 
 var m_kCollisionManager;
 
@@ -40,7 +45,12 @@ var m_kPathfinder;
 var m_kGameStats;
 
 function initMain()
-{
+{	
+	// Disable right click menu
+	document.oncontextmenu = function(e){return false;}
+	
+	m_liKeysDown = new Array();
+
 	// SAT Short-cuts
 	C = SAT.Circle;
 	V = SAT.Vector;
@@ -52,6 +62,9 @@ function initMain()
 	m_kCanvas.width = window.innerWidth;
 	m_kContext = m_kCanvas.getContext("2d");
 	m_kCamera = new Camera(m_kContext);				// External Lib
+	
+	// Create touch input handler
+	m_kHammerTime = new Hammer(m_kCanvas);
 	
 	// Graphics helper
 	m_kShipParts = new ShipParts();

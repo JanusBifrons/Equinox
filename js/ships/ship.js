@@ -934,6 +934,8 @@ Ship.prototype.afterBurner = function()
 Ship.prototype.rotateLeft = function()
 {
 	this.m_iRotation = wrapAngle(this.m_iRotation - this.m_iRotationSpeed);
+	
+	return false;
 }
 
 Ship.prototype.rotateRight = function()

@@ -45,11 +45,54 @@ function Player(district, sector, x, y)
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
 	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
 	
+	// Input
+	this.m_liKeys = new Array();
+	
+	
 	console.log("Player initialised successfully.");
 }
 
+Player.prototype.bindControls = function(player)
+{
+	// Bind Controls
+		
+	// Bind a reference to left click function
+	var leftClick = (this.onLeftClick).bind(this);
+	
+	// Bind action to function call
+	mouse.on('down', 'left', leftClick);
+	
+	m_kHammerTime.on('tap', function(ev){
+											m_kLog.addItem("Tapped!", 5000, 255, 255, 255);
+									});
+	
+	return;
+	
+	this.bindKey("a");
+	this.bindKey("d");
+	this.bindKey("w");
+	this.bindKey("s");
+	
+	this.bindKey("left");
+	this.bindKey("right");
+	this.bindKey("up");
+	this.bindKey("down");
+	
+	this.bindKey("space");
+	this.bindKey("shift");
+	
+	this.bindKey("del");
+	this.bindKey("esc");
+	
+	this.bindKey('1');
+	this.bindKey('2');
+	this.bindKey('3');
+}
+
 Player.prototype.update = function()
-{	
+{		
+	m_kLog.addStaticItem(m_liKeysDown.length, 1000, 255, 0, 0);
+
 	// Update sector overview
 	this.m_kSectorOverview.update();
 	
@@ -123,9 +166,7 @@ Player.prototype.onShipChange = function(ship)
 }
 
 Player.prototype.onLeftClick = function()
-{
-	this.m_bIsDragging = true;
-	
+{	
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 	
@@ -185,6 +226,26 @@ Player.prototype.onLeftClick = function()
 }
 
 // HELPERS
+
+Player.prototype.isKeyDown = function(key)
+{
+	if(m_liKeysDown.indexOf(key) >= 0)
+		return true;
+	else
+		return false;
+}
+
+Player.prototype.bindKey = function(key)
+{
+	Mousetrap.bind(key, function(){
+							if(m_liKeysDown.indexOf(key) < 0){
+								m_liKeysDown.push(key);
+							}}, 'keydown');
+							
+	Mousetrap.bind(key, function(){
+									m_liKeysDown.splice(m_liKeysDown.indexOf(key), 1);
+								}, 'keyup');
+}
 
 Player.prototype.selectObject = function(object)
 {
@@ -312,6 +373,64 @@ Player.prototype.drawExpBar = function()
 Player.prototype.setHyperTarget = function(target)
 {
 	this.m_kShip.m_iHyperTarget = target;
+}
+
+Player.prototype.newUpdate = function()
+{
+	// Create X/Y coords in world space for mouse position
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+	var _quadTree = this.m_kSector.m_kQuadTree;
+
+	// Check if mouse is over a game object
+	m_kCollisionManager.checkMouse(_worldPos, false, _quadTree);
+	
+	// Collision point for the mouse position IN SCREEN SPACE
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+	
+	// Handle mouse overs
+	this.m_kSectorOverview.onMouseOver(_mouseCircle);
+	this.m_kSelectedObject.onMouseOver(_mouseCircle);
+	for(var i = 0; i < this.m_kShip.m_liTargets.length; i++)
+		_shipTargets[i].onMouseOver(_mouseCircle);
+	
+	if(this.isKeyDown("left") || this.isKeyDown("a"))
+		this.m_kShip.rotateLeft();
+	
+	if(this.isKeyDown("right") || this.isKeyDown("d"))
+		this.m_kShip.rotateRight();
+	
+	if(this.isKeyDown("up") || this.isKeyDown("w"))
+		this.m_kShip.accellerate();
+	
+	if(this.isKeyDown("down") || this.isKeyDown("s"))
+		this.m_kShip.accellerate();
+	
+	if(this.isKeyDown("space"))
+		this.m_kShip.onFire();
+	
+	if(this.isKeyDown("shift"))
+		this.m_kShip.afterBurner();
+	
+	if(this.isKeyDown('1'))
+		this.m_kShip.selectWeapon(0);
+	
+	if(this.isKeyDown('2'))
+		this.m_kShip.selectWeapon(1);
+	
+	if(this.isKeyDown('3'))
+		this.m_kShip.selectWeapon(2);
+	
+	if(this.isKeyDown("del"))
+		this.m_kShip.onDeath();
+	
+	if(this.isKeyDown("esc"))
+		this.m_bPlacingStructure = false;
+	
+	if(this.isKeyDown("x"))
+		if(this.m_iTeam == 1)
+			this.m_iTeam = 2;
+		else
+			this.m_iTeam = 1;
 }
 
 Player.prototype.updateInput = function()
