@@ -21,8 +21,6 @@ Wing.prototype.draw = function()
 	// Initialises the draw and rotates/scales/centers the view
 	Component.prototype.startDraw.call(this);
 	
-	m_kLog.addStaticItem(this.m_bMirror);
-	
 	m_kContext.strokeStyle = 'black';	
 	m_kContext.fillStyle = this.m_cSecondaryColour;
 	m_kContext.lineWidth = 1;

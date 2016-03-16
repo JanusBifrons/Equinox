@@ -99,7 +99,7 @@ Log.prototype.draw = function()
 	}
 	
 	// Reset variables
-	_x = m_kCanvas.width * 0.75;
+	_x = m_kCanvas.width * 0.65;
 	_y = 20;
 	
 	// Font size and type
