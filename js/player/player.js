@@ -44,10 +44,20 @@ function Player(district, sector, x, y)
 	// User Interface
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
 	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
+	this.m_kThrottleBar = new ThrottleBar(this);
+	this.m_kInertialButton = new InertialButton(this);
 	
 	// Input
 	this.m_liKeys = new Array();
 	
+	// Tablet movement
+	this.m_iDrawTimer = 0;
+	this.m_liStartPos = new Array();
+	this.m_liEndPos = new Array();
+	this.m_liStartPos[0] = 0;
+	this.m_liStartPos[1] = 0;
+	this.m_liEndPos[0] = 0;
+	this.m_liEndPos[1] = 0;
 	
 	console.log("Player initialised successfully.");
 }
@@ -56,17 +66,24 @@ Player.prototype.bindControls = function(player)
 {
 	// Bind Controls
 		
-	// Bind a reference to left click function
+	// Bind a references
 	var leftClick = (this.onLeftClick).bind(this);
+	var startRotate = (this.setRotateStart).bind(this);
+	var moveRotate = (this.setRotateMove).bind(this);
+	var endRotate = (this.setRotateEnd).bind(this);
 	
 	// Bind action to function call
 	mouse.on('down', 'left', leftClick);
 	
-	m_kHammerTime.on('tap', function(ev){
-											m_kLog.addItem("Tapped!", 5000, 255, 255, 255);
-									});
+	m_kHammerTime.get('pan').set({ direction: Hammer.DIRECTION_ALL, threshold: 0});
+									
+	m_kHammerTime.on('panstart', startRotate);
+	m_kHammerTime.on('panmove', moveRotate);
+	m_kHammerTime.on('panend', endRotate);
 	
 	return;
+	
+	m_kHammerTime.on('tap', function(ev){ m_kLog.addItem("Tapped!", 5000, 255, 255, 255); });
 	
 	this.bindKey("a");
 	this.bindKey("d");
@@ -90,8 +107,17 @@ Player.prototype.bindControls = function(player)
 }
 
 Player.prototype.update = function()
-{		
-	m_kLog.addStaticItem(m_liKeysDown.length, 1000, 255, 0, 0);
+{
+	this.m_kThrottleBar.update();
+	this.m_kInertialButton.update();
+	
+	this.m_iDrawTimer += m_fElapsedTime;
+	
+	m_kLog.addStaticItem(this.m_liStartPos[0]);
+	m_kLog.addStaticItem(this.m_liStartPos[1]);
+	
+	m_kLog.addStaticItem(this.m_liEndPos[0]);
+	m_kLog.addStaticItem(this.m_liEndPos[1]);
 
 	// Update sector overview
 	this.m_kSectorOverview.update();
@@ -108,6 +134,7 @@ Player.prototype.update = function()
 	// Updateing a structure if one is currently attempting to be placed
 	this.updateStructurePlacement()
 }
+
 
 Player.prototype.draw = function()
 {	
@@ -130,6 +157,11 @@ Player.prototype.draw = function()
 	// WORLD SPACE END
 	
 	// SCREEN SPACE
+	
+	if(this.m_iDrawTimer <= 1000)
+	{
+		this.drawRotate();
+	}
 	
 	// Target targets, selected objects and overview
 	this.drawUI();
@@ -169,6 +201,9 @@ Player.prototype.onLeftClick = function()
 {	
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+	
+	this.m_kThrottleBar.onMouseClick(_mouseCircle);
+	this.m_kInertialButton.onMouseClick(_mouseCircle);
 	
 	if(this.m_kSectorOverview.onMouseClick(_mouseCircle))
 	{
@@ -227,6 +262,64 @@ Player.prototype.onLeftClick = function()
 
 // HELPERS
 
+Player.prototype.drawRotate = function()
+{
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 5;
+	
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);
+	var _endX = this.m_liEndPos[0];
+	var _endY = this.m_liEndPos[1];
+	
+	
+	if(this.m_bIsPanning)
+	{
+		_endX = _worldPos.x;
+		_endY = _worldPos.y;
+	}
+	
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_liStartPos[0], this.m_liStartPos[1]);
+	m_kContext.lineTo(_endX, _endY);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+}
+
+Player.prototype.setRotateStart = function()
+{
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);
+	
+	this.m_liStartPos[0] = m_iMouseX;
+	this.m_liStartPos[1] = m_iMouseY;
+}
+
+Player.prototype.setRotateMove = function()
+{		
+	this.m_liEndPos[0] = m_iMouseX;
+	this.m_liEndPos[1] = m_iMouseY;
+	
+	this.m_iDrawTimer = 0;
+}
+
+Player.prototype.setRotateEnd = function()
+{	
+	this.m_iDrawTimer = 0;
+
+	this.m_liEndPos[0] = m_iMouseX;
+	this.m_liEndPos[1] = m_iMouseY;
+	
+	var _desiredRotationVector = new Array();
+	_desiredRotationVector[0] = this.m_liEndPos[0] - this.m_liStartPos[0];
+	_desiredRotationVector[1] = this.m_liEndPos[1] - this.m_liStartPos[1];
+	
+	var _direction = Math.atan2(_desiredRotationVector[1], _desiredRotationVector[0]);
+	
+	_direction = wrapAngle(_direction);
+	
+	this.m_kShip.m_iDesiredRotation = _direction;
+}
+
 Player.prototype.isKeyDown = function(key)
 {
 	if(m_liKeysDown.indexOf(key) >= 0)
@@ -258,11 +351,19 @@ Player.prototype.selectObject = function(object)
 }
 
 Player.prototype.drawUI = function()
-{
-	var _width = 400;
-	var _height = 200;
-	var _size = 100;
-	var _padding = 20;
+{		
+	//var _width = 400;
+	//var _height = 200;
+	//var _size = 100;
+	//var _padding = 20;
+	
+	var _width = m_kCanvas.width * 0.2;
+	var _height = _width * 0.5;
+	var _size = _height * 0.5;
+	var _padding = _size * 0.2;
+	
+	this.m_kThrottleBar.draw(_padding, (m_kCanvas.height - (_size * 5)) - _padding, _size, _size * 5);
+	this.m_kInertialButton.draw(_padding + _size + _padding, (m_kCanvas.height - (_size / 2)) - _padding, _size / 2, _size / 2); 
 	
 	var _x = m_kCanvas.width - (_width + _padding);
 	var _y = _padding;
@@ -434,7 +535,9 @@ Player.prototype.newUpdate = function()
 }
 
 Player.prototype.updateInput = function()
-{		
+{	
+	// Rotate ship to face direction
+	
 	this.m_iInertiaTimer -= m_fElapsedTime;
 	
 	// Create X/Y coords in world space for mouse position
@@ -450,7 +553,7 @@ Player.prototype.updateInput = function()
 	// MOUSE CLICK
 	if(isMousePressed())
 	{	
-		this.onLeftClick();
+		//this.onLeftClick();
 	}
 	else
 	{
@@ -481,13 +584,15 @@ Player.prototype.updateInput = function()
 	// UP ARROW
 	if(isKeyDown(38) || isKeyDown(87))
 	{
-		this.m_kShip.accellerate();
+		this.m_kShip.throttleUp();
+		//this.m_kShip.accellerate();
 	}
 	
 	// DOWN ARROW
 	if(isKeyDown(40) || isKeyDown(83))
 	{
-		this.m_kShip.deccellerate();
+		this.m_kShip.throttleDown();
+		//this.m_kShip.deccellerate();
 	}
 	
 	// Z KEY

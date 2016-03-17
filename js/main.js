@@ -130,6 +130,8 @@ function draw()
 	// Draw the states
 	m_kStateManager.draw();
 	
+	m_kLog.addStaticItem("Elapsed Time: " + m_fElapsedTime);
+	
 	// Draw log on top of everything
 	m_kLog.draw();
 }
