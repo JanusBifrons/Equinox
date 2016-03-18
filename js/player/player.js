@@ -190,11 +190,14 @@ Player.prototype.onDragEnd = function()
 	if(this.m_kShip.m_kCargoHold.onMouseDrop(_mouseCircle) && this.m_bObjectSelected)
 	{
 		if(!this.m_kDraggedObject.m_bIsCargo)
-		{			
-			this.m_kShip.m_kCargoHold.onStore(this.m_kDraggedObject);
-			
-			// Remove object from the sector, it is now in a cargo hold!
-			this.m_kSector.removeObject(this.m_kDraggedObject);
+		{		
+			// Attempt to store object
+			if(this.m_kShip.m_kCargoHold.onStore(this.m_kDraggedObject))
+			{
+						
+				// Remove object from the sector, it is now in a cargo hold!
+				this.m_kSector.removeObject(this.m_kDraggedObject);	
+			}
 		}
 	}
 	else
