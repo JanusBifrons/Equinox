@@ -24,6 +24,7 @@ function GameState()
 	
 	// Initialise local player
 	m_kPlayer = new Player(m_kDistrict, this.m_kSectorA, -500, 0);
+	m_kPlayer.bindControls(m_kPlayer);
 	
 	// Add ships to the sector and spawn it
 	this.m_kSectorA.addShip(m_kPlayer.m_kShip);

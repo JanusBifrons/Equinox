@@ -27,6 +27,9 @@ var C;
 var V;
 var P;
 
+// Keyboard Input
+var m_liKeysDown;
+
 // Collision Detection 
 var m_kCollisionManager;
 
@@ -40,7 +43,12 @@ var m_kPathfinder;
 var m_kGameStats;
 
 function initMain()
-{
+{	
+	// Disable right click menu
+	document.oncontextmenu = function(e){return false;}
+	
+	m_liKeysDown = new Array();
+
 	// SAT Short-cuts
 	C = SAT.Circle;
 	V = SAT.Vector;
@@ -116,6 +124,8 @@ function draw()
 	
 	// Draw the states
 	m_kStateManager.draw();
+	
+	m_kLog.addStaticItem("Elapsed Time: " + m_fElapsedTime);
 	
 	// Draw log on top of everything
 	m_kLog.draw();
