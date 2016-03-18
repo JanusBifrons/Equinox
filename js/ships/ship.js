@@ -100,7 +100,7 @@ Ship.prototype.update = function()
 
 	// Regen stats
 	this.regenStats();
-		
+	
 	// Calculate length of the speed vector
 	this.m_iSpeed = calculateMagnitude(this.m_liMove);
 	
@@ -893,6 +893,20 @@ Ship.prototype.activeWeapons = function()
 
 // INPUT ACCESSORS
 
+Ship.prototype.accellerate = function()
+{
+	this.m_liMove[0] += Math.cos(this.m_iRotation) * this.m_iAccel;
+	this.m_liMove[1] += Math.sin(this.m_iRotation) * this.m_iAccel;
+		
+	this.m_bIsAccelerating = true;
+}
+
+Ship.prototype.deccellerate = function()
+{
+	this.m_liMove[0] -= Math.cos(this.m_iRotation) * this.m_iAccel;
+	this.m_liMove[1] -= Math.sin(this.m_iRotation) * this.m_iAccel;
+}
+
 Ship.prototype.afterBurner = function()
 {
 	// If not currently using the afterburner
@@ -934,6 +948,8 @@ Ship.prototype.afterBurner = function()
 Ship.prototype.rotateLeft = function()
 {
 	this.m_iRotation = wrapAngle(this.m_iRotation - this.m_iRotationSpeed);
+	
+	return false;
 }
 
 Ship.prototype.rotateRight = function()
@@ -941,19 +957,6 @@ Ship.prototype.rotateRight = function()
 	this.m_iRotation = wrapAngle(this.m_iRotation + this.m_iRotationSpeed);
 }
 
-Ship.prototype.accellerate = function()
-{
-	this.m_liMove[0] += Math.cos(this.m_iRotation) * this.m_iAccel;
-	this.m_liMove[1] += Math.sin(this.m_iRotation) * this.m_iAccel;
-		
-	this.m_bIsAccelerating = true;
-}
-
-Ship.prototype.deccellerate = function()
-{
-	this.m_liMove[0] -= Math.cos(this.m_iRotation) * this.m_iAccel;
-	this.m_liMove[1] -= Math.sin(this.m_iRotation) * this.m_iAccel;
-}
 
 // This is mostly for the AI to prevent reversing
 Ship.prototype.stop = function()
