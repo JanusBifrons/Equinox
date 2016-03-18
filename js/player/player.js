@@ -45,6 +45,10 @@ function Player(district, sector, x, y)
 	
 	// Input
 	this.m_liKeys = new Array();
+	this.m_liDragPos = new Array();
+	this.m_bIsDragging = false;
+	this.m_bObjectSelected = false;
+	this.m_kDraggedObject;
 	
 	// Disabled indefinitely
 	//this.m_kThrottleBar = new ThrottleBar(this);
@@ -53,18 +57,21 @@ function Player(district, sector, x, y)
 	console.log("Player initialised successfully.");
 }
 
+
 Player.prototype.bindControls = function(player)
 {
 	// Bind Controls
 		
 	// Bind a references
 	var leftClick = (this.onLeftClick).bind(this);
+	var onDrag = (this.onDrag).bind(this);
+	var onDragEnd = (this.onDragEnd).bind(this);
 	
 	// Bind action to function call
 	mouse.on('down', 'left', leftClick);
 	
-	mouse.on('drag', 'left', function(e){ m_kLog.addStaticItem("Dragged!"); });
-	mouse.on('drop', 'left', function(e){ m_kLog.addItem("Dropped!", 1000, 255, 255, 255); });
+	mouse.on('drag', 'left', onDrag);
+	mouse.on('drop', 'left', onDragEnd);
 	
 	return;
 	
@@ -90,7 +97,7 @@ Player.prototype.bindControls = function(player)
 }
 
 Player.prototype.update = function()
-{
+{	
 	// Update sector overview
 	this.m_kSectorOverview.update();
 	
@@ -141,7 +148,32 @@ Player.prototype.draw = function()
 	
 	// Draw Cargo!
 	if(this.m_kShip.m_bDrawCargo)
-		this.m_kShip.m_kCargoHold.draw();
+	{	
+		var _padding = m_kCanvas.width * 0.01;
+		var _width = m_kCanvas.width * 0.2;
+		var _height = _width;
+		
+		var _x = _padding;
+		var _y = (m_kCanvas.height - _padding) - _height;
+		
+		this.m_kShip.m_kCargoHold.draw(_x, _y, _width, _height);
+	}
+		
+	if(this.m_bIsDragging && this.m_bObjectSelected)
+	{		
+		// This is bad and inefficient code 
+		// but changing it would require a refactor of every
+		// single 'drawBody' call to 'fix' it
+		
+		m_kContext.save();
+		
+		m_kContext.translate(m_iMouseX, m_iMouseY);
+		m_kContext.translate(-(this.m_kDraggedObject.m_liPos[0]), -(this.m_kDraggedObject.m_liPos[1]));
+		
+		this.m_kDraggedObject.drawBody();
+		
+		m_kContext.restore();
+	}
 	
 	// Draw Exp Bar
 	//this.drawExpBar();
@@ -149,9 +181,56 @@ Player.prototype.draw = function()
 
 // EVENTS
 
+Player.prototype.onDragEnd = function()
+{	
+	// Collision point for the mouse position IN SCREEN SPACE
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+
+	// Store in cargo hold
+	if(this.m_kShip.m_kCargoHold.onMouseDrop(_mouseCircle) && this.m_bObjectSelected)
+	{
+		if(!this.m_kDraggedObject.m_bIsCargo)
+		{			
+			this.m_kShip.m_kCargoHold.onStore(this.m_kDraggedObject);
+			
+			// Remove object from the sector, it is now in a cargo hold!
+			this.m_kSector.removeObject(this.m_kDraggedObject);
+		}
+	}
+	else
+	{
+		if(this.m_kDraggedObject.m_bIsCargo && this.m_bObjectSelected)
+		{
+			// Create X/Y coords in world space for mouse position
+			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+			
+			this.m_kDraggedObject.m_bIsCargo = false;
+			
+			this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+			this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+			
+			this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+			
+			this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+		}
+	}
+	
+	// Reset flags
+	this.m_bObjectSelected = false;
+	this.m_bIsDragging = false;
+}
+
+Player.prototype.onDrag = function()
+{	
+	this.m_liDragPos[0] = m_iMouseX;
+	this.m_liDragPos[1] = m_iMouseY;
+	
+	this.m_bIsDragging = true;
+}
+
 Player.prototype.onStore = function(object)
 {
-	this.m_kShip.m_kCargoHold.store(object);
+	this.m_kShip.m_kCargoHold.onStore(object);
 }
 
 Player.prototype.onOpenCargo = function(object)
@@ -169,26 +248,23 @@ Player.prototype.onLeftClick = function()
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 	
-	if(this.m_kSectorOverview.onMouseClick(_mouseCircle))
-	{
+	if(this.m_kShip.m_kCargoHold.onMouseClick(_mouseCircle))
 		return;
-	}
 	
-	var _shipTargets = this.m_kShip.m_liTargets;
+	// Check if you're clicking the buttons on the overview
+	if(this.m_kSectorOverview.onMouseClick(_mouseCircle))
+		return;
 	
-	for(var i = 0; i < _shipTargets.length; i++)
-	{
-		_shipTargets[i].onMouseClick(_mouseCircle);
-	}
+	// Check for clicks on targets (setting them as primary target)
+	for(var i = 0; i < this.m_kShip.m_liTargets.length; i++)
+		if(this.m_kShip.m_liTargets[i].onMouseClick(_mouseCircle))
+			return;
 	
-	// Check against UI elements
+	// Check if you're clicking the buttons on the selected object
 	if(this.m_kSelectedObject.onMouseClick(_mouseCircle))
 	{		
 		// Cancel structure
 		this.m_bPlacingStructure = false;
-	
-		// Don't accidentally select something or highlight something
-		// or accidentally place a structure
 		return;
 	}
 	
@@ -220,11 +296,17 @@ Player.prototype.onLeftClick = function()
 		var _quadTree = this.m_kSector.m_kQuadTree;
 
 		// Check if mouse is over a game object and should select this ship
-		m_kCollisionManager.checkMouse(_worldPos, true, _quadTree);
+		m_kCollisionManager.checkMouse(_worldPos, true, _quadTree);	
 	}
 }
 
 // HELPERS
+
+Player.prototype.setDragObject = function(object)
+{
+	this.m_kDraggedObject = object;
+	this.m_bObjectSelected = true;
+}
 
 Player.prototype.isKeyDown = function(key)
 {
@@ -247,7 +329,17 @@ Player.prototype.bindKey = function(key)
 }
 
 Player.prototype.selectObject = function(object)
-{
+{					
+	if(object.m_eObjectType == "Object")
+	{
+		this.m_kDraggedObject = object;
+		this.m_bObjectSelected = true;
+	}
+	else
+	{
+		this.m_bObjectSelected = false;
+	}
+	
 	// Unselect old object
 	this.m_kSelectedObject.m_kSelected.m_kTarget.m_bIsSelected = false;
 	
@@ -420,7 +512,7 @@ Player.prototype.newUpdate = function()
 		this.m_kShip.selectWeapon(2);
 	
 	if(this.isKeyDown("del"))
-		this.m_kShip.onDeath();
+		this.m_kShip.onDestroy();
 	
 	if(this.isKeyDown("esc"))
 		this.m_bPlacingStructure = false;
@@ -552,7 +644,7 @@ Player.prototype.updateInput = function()
 	// DELETE
 	if(isKeyDown(46) && this.m_kShip.m_bIsAlive)
 	{
-		this.m_kShip.onDeath();
+		this.m_kShip.onDestroy();
 	}
 	
 	// ESCAPE

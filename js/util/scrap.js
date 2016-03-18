@@ -1,6 +1,6 @@
 function Scrap(sector, component, moveX, moveY)
 {
-	this.m_eObjectType = "Scrap";
+	this.m_eObjectType = "Object";
 	
 	this.m_kSector = sector;
 	
@@ -24,6 +24,7 @@ function Scrap(sector, component, moveX, moveY)
 	// For cross compatability (unused currently)
 	this.m_bDelete = false;
 	this.m_bIsAlive = true;
+	this.m_bIsCargo = false;
 	
 	this.m_iRotation = component.m_iRotation + component.m_iRotationOffset;
 	this.m_iRotationMove = component.m_kOwner.m_iRotationSpeed * 0.25;	// Unused ATM

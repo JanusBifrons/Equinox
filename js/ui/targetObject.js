@@ -102,7 +102,11 @@ TargetObject.prototype.onMouseClick = function(mouse)
 	if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_kButton.m_cdCollision))
 	{			
 		this.m_kOwner.setPrimaryTarget(this);
+		
+		return true;
 	}
+	
+	return false;
 }
 
 // HELPERS
