@@ -30,8 +30,6 @@ var P;
 // Keyboard Input
 var m_liKeysDown;
 
-var m_kHammerTime;
-
 // Collision Detection 
 var m_kCollisionManager;
 
@@ -62,9 +60,6 @@ function initMain()
 	m_kCanvas.width = window.innerWidth;
 	m_kContext = m_kCanvas.getContext("2d");
 	m_kCamera = new Camera(m_kContext);				// External Lib
-	
-	// Create touch input handler
-	m_kHammerTime = new Hammer(m_kCanvas);
 	
 	// Graphics helper
 	m_kShipParts = new ShipParts();
