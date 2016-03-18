@@ -89,6 +89,8 @@ function Ship()
 
 Ship.prototype.update = function()
 {	
+	this.m_kCargoHold.update();
+
 	// Update targets
 	this.updateTargets();
 

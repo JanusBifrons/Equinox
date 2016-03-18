@@ -573,6 +573,28 @@ Sector.prototype.removeShip = function(ship)
 	}
 }
 
+Sector.prototype.removeObject = function(object)
+{
+	// Item to delete
+	var _index = -1;
+	
+	// Find ship
+	for (var i = 0; i < this.m_liObjects.length; i++) 
+	{
+		// Set index
+		if(this.m_liObjects[i] == object)
+		{		
+			_index = i;
+		}
+	}
+	
+	if(_index > -1)
+	{		
+		// Remove item
+		this.m_liObjects.splice(_index, 1);
+	}
+}
+
 Sector.prototype.addStructure = function(structure)
 {
 	this.m_kStructureManager.addStructure(structure);

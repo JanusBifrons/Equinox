@@ -61,6 +61,8 @@ function initMain()
 	m_kContext = m_kCanvas.getContext("2d");
 	m_kCamera = new Camera(m_kContext);				// External Lib
 	
+	m_kCanvas.style.cursor = 'crosshair';
+	
 	// Graphics helper
 	m_kShipParts = new ShipParts();
 	

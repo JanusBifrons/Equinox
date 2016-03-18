@@ -4,43 +4,149 @@ function Cargo(owner, capacity)
 	this.m_iCapacity = capacity;
 	
 	this.m_liStored = new Array();
+	
+	this.m_liPos = new Array();
+	this.m_liPos[0] = 0;
+	this.m_liPos[1] = 0;
+	this.m_iWidth = 1;
+	this.m_iHeight = 1;
+	
+	this.m_kCargoArea;
 }
 
-Cargo.prototype.store = function(item)
+Cargo.prototype.update = function()
 {
-	this.m_liStored.push(item);
+	this.m_kCargoArea = new UIButton(this, 0, this.m_liPos[0], this.m_liPos[1], this.m_iWidth, this.m_iHeight, false);
+	
+	for(var i = 0; i < this.m_liStored.length; i++)
+	{
+		this.m_liStored[i].update();
+	}
 }
 
 // This draws the contents to the SCREEN
-Cargo.prototype.draw = function()
-{
-	m_kLog.addStaticItem("Drawing Cargo!");
+Cargo.prototype.draw = function(x, y, width, height)
+{	
+	this.m_liPos = new Array();
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
 	
-	var _padding = m_kCanvas.width * 0.01;
-	var _width = m_kCanvas.width * 0.2;
-	var _height = _width;
+	this.m_iWidth = width;
+	this.m_iHeight = height;
 	
-	var _x = _padding;
-	var _y = (m_kCanvas.height - _padding) - _height;
+	this.drawBackgroundBorder(x, y, width, height);
 	
-	this.drawBackgroundBorder(_x, _y, _width, _height);
+	this.drawHeader(x, y, width, height * 0.1);
 	
-	this.drawHeader(_x, _y, _width, _height * 0.1);
+	y += (height * 0.1);
 	
-	_y += (_height * 0.1);
+	this.drawCapacityBar(x, y, width, height * 0.075);
 	
-	this.drawCapacityBar(_x, _y, _width, _height * 0.075);
+	y += (height * 0.075);
 	
-	this.drawContents(_x, _y, _width, _height);
+	this.drawContents(x, y, width, height, height * 0.01);
 }
+
+// EVENTS
+
+Cargo.prototype.onMouseDrop = function(mouse)
+{	
+	if(m_kCollisionManager.circlePolygonCollisionDetection(mouse, this.m_kCargoArea.m_cdCollision))
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+Cargo.prototype.onMouseClick = function(mouse)
+{	
+	for(var i = 0; i < this.m_liStored.length; i++)
+	{
+		if(this.m_liStored[i].onMouseClick(mouse))
+		{
+			
+		}
+	}
+	
+	return false;
+}
+
+Cargo.prototype.onStore = function(object)
+{	
+	object.m_bIsCargo = true;
+
+	this.m_liStored.push(new CargoObject(object));
+}
+
+Cargo.prototype.onDrop = function(object)
+{
+	// Item to delete
+	var _index = -1;
+	
+	// Find ship
+	for (var i = 0; i < this.m_liStored.length; i++) 
+	{
+		// Set index
+		if(this.m_liStored[i].m_kObject == object)
+		{
+			_index = i;
+		}
+	}
+	
+	if(_index > -1)
+	{		
+		// Remove item
+		this.m_liStored.splice(_index, 1);
+	}
+}
+
 
 // HELPERS
 
-Cargo.prototype.drawContents = function(x, y, width, height)
-{
+Cargo.prototype.drawBackground = function(x, y, size)
+{	
+	// Save context!
+	m_kContext.save();
+	
+	// Translate to center// Translate to center
+	m_kContext.translate(x, y);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Background
+	m_kContext.fillRect(0, 0, size, size);
+	m_kContext.beginPath();
+	m_kContext.rect(0, 0, size, size);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	// Restore the context back to how it was before!
+	m_kContext.restore();
+}
+
+Cargo.prototype.drawContents = function(x, y, width, height, padding)
+{	
+	var _x = x + padding;
+	var _y = y + padding;
+	var _cols = 5;
+	var _width = (width - (padding * (_cols + 1))) / _cols;
+	
 	for(var i = 0; i < this.m_liStored.length; i++)
-	{
+	{		
+		this.m_liStored[i].draw(_x, _y, _width, padding);
 		
+		_x += padding;
+		_x += _width;
+		
+		if(_x > width)
+		{
+			_x = x + padding;
+			_y += padding;
+			_y += _width;
+		}
 	}
 }
 

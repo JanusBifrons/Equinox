@@ -34,7 +34,9 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 					
 					// If mouse was clicked and you're not already selected
 					if(mouseClicked)
+					{
 						m_kPlayer.selectObject(_ship);
+					}
 				}
 			}
 		}
@@ -52,7 +54,9 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 					_structure.m_bDrawUI = true;
 					
 					if(mouseClicked)
+					{
 						m_kPlayer.selectObject(_structure);
+					}
 				}
 			}
 		}
@@ -67,7 +71,9 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 				_asteroid.m_bDrawUI = true;
 				
 				if(mouseClicked)
+				{
 					m_kPlayer.selectObject(_asteroid);
+				}
 			}
 		}
 		
@@ -81,7 +87,9 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 				_object.m_bDrawUI = true;
 				
 				if(mouseClicked)
+				{
 					m_kPlayer.selectObject(_object);
+				}
 			}
 		}
 	}
