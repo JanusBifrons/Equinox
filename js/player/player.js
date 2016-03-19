@@ -98,6 +98,8 @@ Player.prototype.bindControls = function(player)
 
 Player.prototype.update = function()
 {	
+	m_kLog.addStaticItem(this.m_kShip.holyshitthisworks);
+
 	// Update sector overview
 	this.m_kSectorOverview.update();
 	
@@ -202,19 +204,22 @@ Player.prototype.onDragEnd = function()
 	}
 	else
 	{
-		if(this.m_kDraggedObject.m_bIsCargo && this.m_bObjectSelected)
+		if(this.m_bIsDragging)
 		{
-			// Create X/Y coords in world space for mouse position
-			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
-			
-			this.m_kDraggedObject.m_bIsCargo = false;
-			
-			this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
-			this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
-			
-			this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
-			
-			this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+			if(this.m_kDraggedObject.m_bIsCargo && this.m_bObjectSelected)
+			{
+				// Create X/Y coords in world space for mouse position
+				var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+				
+				this.m_kDraggedObject.m_bIsCargo = false;
+				
+				this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+				this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+				
+				this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+				
+				this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+			}
 		}
 	}
 	
@@ -608,7 +613,8 @@ Player.prototype.updateInput = function()
 	// SHIFT
 	if(isKeyDown(16))
 	{
-		this.m_kShip.afterBurner();
+		// Disabled
+		//this.m_kShip.afterBurner();
 	}
 	
 	// NUMPAD 1

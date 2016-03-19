@@ -544,8 +544,6 @@ Sector.prototype.addShip = function(ship)
 {	
 	this.m_liShips.push(ship);
 	
-	ship.onEnterSector(this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids);
-	
 	// If this isn't the player, notify them somebody has entered the sector!
 	if(ship.m_iID != m_kPlayer.m_kShip.m_iID)
 		m_kLog.addItem("An unknown ship has entered the sector.", 2500, 255, 0, 0);
