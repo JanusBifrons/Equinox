@@ -68,7 +68,7 @@ function Ship()
 	
 	// Ship cargo
 	this.m_bDrawCargo = false;
-	this.m_kCargoHold = new Cargo(this, 0);
+	this.m_kCargoHold = new Cargo(0);
 	
 	// Collision Detection
 	this.m_iTimeSinceLastHit = 5001;

@@ -1,6 +1,5 @@
-function Cargo(owner, capacity)
+function Cargo(capacity)
 {
-	this.m_kOwner = owner;
 	this.m_iCapacity = capacity;
 	
 	this.m_liStored = new Array();
@@ -74,9 +73,20 @@ Cargo.prototype.onMouseClick = function(mouse)
 
 Cargo.prototype.onStore = function(object)
 {	
-	object.m_bIsCargo = true;
+	if(this.m_liStored.length < this.m_iCapacity)
+	{	
+		object.m_bIsCargo = true;
 
-	this.m_liStored.push(new CargoObject(object));
+		this.m_liStored.push(new CargoObject(object));
+		
+		return true;	
+	}
+	else
+	{
+		m_kLog.addItem("Cargo Hold is full!", 5000, 255, 0, 0);
+		
+		return false;
+	}
 }
 
 Cargo.prototype.onDrop = function(object)
@@ -203,7 +213,7 @@ Cargo.prototype.drawHeader = function(x, y, width, height)
 	m_kContext.font="15px Verdana";
 	m_kContext.fillStyle = "white";
 	
-	var _title = this.m_kOwner.m_iID;
+	var _title = "My Cargo"
 	var _titleWidth = m_kContext.measureText(_title).width;
 	var _titleHeight = 22;
 	

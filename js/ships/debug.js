@@ -57,7 +57,7 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	this.m_iHyperCharge = 0;
 	this.m_iHyperChargeMax = 5000; // Milliseconds
 	
-	this.m_kCargoHold = new Cargo(this, 5);
+	this.m_kCargoHold = new Cargo(5);
 	
 	this.createWeapons();
 	
