@@ -24,17 +24,17 @@ EnergyBar.prototype.draw = function()
 	Component.prototype.startDraw.call(this);
 	
 	// Variables required for drawing
-	if(this.m_iCurrentDrain != this.m_kOwner.m_iPowerDrain)
+	if(this.m_kOwner.m_iCurrentDrain != this.m_kOwner.m_iPowerDrain)
 	{		
-		var _difference = this.m_kOwner.m_iPowerDrain - this.m_iCurrentDrain;
-		this.m_iCurrentDrain += (_difference / 1000) * m_fElapsedTime;
+		var _difference = this.m_kOwner.m_iPowerDrain - this.m_kOwner.m_iCurrentDrain;
+		this.m_kOwner.m_iCurrentDrain += (_difference / 1000) * m_fElapsedTime;
 	}
 	
 	var _power = 0;
 	
-	if(this.m_iCurrentDrain > 0 && this.m_kOwner.m_iPowerGenerated > 0)
+	if(this.m_kOwner.m_iCurrentDrain > 0 && this.m_kOwner.m_iPowerGenerated > 0)
 	{
-		_power = (this.m_iCurrentDrain / this.m_kOwner.m_iPowerGenerated) * 100;	
+		_power = (this.m_kOwner.m_iCurrentDrain / this.m_kOwner.m_iPowerGenerated) * 100;	
 		_power = Math.round(_power);
 	}
 	
