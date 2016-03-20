@@ -252,7 +252,7 @@ Sector.prototype.populateQuadTree = function(ships, structures, asteroids, objec
 Sector.prototype.createHomeSector = function()
 {
 	// Spawn control tower
-	var _control = new Control(0, 0, 1);
+	var _control = new Control(0, 0, 1, this);
 	_control.m_kSector = this;
 	_control.onPlace();
 	_control.onConstruct(1000);
@@ -260,7 +260,7 @@ Sector.prototype.createHomeSector = function()
 	this.addStructure(_control);		
 	
 	// Spawn connector for assembler
-	var _connector = new Connector(-350, -350);
+	var _connector = new Connector(-350, -350, this);
 	_connector.m_kSector = this;
 	_connector.update();
 	_connector.onPlace();
@@ -269,7 +269,7 @@ Sector.prototype.createHomeSector = function()
 	this.addStructure(_connector);
 	
 	// Spawn assembler
-	var _assembler = new Assembler(-1000, -350);
+	var _assembler = new Assembler(-1000, -350, this);
 	_assembler.m_kSector = this;
 	_assembler.update();
 	_assembler.onPlace();

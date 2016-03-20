@@ -3,7 +3,6 @@ Ship.prototype.constructor = Ship;
 
 function Ship()
 {
-	this.m_sDebug = "This is a ship class.";
 	this.m_eObjectType = "Ship";
 	
 	this.m_kOwner;
@@ -48,9 +47,6 @@ Ship.prototype.update = function()
 
 	// Update targets
 	this.updateTargets();
-	
-	// Update shield draw timer
-	this.updateTimer();
 	
 	// Loop through all weapons
 	for(var i = 0; i < this.m_liWeapons.length; i++)
@@ -102,12 +98,9 @@ Ship.prototype.draw = function()
 			_weapons[j].draw();
 		}
 	}
-	
-	this.drawBody();
 }
 
 // OVERRRIDE EVENTS
-
 
 Ship.prototype.onHit = function(damage)
 {
@@ -188,13 +181,12 @@ Ship.prototype.onHyperEnd = function(sector)
 
 Ship.prototype.onDestroy = function(reason)
 {			
-
 	// If you remove this then onDestroy is called a million times
 	// and bad stuff happens
 	if(!this.m_bIsAlive)
 		return;
 
-	// Destroy player
+	// Destroy object
 	this.m_bIsAlive = false;
 	
 	// Ask for respawn
@@ -209,7 +201,7 @@ Ship.prototype.onDestroy = function(reason)
 	switch(reason)
 	{
 		case 0:
-			m_kLog.addItem("Ship was destroyed by weapons fire!", 2500, 255, 255, 255);
+			m_kLog.addItem(this.m_sName + " was destroyed by weapons fire!", 2500, 255, 255, 255);
 			break;
 	}
 }
@@ -391,22 +383,6 @@ Ship.prototype.createComponents = function()
 {
 	// This is a holder and is always overwritten!
 }
-
-Ship.prototype.updateTimer = function()
-{
-	if(this.m_iTimeSinceLastHit < 5000)
-	{
-		this.m_iTimeSinceLastHit += m_fElapsedTime;
-		
-		this.m_bDrawShield = true;
-	}
-	else
-	{
-		this.m_bDrawShield = false;
-	}
-}
-
-
 
 // Returns a list of all currently firing weapons
 // for collision detection

@@ -181,6 +181,8 @@ GameObject.prototype.draw = function()
 	}
 	
 	this.m_bDrawUI = false;
+	
+	this.drawBody();
 }
 
 // EVENTS
