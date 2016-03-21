@@ -29,8 +29,7 @@ function Ship()
 	this.m_iHyperChargeMax = 0; // Milliseconds
 	
 	// Ship cargo
-	this.m_bDrawCargo = false;
-	this.m_kCargoHold = new Cargo(0);
+	this.m_kCargoHold = new Cargo("Debug", 0);
 	
 	console.log("Initialized ship successfully.");
 }

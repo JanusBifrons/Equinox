@@ -1,5 +1,6 @@
-function Cargo(capacity)
+function Cargo(name, capacity)
 {
+	this.m_sName = name;
 	this.m_iCapacity = capacity;
 	
 	this.m_liStored = new Array();
@@ -64,7 +65,7 @@ Cargo.prototype.onMouseClick = function(mouse)
 	{
 		if(this.m_liStored[i].onMouseClick(mouse))
 		{
-			
+			return true;
 		}
 	}
 	
@@ -73,9 +74,24 @@ Cargo.prototype.onMouseClick = function(mouse)
 
 Cargo.prototype.onStore = function(object)
 {	
+	for(var i = 0; i < this.m_liStored.length; i++)
+	{
+		if(this.m_liStored[i].m_kObject.m_iID == object.m_iID)
+		{
+			m_kLog.addItem("Cargo Hold already contains this object!", 5000, 255, 0, 0);
+			return false;
+		}
+	}
+
 	if(this.m_liStored.length < this.m_iCapacity)
 	{	
+		if(object.m_bIsCargo)
+		{
+			object.m_kStoredBy.onDrop(object);
+		}
+
 		object.m_bIsCargo = true;
+		object.m_kStoredBy = this;
 
 		this.m_liStored.push(new CargoObject(object));
 		
@@ -99,7 +115,7 @@ Cargo.prototype.onDrop = function(object)
 	{
 		// Set index
 		if(this.m_liStored[i].m_kObject == object)
-		{
+		{			
 			_index = i;
 		}
 	}
@@ -213,11 +229,10 @@ Cargo.prototype.drawHeader = function(x, y, width, height)
 	m_kContext.font="15px Verdana";
 	m_kContext.fillStyle = "white";
 	
-	var _title = "My Cargo"
-	var _titleWidth = m_kContext.measureText(_title).width;
+	var _titleWidth = m_kContext.measureText(this.m_sName).width;
 	var _titleHeight = 22;
 	
-	m_kContext.fillText(_title, x + (x * 0.2), y + _titleHeight);
+	m_kContext.fillText(this.m_sName, x + (width * 0.1), y + _titleHeight);
 }
 
 Cargo.prototype.drawBackgroundBorder = function(x, y, width, height)

@@ -45,8 +45,11 @@ function GameObject()
 	this.m_liShields = new Array();
 	this.m_liComponents = new Array();
 	
+	// Cargo
+	this.m_kStoredBy;
+	
 	// Boolean flags
-	//this.m_bIsCargo = false;
+	this.m_bIsCargo = false;
 	this.m_bIsAccelerating = false;
 	this.m_bInertialDampeners = true; // On by default
 	
@@ -186,6 +189,23 @@ GameObject.prototype.draw = function()
 }
 
 // EVENTS
+
+GameObject.prototype.onStored = function(cargoHold)
+{
+	this.m_kStoredBy = cargoHold;
+	this.m_bIsCargo = true;
+}
+
+GameObject.prototype.onDrop = function(x, y, sector)
+{
+	// Set position
+	this.m_liPos[0] = x;
+	this.m_liPos[1] = y;
+	this.m_kSector = sector;
+	
+	// Unflag as stored
+	this.m_bIsCargo = false;
+}
 
 GameObject.prototype.onCollision = function(vector)
 {	

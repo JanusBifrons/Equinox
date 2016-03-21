@@ -42,6 +42,7 @@ function Player(district, sector, x, y)
 	// User Interface
 	this.m_kSelectedObject = new SelectedObject(this, this.m_kShip);
 	this.m_kSectorOverview = new SectorOverview(this, this.m_kSector);
+	this.m_liCargoHolds = new Array();
 	
 	// Input
 	this.m_liKeys = new Array();
@@ -49,6 +50,7 @@ function Player(district, sector, x, y)
 	this.m_bIsDragging = false;
 	this.m_bObjectSelected = false;
 	this.m_kDraggedObject;
+	this.m_iDraggedCargoIndex = 0;
 	
 	// Disabled indefinitely
 	//this.m_kThrottleBar = new ThrottleBar(this);
@@ -56,7 +58,6 @@ function Player(district, sector, x, y)
 	
 	console.log("Player initialised successfully.");
 }
-
 
 Player.prototype.bindControls = function(player)
 {
@@ -71,6 +72,7 @@ Player.prototype.bindControls = function(player)
 	mouse.on('down', 'left', leftClick);
 	
 	mouse.on('drag', 'left', onDrag);
+	mouse.on('dragMove', 'left', onDrag);
 	mouse.on('drop', 'left', onDragEnd);
 	
 	return;
@@ -98,7 +100,7 @@ Player.prototype.bindControls = function(player)
 
 Player.prototype.update = function()
 {	
-	m_kLog.addStaticItem(this.m_kShip.holyshitthisworks);
+	m_kLog.addStaticItem(this.m_liCargoHolds.length);
 
 	// Update sector overview
 	this.m_kSectorOverview.update();
@@ -148,17 +150,26 @@ Player.prototype.draw = function()
 	this.m_kShip.drawStats();
 	this.m_kShip.drawWeaponList();
 	
-	// Draw Cargo!
-	if(this.m_kShip.m_bDrawCargo)
-	{	
-		var _padding = m_kCanvas.width * 0.01;
-		var _width = m_kCanvas.width * 0.2;
-		var _height = _width;
+	var _padding = m_kCanvas.width * 0.01;
+	var _width = m_kCanvas.width * 0.2;
+	var _height = _width;
+	
+	var _x = _padding;
+	var _y = (m_kCanvas.height - _padding) - _height;
+	
+	for(var i = 0; i < this.m_liCargoHolds.length; i++)
+	{
+		this.m_liCargoHolds[i].draw(_x, _y, _width, _height);
 		
-		var _x = _padding;
-		var _y = (m_kCanvas.height - _padding) - _height;
+		_y -= _height;
+		_y -= _padding;
 		
-		this.m_kShip.m_kCargoHold.draw(_x, _y, _width, _height);
+		if(_y < 0)
+		{
+			_y = (m_kCanvas.height - _padding) - _height;
+			_x += _width;
+			_x += _padding;
+		}
 	}
 		
 	if(this.m_bIsDragging && this.m_bObjectSelected)
@@ -183,8 +194,107 @@ Player.prototype.draw = function()
 
 // EVENTS
 
+Player.prototype.onOpenCargo = function(cargoHold)
+{
+	for(var i = 0; i < this.m_liCargoHolds.length; i++)
+	{
+		if(this.m_liCargoHolds.indexOf(cargoHold) >= 0)
+		{			
+			m_kLog.addItem("Cargo container already open!", 5000, 255, 0, 0);
+			return false;
+		}
+	}
+	
+	this.m_liCargoHolds.push(cargoHold);
+	return true;
+}
+
 Player.prototype.onDragEnd = function()
 {	
+	//this.m_bIsDragging = false;
+	//this.m_bObjectSelected = false;
+
+	// Collision point for the mouse position IN SCREEN SPACE
+	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+	
+	for(var i = 0; i < this.m_liCargoHolds.length; i++)
+	{		
+		// Check if object was dropped in this cargo hold
+		if(this.m_liCargoHolds[i].onMouseDrop(_mouseCircle) && this.m_bObjectSelected)
+		{
+			// Attempt to store here
+			if(this.m_liCargoHolds[i].onStore(this.m_kDraggedObject))
+			{				
+				this.m_kSector.removeObject(this.m_kDraggedObject);
+			}			
+														
+			// Reset flags
+			this.m_bIsDragging = false;
+			this.m_bObjectSelected = false;
+			
+			return;
+		}
+	}
+	
+	if(this.m_kDraggedObject.m_bIsCargo)
+	{
+		// Create X/Y coords in world space for mouse position
+		var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+		
+		this.m_kDraggedObject.m_kStoredBy.onDrop(this.m_kDraggedObject);
+		
+		this.m_kDraggedObject.m_bIsCargo = false;
+		
+		this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+		this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+		
+		this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+	}
+	
+	// Reset flags
+	this.m_bIsDragging = false;
+	this.m_bObjectSelected = false;
+	
+	return;
+
+	if(this.m_bObjectSelected)
+	{
+		m_kLog.addItem("Object is selected!", 5000, 255, 255, 255);
+		
+		if(this.m_kDraggedObject.m_bIsCargo)
+		{
+			// Create X/Y coords in world space for mouse position
+			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+			
+			this.m_kDraggedObject.m_kStoredBy.onDrop(this.m_kDraggedObject, _worldPos.x, _worldPos.y, this.m_kSector);
+			
+			m_kLog.addItem("Tried to drop in space!", 5000, 255, 255, 255);
+			
+			return;
+			
+			// Create X/Y coords in world space for mouse position
+			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+			
+			this.m_kDraggedObject.m_bIsCargo = false;
+			
+			this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+			this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+			
+			this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+			
+			this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+		}
+		else
+		{
+			m_kLog.addItem("Object is not in cargo!", 5000, 255, 255, 255);
+		}
+	}	
+	
+	// Reset flags
+	this.m_bObjectSelected = false;
+	
+	return;
+
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 
@@ -240,11 +350,6 @@ Player.prototype.onStore = function(object)
 	return this.m_kShip.m_kCargoHold.onStore(object);
 }
 
-Player.prototype.onOpenCargo = function(object)
-{
-	m_kLog.addItem("This code hasn't been written yet!", 1000, 255, 0, 0);
-}
-
 Player.prototype.onShipChange = function(ship)
 {
 	this.m_kShip = ship;
@@ -254,6 +359,12 @@ Player.prototype.onLeftClick = function()
 {	
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
+	
+	for(var i = 0; i < this.m_liCargoHolds.length; i++)
+	{
+		if(this.m_liCargoHolds[i].onMouseClick(_mouseCircle))
+			return;	
+	}
 	
 	if(this.m_kShip.m_kCargoHold.onMouseClick(_mouseCircle))
 		return;
@@ -693,20 +804,10 @@ Player.prototype.updateInput = function()
 	{
 		if(this.m_iInertiaTimer <= 0)
 		{
-			if(!this.m_kShip.m_bDrawCargo)
-			{
-				this.m_kShip.m_bDrawCargo = true;
-				
-				// This should be a generic variable
-				this.m_iInertiaTimer = this.m_iInteriaTimerMax;
-			}
-			else
-			{
-				this.m_kShip.m_bDrawCargo = false;
-				
-				// This should be a generic variable
-				this.m_iInertiaTimer = this.m_iInteriaTimerMax;
-			}	
+			this.onOpenCargo(this.m_kShip.m_kCargoHold);
+			
+			// This should be a generic variable
+			this.m_iInertiaTimer = this.m_iInteriaTimerMax;
 		}
 	}
 	
