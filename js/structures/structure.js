@@ -2,13 +2,10 @@ Structure.prototype = new GameObject();
 Structure.prototype.constructor = Structure;
 
 function Structure()
-{	
-	this.m_eObjectType = "Structure";
-	
+{		
 	// Switches
 	this.m_bIsPlaced = false;
 	this.m_bIsConstructed = false;
-	this.m_bDelete = false;
 	
 	// Placement switches
 	this.m_bCollideShips = true;
@@ -19,7 +16,6 @@ function Structure()
 	this.m_bNeedsTeam = false;
 	this.m_bNeedsPower = false;
 	this.m_bNeedsMetal = false;
-	
 	
 	this.m_iTeamCheckTimer = 0; // seconds (mili)
 	this.m_iTeamCheckTimerMax = 5000; // seconds (mili)
@@ -59,6 +55,9 @@ function Structure()
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
 	
+	// Cargo
+	this.m_kCargoHold = new Cargo("Debug", 0);
+	
 	// Drawing
 	this.m_iR = 128;
 	this.m_iG = 128;
@@ -83,6 +82,7 @@ Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated
 	this.m_iMetalStoredMax = metalStoreMax;
 	this.m_iMetalStored = 0;
 	
+	this.m_kCargoHold = new Cargo(this.m_sName + " Cargo Hold", 50);
 }
 
 Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMetal)
@@ -94,6 +94,8 @@ Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMe
 
 Structure.prototype.update = function()
 {	
+	this.m_kCargoHold.update();
+
 	// Not all structures have or need a team!
 	if(this.m_bNeedsTeam)
 	{

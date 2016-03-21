@@ -69,18 +69,9 @@ TargetObject.prototype.draw = function(x, y, size, padding)
 		y += padding * 0.5;
 	}
 	else
-	{				
-		// Draw stats for structures and ships
-		if(this.m_kTarget.m_eObjectType == "Structure" || this.m_kTarget.m_eObjectType == "Ship")
-		{		
-			y = this.drawStats(x, y, size, padding);
-		}
-		else
-		{
-			y += padding * 0.5;
-		}
+	{			
+		y = this.drawStats(x, y, size, padding);
 		
-		// Draw the distance to this target
 		this.drawDistance(x, y);
 	}
 		
@@ -176,6 +167,41 @@ TargetObject.prototype.drawInfoBar = function(x, y, size, current, total, colour
 	
 	// Percent
 	m_kContext.fillRect(x, y, size * _percent, 10);
+	
+	m_kContext.strokeStyle = 'black';	
+	
+	var _segments = total / 50;
+	var _increment = 1 / _segments;
+	_increment = size * _increment;
+	
+	if(_segments < 10)
+		this.drawIncrements(x, y, _increment, _segments, x + size, 'grey');
+	
+	_segments = total / 100;
+	_increment = 1 / _segments;
+	_increment = size * _increment;
+	
+	if(_segments < 10)
+		this.drawIncrements(x, y, _increment, _segments, x + size, 'white');
+}
+
+TargetObject.prototype.drawIncrements = function(x, y, increment, segments, limit, colour)
+{
+	m_kContext.strokeStyle = colour;	
+	
+	for(var i = 0; i < segments; i++)
+	{		
+		x += increment;
+		
+		if(x < limit)
+		{			
+			m_kContext.beginPath();
+			m_kContext.moveTo(x, y);
+			m_kContext.lineTo(x, y + 10);
+			m_kContext.closePath();	
+			m_kContext.stroke();
+		}
+	}
 }
 
 TargetObject.prototype.drawDistance = function(x, y)

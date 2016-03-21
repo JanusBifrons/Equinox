@@ -135,7 +135,7 @@ SelectedObject.prototype.onClick = function(id)
 			}
 			
 		case 2:
-			this.m_kOwner.onOpenCargo(this.m_kSelected.m_kTarget);
+			this.m_kOwner.onOpenCargo(this.m_kSelected.m_kTarget.m_kCargoHold);
 			break;
 			
 		case 3:

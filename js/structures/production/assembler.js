@@ -27,6 +27,8 @@ function Assembler(x, y, sector)
 	// Local variables
 	this.m_iCurrentDrain = 0;
 	
+	//this.m_kCargoHold.onStore(new Scrap(new RearWing(this, -30, -12, 1, false), 0, 0));
+	
 	console.log("Initialized Assembler structure successfully.");
 }
 
@@ -59,4 +61,6 @@ Assembler.prototype.createComponents = function()
 	
 	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 350, 400, 15));
 	this.m_liComponents.push(new StatusBar(this, 50, -125, 0.75));
+	
+	this.m_liComponents.push(new CargoWindow(this, 0, 0, 1));
 }
