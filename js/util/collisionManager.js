@@ -20,76 +20,18 @@ CollisionManager.prototype.checkMouse = function(mousePos, mouseClicked, quadTre
 	
 	for(var i = 0; i < _elements.length; i++)
 	{
-		// SHIP!
-		if(_elements[i].type == 0)
-		{			
-			var _ship = _elements[i].object;
-			
-			for(var k = 0; k < _ship.m_liShields.length; k++)
-			{
-				if(this.circleCircleCollisionDetection(_ship.m_liShields[k], _mouseCircle))
-				{
-					// Make it draw stats!
-					_ship.m_bDrawUI = true;
-					
-					// If mouse was clicked and you're not already selected
-					if(mouseClicked)
-					{
-						m_kPlayer.selectObject(_ship);
-					}
-				}
-			}
-		}
+		var _object = _elements[i].object;
 		
-		// STRUCTURE!
-		if(_elements[i].type == 1)
-		{			
-			var _structure = _elements[i].object;
-			
-			for(var k = 0; k < _structure.m_liShields.length; k++)
-			{
-				if(this.circleCircleCollisionDetection(_structure.m_liShields[k], _mouseCircle))
-				{
-					// Make it draw stats!
-					_structure.m_bDrawUI = true;
-					
-					if(mouseClicked)
-					{
-						m_kPlayer.selectObject(_structure);
-					}
-				}
-			}
-		}
-		
-		// ASTEROID!
-		if(_elements[i].type == 2)
+		for(var j = 0; j < _object.m_liShields.length; j++)
 		{
-			var _asteroid = _elements[i].object;
-			
-			if(this.polygonCircleCollisionDetection(_asteroid.m_cdCollision, _mouseCircle))
-			{
-				_asteroid.m_bDrawUI = true;
-				
-				if(mouseClicked)
-				{
-					m_kPlayer.selectObject(_asteroid);
-				}
-			}
-		}
-		
-		// OBJECTS!
-		if(_elements[i].type == 3)
-		{
-			var _object = _elements[i].object;
-			
-			if(this.polygonCircleCollisionDetection(_object.m_cdCollision, _mouseCircle))
+			if(this.circleCircleCollisionDetection(_object.m_liShields[j], _mouseCircle))
 			{
 				_object.m_bDrawUI = true;
 				
 				if(mouseClicked)
-				{
 					m_kPlayer.selectObject(_object);
-				}
+				
+				return;
 			}
 		}
 	}
@@ -116,19 +58,19 @@ CollisionManager.prototype.checkCollisions = function(quadTree, ships, structure
 		{	
 			// SHIP!
 			if(_elements[k].type == 0)
-				this.objectToShip(objects[i], _elements[k].object);
+				this.gameObjectToGameObject(objects[i], _elements[k].object);
 			
 			// STRUCTURE!
 			if(_elements[k].type == 1)
-				this.objectToStructure(objects[i], _elements[k].object);
+				this.gameObjectToGameObject(objects[i], _elements[k].object);
 			
 			// ASTEROID!
 			if(_elements[k].type == 2)
-				this.objectToAsteroid(objects[i], _elements[k].object);
+				this.gameObjectToGameObject(objects[i], _elements[k].object);
 			
 			// OBJECTS!
 			if(_elements[k].type == 3)
-				this.objectToObject(objects[i], _elements[k].object);
+				this.gameObjectToGameObject(objects[i], _elements[k].object);
 		}
 	}
 	
@@ -154,20 +96,21 @@ CollisionManager.prototype.checkCollisions = function(quadTree, ships, structure
 				// SHIP!
 				if(_elements[k].type == 0)
 				{
-					this.shipToShip(ships[i], _elements[k].object);
+					this.gameObjectToGameObject(ships[i], _elements[k].object);
+					//this.shipToShip(ships[i], _elements[k].object);
 				}
 		
 				// STRUCTURE!
 				if(_elements[k].type == 1)
-					this.shipToStructure(ships[i], _elements[k].object);
+					this.gameObjectToGameObject(ships[i], _elements[k].object);
 				
 				// ASTEROID!
 				if(_elements[k].type == 2)
-					this.shipToAsteroid(ships[i], _elements[k].object);
+					this.gameObjectToGameObject(ships[i], _elements[k].object);
 				
 				// OBJECT!
 				if(_elements[k].type == 3)
-					this.shipToObject(ships[i], _elements[k].object);
+					this.gameObjectToGameObject(ships[i], _elements[k].object);
 			}
 		}
 	}
@@ -272,66 +215,57 @@ CollisionManager.prototype.checkWeapons = function(quadTree, ships, structures, 
 	}
 }
 
-CollisionManager.prototype.objectToObject = function(object, otherObject)
+CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGameObject)
 {
-	if(object.m_iID != otherObject.m_iID)
+	// Dont hit yourself dummy...
+	if(gameObject.m_iID == otherGameObject.m_iID)
+		return;
+		
+	// If you are on the same team only check components
+	if(gameObject.m_iTeam == otherGameObject.m_iTeam)
 	{
-		if(object.m_bIsMoving)
+		for(var i = 0; i < gameObject.m_liComponents.length; i++)
+			for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
+				if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
+					return gameObject.onCollision(this.m_kResponse.overlapV);
+	}
+	else
+	{
+		if(gameObject.m_iShields > 0 && otherGameObject.m_iShields > 0)
+		{		
+			for(var i = 0; i < gameObject.m_liShields.length; i++)
+				for(var j = 0; j < otherGameObject.m_liShields.length; j++)
+					if(this.circleCircleCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liShields[i]))
+						return gameObject.onCollision(this.m_kResponse.overlapV);
+		}
+		
+		if(gameObject.m_iShields > 0 && otherGameObject.m_iShields <= 0)
+		{							
+			for(var i = 0; i < gameObject.m_liComponents.length; i++)
+				for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
+					if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
+						return gameObject.onCollision(this.m_kResponse.overlapV);
+		}
+		
+		if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields > 0)
+		{		
+			for(var i = 0; i < gameObject.m_liComponents.length; i++)
+				for(var j = 0; j < otherGameObject.m_liShields.length; j++)
+					if(this.circlePolygonCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liComponents[i].m_cdCollision))
+						return gameObject.onCollision(this.m_kResponse.overlapV);
+		}
+		
+		if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields <= 0)
 		{
-			if(this.polygonPolygonCollisionDetection(otherObject.m_cdCollision, object.m_cdCollision))
-			{
-				if(!otherObject.m_bIsMoving)
-				{
-					var _x = this.m_kResponse.overlapV.x *= -1;
-					var _y = this.m_kResponse.overlapV.y *= -1;
-					
-					var _reverse = new V(_x * 0.5, _y * 0.5);
-					
-					otherObject.onCollision(_reverse);
-				}
-				
-				return object.onCollision(this.m_kResponse.overlapV);
-			}
+			for(var i = 0; i < gameObject.m_liComponents.length; i++)
+				for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
+					if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
+						return gameObject.onCollision(this.m_kResponse.overlapV);
 		}
 	}
-}
-
-CollisionManager.prototype.objectToAsteroid = function(object, asteroid)
-{
-	if(this.polygonPolygonCollisionDetection(asteroid.m_cdCollision, object.m_cdCollision))
-		return object.onCollision(this.m_kResponse.overlapV);
-}
-
-CollisionManager.prototype.objectToStructure = function(object, structure)
-{
-	if(structure.m_iShields > 0 && object.m_iTeam != structure.m_iTeam)
-	{
-		for(var i = 0; i < structure.m_liShields.length; i++)
-			if(this.circlePolygonCollisionDetection(structure.m_liShields[i], object.m_cdCollision))
-				return object.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		for(var i = 0; i < structure.m_liComponents.length; i++)
-			if(this.polygonPolygonCollisionDetection(structure.m_liComponents[i].m_cdCollision, object.m_cdCollision))
-				return object.onCollision(this.m_kResponse.overlapV);
-	}
-}
-
-CollisionManager.prototype.objectToShip = function(object, ship)
-{	
-	if(ship.m_iShields > 0)
-	{
-		for(var i = 0; i < ship.m_liShields.length; i++)
-			if(this.circlePolygonCollisionDetection(ship.m_liShields[i], object.m_cdCollision))
-				return object.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		for(var i = 0; i < ship.m_liComponents.length; i++)
-			if(this.polygonPolygonCollisionDetection(ship.m_liComponents[i].m_cdCollision, object.m_cdCollision))
-				return object.onCollision(this.m_kResponse.overlapV);
-	}
+	
+	// No collision!
+	return false;
 }
 
 CollisionManager.prototype.structureWeaponsToAsteroid = function(structure, asteroid)
@@ -384,22 +318,6 @@ CollisionManager.prototype.structureWeaponsToShip = function(structure, ship)
 	}
 }
 
-CollisionManager.prototype.shipToObject = function(ship, object)
-{
-	if(ship.m_iShields > 0)
-	{
-		for(var i = 0; i < ship.m_liShields.length; i++)
-			if(this.polygonCircleCollisionDetection(object.m_cdCollision, ship.m_liShields[i]))
-				return ship.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		for(var i = 0; i < ship.m_liComponents.length; i++)
-			if(this.polygonPolygonCollisionDetection(object.m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-				return ship.onCollision(this.m_kResponse.overlapV);
-	}
-}
-
 CollisionManager.prototype.shipWeaponsToShip = function(ship, otherShip)
 {	
 	// Dont hit yourself dummy...
@@ -425,71 +343,6 @@ CollisionManager.prototype.shipWeaponsToShip = function(ship, otherShip)
 	}
 }
 
-CollisionManager.prototype.shipToShip = function(ship, otherShip)
-{
-	// Dont hit yourself dummy...
-	if(ship.m_iID == otherShip.m_iID)
-		return;
-		
-	if(ship.m_iTeam == otherShip.m_iTeam)
-	{
-		for(var i = 0; i < ship.m_liComponents.length; i++)
-			for(var j = 0; j < otherShip.m_liComponents.length; j++)
-				if(this.polygonPolygonCollisionDetection(otherShip.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-					return ship.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		if(ship.m_iShields > 0 && otherShip.m_iShields > 0)
-		{		
-			for(var i = 0; i < ship.m_liShields.length; i++)
-				for(var j = 0; j < otherShip.m_liShields.length; j++)
-					if(this.circleCircleCollisionDetection(otherShip.m_liShields[j], ship.m_liShields[i]))
-						return ship.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(ship.m_iShields > 0 && otherShip.m_iShields <= 0)
-		{							
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < otherShip.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(otherShip.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-						return ship.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(ship.m_iShields <= 0 && otherShip.m_iShields > 0)
-		{		
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < otherShip.m_liShields.length; j++)
-					if(this.circlePolygonCollisionDetection(otherShip.m_liShields[j], ship.m_liComponents[i].m_cdCollision))
-						return ship.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(ship.m_iShields <= 0 && otherShip.m_iShields <= 0)
-		{
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < otherShip.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(otherShip.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-						return ship.onCollision(this.m_kResponse.overlapV);
-		}
-	}
-}
-
-CollisionManager.prototype.shipToAsteroid = function(ship, asteroid)
-{
-	if(ship.m_iShields > 0)
-	{
-		for(var i = 0; i < ship.m_liShields.length; i++)
-			if(this.polygonCircleCollisionDetection(asteroid.m_cdCollision, ship.m_liShields[i]))
-				return ship.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		for(var i = 0; i < ship.m_liComponents.length; i++)
-			if(this.polygonPolygonCollisionDetection(asteroid.m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-				return ship.onCollision(this.m_kResponse.overlapV);
-	}
-}
-
 CollisionManager.prototype.shipWeaponsToStructure = function(ship, structure)
 {
 	// Retreive list of all active weapons
@@ -508,52 +361,6 @@ CollisionManager.prototype.shipWeaponsToStructure = function(ship, structure)
 			for(var j = 0; j < structure.m_liComponents.length; j++)
 				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liComponents[j].m_cdCollision))
 					_weapons[i].onHit(structure.m_liComponents[j]);
-	}
-}
-
-CollisionManager.prototype.shipToStructure = function(ship, structure)
-{	
-		
-	if(ship.m_iTeam == structure.m_iTeam)
-	{
-		for(var i = 0; i < ship.m_liComponents.length; i++)
-			for(var j = 0; j < structure.m_liComponents.length; j++)
-				if(this.polygonPolygonCollisionDetection(structure.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-					return structure.onCollision(ship);
-	}
-	else
-	{
-		if(ship.m_iShields > 0 && structure.m_iShields > 0)
-		{		
-			for(var i = 0; i < ship.m_liShields.length; i++)
-				for(var j = 0; j < structure.m_liShields.length; j++)
-					if(this.circleCircleCollisionDetection(structure.m_liShields[j], ship.m_liShields[i]))
-						return structure.onCollision(ship);
-		}
-		
-		if(ship.m_iShields > 0 && structure.m_iShields <= 0)
-		{							
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < structure.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(structure.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-						return structure.onCollision(ship);
-		}
-		
-		if(ship.m_iShields <= 0 && structure.m_iShields > 0)
-		{		
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < structure.m_liShields.length; j++)
-					if(this.circlePolygonCollisionDetection(structure.m_liShields[j], ship.m_liComponents[i].m_cdCollision))
-						return structure.onCollision(ship);
-		}
-		
-		if(ship.m_iShields <= 0 && structure.m_iShields <= 0)
-		{
-			for(var i = 0; i < ship.m_liComponents.length; i++)
-				for(var j = 0; j < structure.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(structure.m_liComponents[j].m_cdCollision, ship.m_liComponents[i].m_cdCollision))
-						return structure.onCollision(ship);
-		}
 	}
 }
 
@@ -646,6 +453,8 @@ CollisionManager.prototype.checkRay = function(source, target, ray, structures, 
 // Returns true or false if you can place it in this position or not
 CollisionManager.prototype.asteroidPlacementCheck = function(asteroid, ships, structures, asteroids)
 {	
+	return true;
+
 	// Ships
 	for(var i = 0; i < ships.length; i++)
 		for(var j = 0; j < ships[i].m_liShields.length; j++)
@@ -686,19 +495,20 @@ CollisionManager.prototype.structurePlacementCheck = function(structure, ships, 
 				for(var k = 0; k < ships[j].m_liShields.length; k++)
 					if(this.circleCircleCollisionDetection(structure.m_liShields[i], ships[j].m_liShields[k]))
 						return false;	
-				
+					
 		// Structures
 		if(structure.m_bCollideStructures)
 			for(var j = 0; j < structures.length; j++)
 				for(var k = 0; k < structures[j].m_liShields.length; k++)
 					if(this.circleCircleCollisionDetection(structure.m_liShields[i], structures[j].m_liShields[k]))
 						return false;	
-				
+					
 		// Asteroids
 		if(structure.m_bCollideAsteroids)
-			for(var j = 0; j < asteroids.length; j++)
-				if(this.circlePolygonCollisionDetection(structure.m_liShields[i], asteroids[j].m_cdCollision))
-					return false;
+			for(var j = 0; j < structures.length; j++)
+				for(var k = 0; k < structures[j].m_liShields.length; k++)
+					if(this.circleCircleCollisionDetection(structure.m_liShields[i], structures[j].m_liShields[k]))
+						return false;
 	}
 	
 	// Space clear!

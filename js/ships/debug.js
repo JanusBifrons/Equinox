@@ -7,7 +7,7 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	this.m_kOwner = owner;
 
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Debug", "Ship", team, sector, x, y, moveX, moveY, 0, 0.035, 60, 20, 0.08);
+	GameObject.prototype.initialize.call(this, "Havok (Debug)", "Ship", team, sector, x, y, moveX, moveY, 0, 0.035, 60, 20, 0.08);
 	
 	// Call base initialize stats
 	GameObject.prototype.initializeStats.call(this, 10, 75, 100, 100, 250, 100);

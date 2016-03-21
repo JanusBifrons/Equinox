@@ -192,8 +192,8 @@ GameObject.prototype.onCollision = function(vector)
 	this.m_liPos[0] += (vector.x);
 	this.m_liPos[1] += (vector.y);
 	
-	this.m_liMove[0] += (vector.x * 1.0);
-	this.m_liMove[1] += (vector.y * 1.0);
+	this.m_liMove[0] += (vector.x * 0.75);
+	this.m_liMove[1] += (vector.y * 0.75);
 }
 
 GameObject.prototype.onHit = function(damage)
@@ -304,16 +304,16 @@ GameObject.prototype.drawBody = function()
 	// Draw shields
 	for(var i = 0; i < this.m_liShields.length; i++)
 	{		
-		if(!this.m_bDrawShield)
-			continue;
+		// Alpha the shields
+		m_kContext.globalAlpha = 0.25;
 		
 		if(this.m_iShields <= 0)
 			continue;
 		
 		// Draw Shield
-		m_kContext.strokeStyle = 'lightblue';	
+		m_kContext.strokeStyle = 'blue';	
 		m_kContext.fillStyle = 'blue';
-		m_kContext.lineWidth = (5 / 100) * _shieldPercent;
+		m_kContext.lineWidth = (15 / 100) * _shieldPercent;
 		
 		m_kContext.beginPath();
 		m_kContext.arc(this.m_liShields[i].pos.x, this.m_liShields[i].pos.y, this.m_liShields[i].r, 0, 2 * Math.PI);
@@ -338,7 +338,7 @@ GameObject.prototype.drawUI = function()
 	// Translate to center
 	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
 	
-	var _drawDistance = this.m_iRadius * 1.2;
+	var _drawDistance = this.m_iRadius * 1;
 	
 	m_kContext.strokeStyle = 'white';	
 	m_kContext.fillStyle = 'white';

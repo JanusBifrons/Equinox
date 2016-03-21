@@ -139,7 +139,14 @@ SelectedObject.prototype.onClick = function(id)
 			break;
 			
 		case 3:
-			this.m_kOwner.onStore(this.m_kSelected.m_kTarget);
+			if(this.m_kSelected.m_kTarget.m_eObjectType == "Object")
+			{
+				if(this.m_kOwner.onStore(this.m_kSelected.m_kTarget))
+				{
+					this.m_kOwner.m_kSector.removeObject(this.m_kSelected.m_kTarget);	
+				}
+			}
+			
 			break;
 	}
 }
