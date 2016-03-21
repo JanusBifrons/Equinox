@@ -47,7 +47,8 @@ SectorOverviewObject.prototype.drawInfo = function(x, y, width, height, segments
 	_x = x + (width * segments[1]);
 	_x += (width * 0.005);
 	
-	m_kContext.fillText(this.m_kObject.m_eObjectType, _x, y);
+	//m_kContext.fillText(this.m_kObject.m_eObjectType, _x, y);
+	m_kContext.fillText(this.m_kObject.m_sName, _x, y);
 }
 
 SectorOverviewObject.prototype.drawSegments = function(x, y, width, height, segments)

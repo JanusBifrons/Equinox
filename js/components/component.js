@@ -21,6 +21,7 @@ function Component()
 	// Switch
 	this.m_bCanScrap = true;
 	this.m_bMirror = false;
+	this.m_bAdjustCenter = true;
 	
 	// Scale
 	this.m_fScale = 1.0;
@@ -80,9 +81,12 @@ Component.prototype.update = function()
 	// Scale the points
 	this.scale();
 	
-	// Calculate and adjust to dyanmic center
-	this.calculateCenter(this);
-	this.adjustCenter(this);
+	if(this.m_bAdjustCenter)
+	{
+		// Calculate and adjust to dyanmic center
+		this.calculateCenter(this);
+		this.adjustCenter(this);
+	}
 	
 	// Set collision bounds
 	this.m_cdCollision = new P(new V(0, 0), this.m_liPoints);

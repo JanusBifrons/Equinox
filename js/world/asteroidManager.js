@@ -35,7 +35,7 @@ AsteroidManager.prototype.generateAsteroidField = function(x, y, radius, size)
 	{
 		_randomX = x + (-radius + Math.random() * (radius * 2));
 		_randomY = y + (-radius + Math.random() * (radius * 2));
-		_randomSize = (Math.random() * 80) + 50;
+		_randomSize = (Math.random() * 150) + 50;
 		
 		var _newAsteroid = new Asteroid(_randomX, _randomY, _randomSize);
 		

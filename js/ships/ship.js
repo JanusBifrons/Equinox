@@ -2,9 +2,7 @@ Ship.prototype = new GameObject();
 Ship.prototype.constructor = Ship;
 
 function Ship()
-{
-	this.m_eObjectType = "Ship";
-	
+{	
 	this.m_kOwner;
 	
 	// Construction
@@ -33,10 +31,6 @@ function Ship()
 	// Ship cargo
 	this.m_bDrawCargo = false;
 	this.m_kCargoHold = new Cargo(0);
-	
-	// Drawing
-	this.m_bIsSelected = false;
-	this.m_bDrawShield = false;
 	
 	console.log("Initialized ship successfully.");
 }

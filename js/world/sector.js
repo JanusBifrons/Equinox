@@ -619,7 +619,7 @@ Sector.prototype.createScrap = function(object)
 		
 		var _move = this.generateDrift();
 		
-		this.m_liObjects.push(new Scrap(this, object.m_liComponents[i], object.m_liMove[0] + _move[0], object.m_liMove[1] + _move[1]));
+		this.m_liObjects.push(new Scrap(object.m_liComponents[i], object.m_liMove[0] + _move[0], object.m_liMove[1] + _move[1]));
 	}
 }
 
