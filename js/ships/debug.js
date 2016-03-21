@@ -3,50 +3,18 @@ Debug.prototype.constructor = Debug;
 
 function Debug(x, y, moveX, moveY, owner, sector, team)
 {		
-	// ID
+	// Copy owner
 	this.m_kOwner = owner;
-	this.m_kSector = sector;
-	this.m_iTeam = team;
-	this.m_iID = guid();
+
+	// Call base initialize
+	GameObject.prototype.initialize.call(this, "Havok (Debug)", "Ship", team, sector, x, y, moveX, moveY, 0, 0.035, 60, 20, 0.08);
 	
-	// These must be reinitialized
-	// because Javascript is crazy...
+	// Call base initialize stats
+	GameObject.prototype.initializeStats.call(this, 10, 75, 100, 100, 250, 100);
+	
 	this.m_liWeapons = new Array();
-	this.m_liShields = new Array();
 	this.m_liTargets = new Array();
 	
-	// Movement Variables
-	this.m_liPos = new Array();
-	this.m_liMove = new Array();
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-	this.m_liMove[0] = moveX;
-	this.m_liMove[1] = moveY;
-	this.m_iRadius = 60;
-	
-	// Rotation and Speed
-	this.m_iRotation = 0;
-	this.m_iRotationSpeed = 0.035;
-	this.m_iMaxSpeed = 20;
-	this.m_iAccel = 0.08;
-	
-	// Stats
-	this.m_iShieldRegenCap = 20000;
-	this.m_iShieldRegen = 20000; // seconds (mili)
-	this.m_iShieldCap = 75;
-	this.m_iShields = 75;
-	//this.m_iShieldCap = 0;
-	//this.m_iShields = 0;
-	
-	this.m_iArmourCap = 100;
-	this.m_iArmour = 100;
-	this.m_iArmourRegen = 0;
-	
-	this.m_iHullCap = 250;
-	this.m_iHull = 250;
-	this.m_iHullRegen = 2.5;
-	
-	//this.m_iPowerRegen = 7.5;
 	this.m_iPowerRegen = 75;
 	this.m_iPowerStored = 100;
 	this.m_iPowerCap = 100;
@@ -60,8 +28,6 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	this.m_kCargoHold = new Cargo(5);
 	
 	this.createWeapons();
-	
-	this.createComponents();
 	
 	console.log("Initialized Debug Ship successfully.");
 }

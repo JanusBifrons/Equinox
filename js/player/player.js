@@ -98,6 +98,8 @@ Player.prototype.bindControls = function(player)
 
 Player.prototype.update = function()
 {	
+	m_kLog.addStaticItem(this.m_kShip.holyshitthisworks);
+
 	// Update sector overview
 	this.m_kSectorOverview.update();
 	
@@ -194,7 +196,6 @@ Player.prototype.onDragEnd = function()
 			// Attempt to store object
 			if(this.m_kShip.m_kCargoHold.onStore(this.m_kDraggedObject))
 			{
-						
 				// Remove object from the sector, it is now in a cargo hold!
 				this.m_kSector.removeObject(this.m_kDraggedObject);	
 			}
@@ -202,19 +203,22 @@ Player.prototype.onDragEnd = function()
 	}
 	else
 	{
-		if(this.m_kDraggedObject.m_bIsCargo && this.m_bObjectSelected)
+		if(this.m_bIsDragging && this.m_bObjectSelected)
 		{
-			// Create X/Y coords in world space for mouse position
-			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
-			
-			this.m_kDraggedObject.m_bIsCargo = false;
-			
-			this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
-			this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
-			
-			this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
-			
-			this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+			if(this.m_kDraggedObject.m_bIsCargo)
+			{
+				// Create X/Y coords in world space for mouse position
+				var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+				
+				this.m_kDraggedObject.m_bIsCargo = false;
+				
+				this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+				this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+				
+				this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+				
+				this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
+			}
 		}
 	}
 	
@@ -233,7 +237,7 @@ Player.prototype.onDrag = function()
 
 Player.prototype.onStore = function(object)
 {
-	this.m_kShip.m_kCargoHold.onStore(object);
+	return this.m_kShip.m_kCargoHold.onStore(object);
 }
 
 Player.prototype.onOpenCargo = function(object)
@@ -333,7 +337,7 @@ Player.prototype.bindKey = function(key)
 
 Player.prototype.selectObject = function(object)
 {					
-	if(object.m_eObjectType == "Object")
+	if(object.m_eObjectType == "Scrap")
 	{
 		this.m_kDraggedObject = object;
 		this.m_bObjectSelected = true;
@@ -528,9 +532,7 @@ Player.prototype.newUpdate = function()
 }
 
 Player.prototype.updateInput = function()
-{	
-	// Rotate ship to face direction
-	
+{		
 	this.m_iInertiaTimer -= m_fElapsedTime;
 	
 	// Create X/Y coords in world space for mouse position
@@ -543,23 +545,16 @@ Player.prototype.updateInput = function()
 	// Collision point for the mouse position IN SCREEN SPACE
 	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
 		
-	// MOUSE CLICK
-	if(isMousePressed())
+	// MOUSE OVER
+	if(!isMousePressed())
 	{	
-		//this.onLeftClick();
-	}
-	else
-	{
 		this.m_kSectorOverview.onMouseOver(_mouseCircle);
-		
 		this.m_kSelectedObject.onMouseOver(_mouseCircle);
 	
 		var _shipTargets = this.m_kShip.m_liTargets;
 	
 		for(var i = 0; i < _shipTargets.length; i++)
-		{
 			_shipTargets[i].onMouseOver(_mouseCircle);
-		}
 	}
 
 	// RIGHT ARROW
@@ -608,7 +603,8 @@ Player.prototype.updateInput = function()
 	// SHIFT
 	if(isKeyDown(16))
 	{
-		this.m_kShip.afterBurner();
+		// Disabled
+		//this.m_kShip.afterBurner();
 	}
 	
 	// NUMPAD 1

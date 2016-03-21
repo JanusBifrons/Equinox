@@ -1,48 +1,28 @@
 Connector.prototype = new Structure();
 Connector.prototype.constructor = Connector;
 
-function Connector(x, y)
+function Connector(x, y, sector)
 {
-	this.m_iType = 1;
+	// Call base initialize
+	GameObject.prototype.initialize.call(this, "Connector", "Structure", 0, sector, x, y, 0, 0, 0, 0.035, 25, 20, 0);
 	
-	// ID
-	this.m_iID = guid();
-	this.m_bNeedsTeam = false;
-	this.m_iTeam = 0;
-
-	this.m_liPos = new Array();
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-	this.m_iRadius = 25;
+	// Call base initialize stats
+	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250, 100);
+	
+	// Call base initialize resources
+	Structure.prototype.initializeResources.call(this, 0, 0, false, 0);
+	
+	// Call base initialize flags
+	Structure.prototype.initializeFlags.call(this, false, true, true);
 	
 	this.m_iMaxConnections = 6;
-	
-	// Stats
-	this.m_iShieldRegenCap = 0;
-	this.m_iShieldCap = 0;
-	this.m_iArmourCap = 0;
-	this.m_iArmourRegen = 0;
-	this.m_iHullCap = 250;
-	this.m_iHullRegen = 0;
-	
-	// Collision Detection
-	this.m_liShields = new Array();
 	
 	// Construction
 	this.m_iMetalRequired = 5;
 	
-	this.m_iID = guid();
-	
-	// Drawing
-	this.m_iR = 128;
-	this.m_iG = 128;
-	this.m_iB = 128;
-	this.m_iA = 255;
-	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
-	
-	// Components
-	this.m_liComponents = new Array();
-	this.m_liComponents.push(new HexHull(this, 0, 0, 0.1));
+	// Pathfinding
+	this.m_liSiblings = new Array();
+	this.m_liRoutes = new Array();
 	
 	console.log("Initialized Connector structure successfully.");
 }
@@ -58,3 +38,15 @@ Connector.prototype.draw = function()
 	// Call base draw
 	Structure.prototype.draw.call(this);
 }
+
+
+// HELPERS
+
+Connector.prototype.createComponents = function()
+{
+	this.m_liComponents = new Array();
+	
+	// Components
+	this.m_liComponents.push(new HexHull(this, 0, 0, 0.1));
+}
+

@@ -1,39 +1,13 @@
+Structure.prototype = new GameObject();
+Structure.prototype.constructor = Structure;
+
 function Structure()
-{
-	this.m_sDebug = "This is a structure class.";
-	this.m_sName = "Structure (Mistake!)";
-	
+{	
 	this.m_eObjectType = "Structure";
 	
-	// Stats
-	this.m_liPos = new Array();
-	this.m_liMove = new Array();
-	this.m_liPos[0] = 0;
-	this.m_liPos[1] = 0;
-	this.m_liMove[0] = 0;
-	this.m_liMove[1] = 0;
-	this.m_iRadius = 10;
-	this.m_iRotation = 0;
-	
-	// Stats
-	this.m_iShieldRegenCap = 0;
-	this.m_iShieldRegen = 0; // seconds (mili)
-	this.m_iShieldCap = 0;
-	this.m_iShields = 0;
-	this.m_iArmourCap = 0;
-	this.m_iArmour = 1;
-	this.m_iArmourRegen = 0;
-	this.m_iHullCap = 0;
-	this.m_iHull = 1;
-	this.m_iHullRegen = 0;
-	
 	// Switches
-	this.m_bIsSelected = false
-	this.m_bDrawUI = false;
 	this.m_bIsPlaced = false;
 	this.m_bIsConstructed = false;
-	this.m_bDrawStats = false;
-	this.m_bIsAlive = true;
 	this.m_bDelete = false;
 	
 	// Placement switches
@@ -47,13 +21,6 @@ function Structure()
 	this.m_bNeedsMetal = false;
 	
 	
-	// References
-	this.m_kSector;
-	
-	// ID
-	this.m_iID = 0;
-	this.m_iType = 0; // Debug
-	this.m_iTeam = 0; // Neutral
 	this.m_iTeamCheckTimer = 0; // seconds (mili)
 	this.m_iTeamCheckTimerMax = 5000; // seconds (mili)
 	
@@ -88,12 +55,6 @@ function Structure()
 	this.m_iMetalRequired = 0;
 	this.m_iMetalBuilt = 0;
 	
-	// Collision Detection
-	this.m_liShields = new Array();
-	this.m_liComponents = new Array();
-	this.m_iTimeSinceLastHit = 5001;
-	this.m_iMaxRange = 0;
-	
 	// Weapons
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -108,45 +69,7 @@ function Structure()
 	console.log("Initialized structure successfully.");
 }
 
-Structure.prototype.initialize = function(type, name, x, y, radius)
-{
-	// Initiailize arrays
-	this.m_liShields = new Array();
-	this.m_liComponents = new Array();
-	
-	// Initialize identifiers
-	this.m_iType = type;
-	this.m_sName = name;
-	this.m_iID = guid();
-
-	// Initialize location and size
-	this.m_liPos = new Array();
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-	this.m_iRadius = radius;
-	
-	// Create visual and collision detection components
-	this.createComponents();
-}
-
-// Regen amounts are given in seconds and converted
-// The shield is a timer which regens once expired, the armour and hull are calculated per second
-Structure.prototype.initializeStats = function(shieldRegen, shieldCap, armourCap, armourRegen, hullCap, hullRegen)
-{
-	// Set shields
-	this.m_iShieldRegenCap = (shieldRegen * 1000);
-	this.m_iShieldCap = shieldCap;
-	
-	// Set armour
-	this.m_iArmourCap = armourCap;
-	this.m_iArmourRegen = armourCap / armourRegen;
-	
-	// Set hull
-	this.m_iHullCap = hullCap;
-	this.m_iHullRegen = hullCap / hullRegen;
-}
-
-Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated)
+Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated, isMetalStore, metalStoreMax)
 {
 	// Initialize all resource variables
 	this.m_iCurrentDrain = 0;
@@ -155,6 +78,11 @@ Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated
 	
 	this.m_iPowerStoreMax = powerStoreMax;
 	this.m_iPowerGenerated = powerGenerated;
+	
+	this.m_bMetalStore = isMetalStore;
+	this.m_iMetalStoredMax = metalStoreMax;
+	this.m_iMetalStored = 0;
+	
 }
 
 Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMetal)
@@ -166,9 +94,6 @@ Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMe
 
 Structure.prototype.update = function()
 {	
-	// Update hit timer
-	this.m_iTimeSinceLastHit += m_fElapsedTime;
-
 	// Not all structures have or need a team!
 	if(this.m_bNeedsTeam)
 	{
@@ -197,16 +122,6 @@ Structure.prototype.update = function()
 		
 		// Connect to all nearby buildings
 		this.setConnectors();
-		
-		// Update collision position
-		// This is set permanently on placement	
-		_shield = new C(new V(this.m_liPos[0], this.m_liPos[1]), this.m_iRadius);
-		
-		// Reset shield list
-		this.m_liShields.length = 0;
-		
-		// Add updated shield
-		this.m_liShields.push(_shield);		// THIS CAN BE OVERWRITTEN BY THE STRUCTURE IF REQUIRED!
 	}
 	
 	// PLACED BUT NOT CONSTRUCTED
@@ -218,10 +133,6 @@ Structure.prototype.update = function()
 			this.onConstruct(1);
 		}
 	}
-	
-	// Update components
-	for(var i = 0; i < this.m_liComponents.length; i++)
-		this.m_liComponents[i].update();
 					
 	// Loop through all weapons
 	for(var i = 0; i < this.m_liWeapons.length; i++)
@@ -240,12 +151,27 @@ Structure.prototype.update = function()
 	// Reset switch
 	this.m_bPowerTransfering = false;
 	
-	// Regenerates stats
-	this.regenStats();
+	// Call base update
+	GameObject.prototype.update.call(this);
 }
 
 Structure.prototype.draw = function()
 {		
+	// Alpha the structure if it isn't fully built!	
+	//var _alpha = 0.6 + (0.4 * (this.m_iMetalBuilt / this.m_iMetalRequired));
+	
+	// Draw with alpha is not constructed
+	//if(!this.m_bIsConstructed)
+		//m_kContext.globalAlpha = _alpha;
+	//else
+		//m_kContext.globalAlpha = 1;	
+
+	// Call base draw
+	GameObject.prototype.draw.call(this);
+	
+	// Reset alpha
+	//m_kContext.globalAlpha = 1;
+
 	// If this isn't placed draw a range circle
 	if(!this.m_bIsPlaced)
 	{
@@ -264,9 +190,6 @@ Structure.prototype.draw = function()
 		// If not constructed draw ring showing how much construction is left
 		this.drawStatRing(this.m_iMetalBuilt, this.m_iMetalRequired, this.m_iRadius + 5, "orange");
 	}
-	
-	// Draw the main components of the structure (shield and body components)
-	this.drawBody();
 	
 	// Loop through all weapons
 	for(var i = 0; i < this.m_liWeapons.length; i++)
@@ -310,185 +233,16 @@ Structure.prototype.draw = function()
 	
 	// Reset colours to default
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
-	
-	// Draw UI if this structure is selected or highlighted
-	if(this.m_bDrawUI)
-		this.drawUI();
-	
-	this.m_bDrawUI = false;
 }
 
-Structure.prototype.drawBody = function()
-{	
-	if(this.m_iTimeSinceLastHit > 0)
-		_alpha = 1 - (this.m_iTimeSinceLastHit / 5000);
-	
-	if(_alpha < 0)
-		_alpha = 0;
-	
-	m_kContext.globalAlpha = _alpha;
+// OVERRRIDE EVENTS
 
-	// Draw Structure Shield
-	m_kContext.fillStyle = "blue";
-	m_kContext.strokeStyle = "blue";
-
-	// Draw shields if they're up/exist
-	if(this.m_iShields > 0)
-	{
-		m_kContext.beginPath();
-		m_kContext.arc(this.m_liPos[0], this.m_liPos[1], this.m_iRadius, 0, 2 * Math.PI);
-		m_kContext.fill();
-		m_kContext.closePath();
+Structure.prototype.onHit = function(damage)
+{
+	if(GameObject.prototype.onHit.call(this, damage))
+	{		
+		this.onDestroy(0);
 	}
-	
-	// Alpha the structure if it isn't fully built!	
-	var _alpha = 0.6 + (0.4 * (this.m_iMetalBuilt / this.m_iMetalRequired));
-	
-	// Draw with alpha is not constructed
-	if(!this.m_bIsConstructed)
-		m_kContext.globalAlpha = _alpha;
-	else
-		m_kContext.globalAlpha = 1;
-	
-	// Draw components
-	for(var i = 0; i < this.m_liComponents.length; i++)
-		this.m_liComponents[i].draw();
-}
-
-// I hate this name, but nevermind... drawStats is already taken!
-Structure.prototype.drawUI = function()
-{
-	// Save context!
-	m_kContext.save();
-	
-	// Translate to center
-	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
-	
-	var _drawDistance = this.m_iRadius * 1.2;
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'white';
-	m_kContext.lineWidth = 1;
-	
-	// Top Left
-	m_kContext.beginPath();
-	m_kContext.moveTo(-_drawDistance, -_drawDistance);
-	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), -_drawDistance);
-	m_kContext.moveTo(-_drawDistance, -_drawDistance);
-	m_kContext.lineTo(-_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
-	m_kContext.closePath();	
-	m_kContext.stroke();
-	
-	// Top Right
-	m_kContext.beginPath();
-	m_kContext.moveTo(_drawDistance, -_drawDistance);
-	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), -_drawDistance);
-	m_kContext.moveTo(_drawDistance, -_drawDistance);
-	m_kContext.lineTo(_drawDistance, -_drawDistance  + (_drawDistance * 0.5));
-	m_kContext.closePath();	
-	m_kContext.stroke();
-	
-	// Bottom Left
-	m_kContext.beginPath();
-	m_kContext.moveTo(-_drawDistance, _drawDistance);
-	m_kContext.lineTo(-_drawDistance + (_drawDistance * 0.5), _drawDistance);
-	m_kContext.moveTo(-_drawDistance, _drawDistance);
-	m_kContext.lineTo(-_drawDistance, _drawDistance - (_drawDistance * 0.5));
-	m_kContext.closePath();	
-	m_kContext.stroke();
-	
-	// Bottom Right
-	m_kContext.beginPath();
-	m_kContext.moveTo(_drawDistance, _drawDistance);
-	m_kContext.lineTo(_drawDistance - (_drawDistance * 0.5), _drawDistance);
-	m_kContext.moveTo(_drawDistance, _drawDistance);
-	m_kContext.lineTo(_drawDistance, _drawDistance - (_drawDistance * 0.5));
-	m_kContext.closePath();	
-	m_kContext.stroke();
-	
-	// Percents
-	var _shieldPercent = (this.m_iShields / this.m_iShieldCap);
-	var _armourPercent = (this.m_iArmour / this.m_iArmourCap);
-	var _hullPercent = (this.m_iHull / this.m_iHullCap);
-	
-	if(!this.m_bIsSelected)
-	{
-		this.drawStatBar(_drawDistance, _hullPercent, 0, 'brown', true);
-		this.drawStatBar(_drawDistance, _armourPercent, 0, 'grey', false);
-		this.drawStatBar(_drawDistance, _shieldPercent, 0, 'blue', false);
-	}
-	
-	// Restore the context back to how it was before!
-	m_kContext.restore();
-}
-
-Structure.prototype.drawStatBar = function(drawDistance, percent, offset, colour, background)
-{
-	var _x = -drawDistance;
-	var _y = drawDistance;
-	var _width = drawDistance * 2;
-	var _height = drawDistance * 0.2;
-	
-	_y += offset;
-	
-	m_kContext.lineWidth = 0.1;
-	
-	if(background)
-	{
-		// Border and Background
-		m_kContext.fillStyle = concatenate(255, 255, 255, 127);;
-		m_kContext.fillRect(_x, _y, _width, _height);
-	
-		m_kContext.fillStyle = 'black';
-		m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), _width * 0.99, _height - (_y * 0.02));	
-	}
-	
-	m_kContext.fillStyle = colour;
-	m_kContext.fillRect(_x * 0.99, _y + (_y * 0.01), (_width * 0.99) * percent, _height - (_y * 0.02));
-}
-
-Structure.prototype.drawConnections = function()
-{
-	// Draw power lines
-	for(var i = 0; i < this.m_liRoutes.length; i++)
-	{
-		var _structure = this.m_liRoutes[i].getNode();
-	
-		var _parentX = _structure.m_liPos[0];
-		var _parentY = _structure.m_liPos[1];
-		
-		if(this.m_liRoutes[i].getTransfer())
-		{
-			m_kContext.lineWidth = 5;			
-		}
-		else
-		{					
-			m_kContext.lineWidth = 2;	
-		}
-		
-		m_kContext.strokeStyle = this.m_liRoutes[i].getColour();
-		m_kContext.beginPath();
-		m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
-		m_kContext.lineTo(_parentX, _parentY);
-		m_kContext.stroke();
-		m_kContext.closePath();		
-	}	
-}
-
-Structure.prototype.drawStatRing = function(stat, statMax, radius, colour, alpha)
-{
-	var _percent = stat / statMax;
-	
-	m_kContext.strokeStyle = colour;
-	m_kContext.globalAlpha = alpha;
-	m_kContext.lineWidth = 5;
-	m_kContext.beginPath();
-	m_kContext.arc(this.m_liPos[0], this.m_liPos[1], radius, 0, (Math.PI * 2) * _percent);
-	m_kContext.stroke();	
-	m_kContext.closePath();
-
-	// Reset alpha
-	m_kContext.globalAlpha = 1.0;
 }
 
 // EVENTS
@@ -509,34 +263,6 @@ Structure.prototype.onCollectMetal = function(metal)
 Structure.prototype.onTractor = function(x, y)
 {
 	// Move towards point!
-}
-
-Structure.prototype.onRepair = function(metal)
-{
-	// Reset hit timer!
-	this.m_iTimeSinceLastHit = 0;
-	
-	// Work out what percentage of the whole this bit was
-	var _percent = (metal / this.m_iMetalRequired);
-	
-	// If the hull isnt full, add that percentage to it
-	if(this.m_iHull < this.m_iHullCap)
-	{		
-		this.m_iHull += (this.m_iHullCap * _percent);
-	}
-	else if(this.m_iArmour < this.m_iArmourCap)
-	{
-		// If the armour isnt full, add that percentage to it
-		this.m_iArmour += (this.m_iArmourCap * _percent);
-	}
-	else
-	{
-		// Nothing needs repairing!
-		return false;
-	}
-	
-	// Successfully added metal to repair!
-	return true;
 }
 
 Structure.prototype.onConstruct = function(metal)
@@ -578,54 +304,16 @@ Structure.prototype.onConstruct = function(metal)
 	return false;
 }
 
-Structure.prototype.onHit = function(damage)
+Structure.prototype.onDestroy = function(reason)
 {	
-	// Reset hit timer!
-	this.m_iTimeSinceLastHit = 0;
+	// If you remove this then onDestroy is called a million times
+	// and bad stuff happens
+	if(!this.m_bIsAlive)
+		return;
 
-	// Check if hit is on shields or player	
-	if(this.m_iShields > 0)
-	{
-		// Impacts on shields
-		this.m_iShields -= damage;	
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-	}
-	else if(this.m_iArmour - damage > 0)
-	{
-		// Impact on the armour
-		this.m_iArmour -= damage;
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-	}
-	else
-	{
-		// Impact on the health
-		this.m_iHull -= damage;
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-		
-		// Check if structure is alive!
-		if(this.m_iHull <= 0)
-		{
-			// Destroy structure
-			this.m_bIsAlive = false;
-			this.m_bDelete = true;
-			
-			this.onDestroy();
-		
-			return true; // Structure died!
-		}
-	}
-	
-	return false; // Structure lives on
-}
+	// Destroy object
+	this.m_bIsAlive = false;
 
-Structure.prototype.onDestroy = function()
-{	
 	// Disabled for now as it is buggy
 	//this.m_kSector.createScrap(this);
 	
@@ -641,11 +329,19 @@ Structure.prototype.onDestroy = function()
 		
 		_node.removeRoute(this);
 	}
+	
+	// Announce to console why you died
+	switch(reason)
+	{
+		case 0:
+			m_kLog.addItem(this.m_sName + " was destroyed by weapons fire!", 2500, 255, 255, 255);
+			break;
+	}
 }
 
 Structure.prototype.onCollision = function(ship)
 {
-	this.m_iTimeSinceLastHit = 0;
+	//this.m_iTimeSinceLastHit = 0;
 	
 	ship.onCollision(m_kCollisionManager.m_kResponse.overlapV);
 }
@@ -697,6 +393,52 @@ Structure.prototype.onPlace = function()
 	}
 	
 	return true;
+}
+
+// DRAWING HELPERS
+
+Structure.prototype.drawConnections = function()
+{
+	// Draw power lines
+	for(var i = 0; i < this.m_liRoutes.length; i++)
+	{
+		var _structure = this.m_liRoutes[i].getNode();
+	
+		var _parentX = _structure.m_liPos[0];
+		var _parentY = _structure.m_liPos[1];
+		
+		if(this.m_liRoutes[i].getTransfer())
+		{
+			m_kContext.lineWidth = 5;			
+		}
+		else
+		{					
+			m_kContext.lineWidth = 2;	
+		}
+		
+		m_kContext.strokeStyle = this.m_liRoutes[i].getColour();
+		m_kContext.beginPath();
+		m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
+		m_kContext.lineTo(_parentX, _parentY);
+		m_kContext.stroke();
+		m_kContext.closePath();		
+	}	
+}
+
+Structure.prototype.drawStatRing = function(stat, statMax, radius, colour, alpha)
+{
+	var _percent = stat / statMax;
+	
+	m_kContext.strokeStyle = colour;
+	m_kContext.globalAlpha = alpha;
+	m_kContext.lineWidth = 5;
+	m_kContext.beginPath();
+	m_kContext.arc(this.m_liPos[0], this.m_liPos[1], radius, 0, (Math.PI * 2) * _percent);
+	m_kContext.stroke();	
+	m_kContext.closePath();
+
+	// Reset alpha
+	m_kContext.globalAlpha = 1.0;
 }
 
 // HELPERS

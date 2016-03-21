@@ -17,7 +17,7 @@ StructureManager.prototype.update = function()
 		this.m_liStructures[i].update();
 		
 		// If destroyed, set index
-		if(this.m_liStructures[i].m_bDelete)
+		if(!this.m_liStructures[i].m_bIsAlive)
 		{		
 			_index = i;
 		}
