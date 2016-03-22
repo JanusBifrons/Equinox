@@ -14,7 +14,7 @@ function Scrap(component, moveX, moveY)
 	this.m_kComponent.initialize(this, 0, 0, this.m_kComponent.m_fScale, this.m_kComponent.m_bMirror);
 	
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Scrap", "Scrap", _team, _sector, _x, _y, moveX, moveY, 0, 0, 50, 5, 0.06);
+	GameObject.prototype.initialize.call(this, "Scrap", "Scrap", _team, _sector, _x, _y, moveX, moveY, 0, 0, 50, 5, 0.009);
 	
 	// Call base initialize stats
 	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250000, 0);

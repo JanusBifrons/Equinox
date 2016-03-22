@@ -220,48 +220,37 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 	// Dont hit yourself dummy...
 	if(gameObject.m_iID == otherGameObject.m_iID)
 		return;
-		
-	// If you are on the same team only check components
-	if(gameObject.m_iTeam == otherGameObject.m_iTeam)
+	
+	if(gameObject.m_iShields > 0 && otherGameObject.m_iShields > 0)
+	{		
+		for(var i = 0; i < gameObject.m_liShields.length; i++)
+			for(var j = 0; j < otherGameObject.m_liShields.length; j++)
+				if(this.circleCircleCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liShields[i]))
+					return gameObject.onCollision(this.m_kResponse.overlapV);
+	}
+	
+	if(gameObject.m_iShields > 0 && otherGameObject.m_iShields <= 0)
+	{	
+		for(var i = 0; i < gameObject.m_liShields.length; i++)
+			for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
+				if(this.polygonCircleCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liShields[i]))
+					return gameObject.onCollision(this.m_kResponse.overlapV);
+	}
+	
+	if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields > 0)
+	{		
+		for(var i = 0; i < gameObject.m_liComponents.length; i++)
+			for(var j = 0; j < otherGameObject.m_liShields.length; j++)
+				if(this.circlePolygonCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liComponents[i].m_cdCollision))
+					return gameObject.onCollision(this.m_kResponse.overlapV);
+	}
+	
+	if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields <= 0)
 	{
 		for(var i = 0; i < gameObject.m_liComponents.length; i++)
 			for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
 				if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
 					return gameObject.onCollision(this.m_kResponse.overlapV);
-	}
-	else
-	{
-		if(gameObject.m_iShields > 0 && otherGameObject.m_iShields > 0)
-		{		
-			for(var i = 0; i < gameObject.m_liShields.length; i++)
-				for(var j = 0; j < otherGameObject.m_liShields.length; j++)
-					if(this.circleCircleCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liShields[i]))
-						return gameObject.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(gameObject.m_iShields > 0 && otherGameObject.m_iShields <= 0)
-		{							
-			for(var i = 0; i < gameObject.m_liComponents.length; i++)
-				for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
-						return gameObject.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields > 0)
-		{		
-			for(var i = 0; i < gameObject.m_liComponents.length; i++)
-				for(var j = 0; j < otherGameObject.m_liShields.length; j++)
-					if(this.circlePolygonCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liComponents[i].m_cdCollision))
-						return gameObject.onCollision(this.m_kResponse.overlapV);
-		}
-		
-		if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields <= 0)
-		{
-			for(var i = 0; i < gameObject.m_liComponents.length; i++)
-				for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
-					if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
-						return gameObject.onCollision(this.m_kResponse.overlapV);
-		}
 	}
 	
 	// No collision!
@@ -400,7 +389,7 @@ CollisionManager.prototype.onExplosion = function(source, ships)
 	{
 		// Trigger their explosion code
 		// Ships automatically determine the results
-		ships[i].onExplosion(source.m_liPos[0], source.m_liPos[1], source.m_iRadius * 10);
+		ships[i].onExplosion(source.m_liPos[0], source.m_liPos[1], source.m_iRadius * 5);
 	}
 }
 

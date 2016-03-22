@@ -33,6 +33,7 @@ function Component()
 	
 	// Graphics
 	this.m_liPoints = new Array();
+	this.m_cDefaultColour = 'grey';
 	this.m_cPrimaryColour = concatenate(128, 128, 128, 255);
 	this.m_cSecondaryColour = concatenate(128, 128, 128, 255);
 	
@@ -99,8 +100,15 @@ Component.prototype.update = function()
 Component.prototype.draw = function()
 {
 	m_kContext.strokeStyle = 'black';	
-	m_kContext.fillStyle = this.m_cPrimaryColour;
+	//m_kContext.fillStyle = this.m_cPrimaryColour;
+	m_kContext.fillStyle = this.m_cDefaultColour;
 	m_kContext.lineWidth = 1;
+	
+	if(this.m_kOwner.m_eObjectType == "Ship")
+	{
+		m_kContext.fillStyle = this.m_cPrimaryColour;
+	}
+	
 	
 	m_kContext.beginPath();
 	
@@ -134,10 +142,15 @@ Component.prototype.mirrorPoints = function()
 	// Clear points list
 	this.m_liPoints.length = 0;
 	
+	var _revIndex = _mirrorPoints.length;
+	
 	// Reinput list from scratch
 	for(var i = 0; i < _mirrorPoints.length; i++)
 	{
-		var _point = _mirrorPoints[i];
+		_revIndex -= 1;
+		
+		//var _point = _mirrorPoints[i];
+		var _point = _mirrorPoints[_revIndex];
 		
 		this.m_liPoints.push(_point);
 	}
@@ -246,8 +259,8 @@ Component.prototype.scale = function()
 
 Component.prototype.updateColours = function()
 {
-	this.m_cPrimaryColour = concatenate(255, 255, 255, 255);
-	this.m_cSecondaryColour = concatenate(255, 255, 255, 255);
+	this.m_cPrimaryColour = 'grey';
+	this.m_cSecondaryColour = 'grey';
 	
 	if(this.m_kOwner.m_iTeam == 1)
 	{
@@ -258,6 +271,21 @@ Component.prototype.updateColours = function()
 	{
 		this.m_cPrimaryColour = concatenate(255, 0, 0, 255);
 		this.m_cSecondaryColour = concatenate(255, 255, 255, 255);
+	}
+	else if(this.m_kOwner.m_iTeam == 3)
+	{
+		this.m_cPrimaryColour = 'green';
+		this.m_cSecondaryColour = concatenate(204, 255, 187, 255);
+	}
+	else if(this.m_kOwner.m_iTeam == 4)
+	{
+		this.m_cPrimaryColour = 'purple';
+		this.m_cSecondaryColour = 'white';
+	}
+	else if(this.m_kOwner.m_iTeam == 5)
+	{
+		this.m_cPrimaryColour = 'gold';
+		this.m_cSecondaryColour = 'white';
 	}
 }
 

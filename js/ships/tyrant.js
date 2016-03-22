@@ -55,15 +55,15 @@ function Tyrant(x, y, moveX, moveY, owner)
 
 	// PORT SIDE CANNONS
 	var _portCannons = new Array();
-	var _cannon1 = new MediumCannon(this, -35, -75, Math.PI + 0.2, Math.PI * 2);
-	var _cannon2 = new MediumCannon(this, -95, -75, Math.PI, (Math.PI * 2) - 0.2);
+	var _cannon1 = new LightBeam(this, -35, -75, Math.PI + 0.2, Math.PI * 2);
+	var _cannon2 = new LightBeam(this, -95, -75, Math.PI, (Math.PI * 2) - 0.2);
 	_portCannons.push(_cannon1);
 	_portCannons.push(_cannon2);
 
 	// STARBOARD SIDE CANNONS
 	var _starboardCannons = new Array();
-	var _cannon3 = new MediumCannon(this, -35, 75, 0, Math.PI - 0.2);
-	var _cannon4 = new MediumCannon(this, -95, 75, 0.2, Math.PI);	
+	var _cannon3 = new LightBeam(this, -35, 75, 0, Math.PI - 0.2);
+	var _cannon4 = new LightBeam(this, -95, 75, 0.2, Math.PI);	
 	_starboardCannons.push(_cannon3);
 	_starboardCannons.push(_cannon4);
 	

@@ -34,12 +34,11 @@ HexHull.prototype.createPoints = function()
 	var _hexWidth = 2 * 100;
 	var _hexSide = (3 / 2) * 100;
 	
-	// Collision Detection
 	this.m_liPoints = new Array();
-	this.m_liPoints.push(new V(-(_hexWidth / 2), 0));
-	this.m_liPoints.push(new V(-(_hexWidth - _hexSide), (_hexHeight / 2)));
-	this.m_liPoints.push(new V((_hexWidth - _hexSide), (_hexHeight / 2)));
-	this.m_liPoints.push(new V((_hexWidth / 2), 0));
-	this.m_liPoints.push(new V((_hexWidth - _hexSide), -(_hexHeight / 2)));
 	this.m_liPoints.push(new V(-(_hexWidth - _hexSide), -(_hexHeight / 2)));
+	this.m_liPoints.push(new V((_hexWidth - _hexSide), -(_hexHeight / 2)));
+	this.m_liPoints.push(new V((_hexWidth / 2), 0));
+	this.m_liPoints.push(new V((_hexWidth - _hexSide), (_hexHeight / 2)));
+	this.m_liPoints.push(new V(-(_hexWidth - _hexSide), (_hexHeight / 2)));
+	this.m_liPoints.push(new V(-(_hexWidth / 2), 0));
 }

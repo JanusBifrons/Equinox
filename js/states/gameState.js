@@ -2,8 +2,7 @@ GameState.prototype = new State();
 GameState.prototype.constructor = GameState;
 
 function GameState()
-{
-	
+{	
 	// Create sectors
 	this.m_kSectorA = new Sector(sectorName(), 0, 0, m_kDistrict, true);
 	this.m_kSectorB = new Sector(sectorName(), 1, 0, m_kDistrict, false);
@@ -23,13 +22,18 @@ function GameState()
 	m_kDistrict.addSector(this.m_kSectorG);
 	
 	// Initialise local player
-	m_kPlayer = new Player(m_kDistrict, this.m_kSectorA, -800, 0);
+	m_kPlayer = new Player(m_kDistrict, this.m_kSectorA, -1500, 1000);
 	m_kPlayer.bindControls(m_kPlayer);
 	
 	// Add ships to the sector and spawn it
 	this.m_kSectorA.addShip(m_kPlayer.m_kShip);
 	
 	this.m_kSectorA.addShip(new Debug(-500, 0, 0, 0, null, this.m_kSectorA, 1));
+	this.m_kSectorA.addShip(new Debug(-5000 * Math.random(), 0, 0, 20, null, this.m_kSectorA, 2));
+	this.m_kSectorA.addShip(new Debug(-5000 * Math.random(), 0, 0, 20, null, this.m_kSectorA, 3));
+	this.m_kSectorA.addShip(new Debug(-5000 * Math.random(), 0, 0, 20, null, this.m_kSectorA, 3));
+	
+	this.m_kSectorA.m_liObjects.push(new Blueprint(-2000, 1000, this.m_kSectorA));
 }
 
 GameState.prototype.update = function()

@@ -92,6 +92,7 @@ function initMain()
 	m_kStateManager.addState(m_kGameState);
 	
 	// Zoom
+	//m_iZoomDefault = 30000;
 	m_iZoomDefault = 3000;
 	//m_iZoomDefault = 700;
 	//m_iZoomDefault = 500;

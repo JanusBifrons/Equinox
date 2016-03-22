@@ -4,7 +4,7 @@ Asteroid.prototype.constructor = Asteroid;
 function Asteroid(x, y, radius, sector)
 {
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Asteroid", "Asteroid", 0, sector, x, y, 0, 0, 0, 0, radius, 0, 0);
+	GameObject.prototype.initialize.call(this, "Asteroid", "Asteroid", 0, sector, x, y, 0, 0, 0, 0, radius, 0, 1.06);
 	
 	// Call base initialize stats
 	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250000, 0);

@@ -10,7 +10,7 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	GameObject.prototype.initialize.call(this, "Havok (Debug)", "Ship", team, sector, x, y, moveX, moveY, 0, 0.035, 60, 20, 0.08);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 10, 75, 100, 100, 250, 100);
+	GameObject.prototype.initializeStats.call(this, 60, 75, 100, 100, 250, 100);
 	
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -20,7 +20,7 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	this.m_iPowerCap = 100;
 	
 	// Hyper Drive
-	this.m_iHyperTarget = this.m_kSector.m_iID; // Default current sector
+	//this.m_iHyperTarget = this.m_kSector.m_iID; // Default current sector
 	this.m_bIsHypering = false;
 	this.m_iHyperCharge = 0;
 	this.m_iHyperChargeMax = 5000; // Milliseconds
@@ -55,15 +55,15 @@ Debug.prototype.createWeapons = function()
 	var _cannons = new Array();
 	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);
 	var _cannon2 = new LightCannon(this, -12, 18, 0, 0);
-	_cannons.push(_cannon1);
-	_cannons.push(_cannon2);
+	//_cannons.push(_cannon1);
+	//_cannons.push(_cannon2);
 	
 	var _construction = new Array();
 	var _construction1 = new Construction(this, 20, 0, 0, 0);
 	_construction.push(_construction1);
 	
 	this.m_liWeapons.push(_beams);
-	this.m_liWeapons.push(_cannons);
+	//this.m_liWeapons.push(_cannons);
 	this.m_liWeapons.push(_construction);
 }
 

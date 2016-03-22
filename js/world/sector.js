@@ -82,7 +82,7 @@ Sector.prototype.update = function()
 	this.updateShips();
 	
 	// Update all of the AI in this sector
-	//this.m_kAIManager.update();
+	this.m_kAIManager.update();
 	
 	// Update all lasers, mines, missiles and scrap
 	this.updateObjects();
