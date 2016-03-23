@@ -62,7 +62,6 @@ Sector.prototype.update = function()
 	// Populate this sectors quad tree!
 	this.populateQuadTree(this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
 	
-		
 	// Check all collisions for this sector!
 	m_kCollisionManager.checkCollisions(this.m_kQuadTree, this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
 	
@@ -70,7 +69,6 @@ Sector.prototype.update = function()
 		
 	// Check all collisions for this sector!
 	m_kCollisionManager.checkWeapons(this.m_kQuadTree, this.m_liShips, this.m_kStructureManager.m_liStructures, this.m_kAsteroidManager.m_liAsteroids, this.m_liObjects);
-	
 	
 	// Update all of the asteroids in the sector
 	this.m_kAsteroidManager.update();	

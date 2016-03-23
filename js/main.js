@@ -27,6 +27,9 @@ var C;
 var V;
 var P;
 
+var Vec2D;
+var Line2D;
+
 // Keyboard Input
 var m_liKeysDown;
 
@@ -53,6 +56,9 @@ function initMain()
 	C = SAT.Circle;
 	V = SAT.Vector;
 	P = SAT.Polygon;
+	
+	Vec2D = toxi.geom.Vec2D;
+	Line2D = toxi.geom.Line2D;
 	
 	// Basic rendering initialization 
 	m_kCanvas = document.getElementById("canvas");
