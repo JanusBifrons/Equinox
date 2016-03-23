@@ -63,9 +63,11 @@ CargoObject.prototype.drawObject = function(x, y, size, padding)
 	// Translate to center// Translate to center
 	m_kContext.translate(x, y);
 	
+	var _title = this.m_kObject.m_sName;
+	
 	m_kContext.font="10px Verdana";
 	m_kContext.fillStyle = "white";
-	m_kContext.fillText(this.m_kObject.m_eObjectType, (size / 2) - (m_kContext.measureText(this.m_kObject.m_eObjectType).width), size * 0.9);
+	m_kContext.fillText(_title, -(m_kContext.measureText(_title).width / 2), size * 0.9);
 	
 	m_kContext.translate(-(this.m_kObject.m_liPos[0] * _scale), -(this.m_kObject.m_liPos[1] * _scale));
 	m_kContext.scale(_scale, _scale);

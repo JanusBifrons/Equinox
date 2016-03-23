@@ -45,6 +45,10 @@ function GameObject()
 	this.m_liShields = new Array();
 	this.m_liComponents = new Array();
 	
+	// Build costs
+	this.m_iConstructionTime = 15000;
+	this.m_iConstructionCost = 100;
+	
 	// Cargo
 	this.m_kStoredBy;
 	

@@ -16,6 +16,7 @@ function Structure()
 	this.m_bNeedsTeam = false;
 	this.m_bNeedsPower = false;
 	this.m_bNeedsMetal = false;
+	this.m_bNeedsBlueprint = false;
 	
 	this.m_iTeamCheckTimer = 0; // seconds (mili)
 	this.m_iTeamCheckTimerMax = 5000; // seconds (mili)
@@ -85,15 +86,18 @@ Structure.prototype.initializeResources = function(powerStoreMax, powerGenerated
 	this.m_kCargoHold = new Cargo(this.m_sName + " Cargo Hold", 50);
 }
 
-Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMetal)
+Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMetal, bNeedsBlueprint)
 {
 	this.m_bNeedsTeam = bNeedsTeam;
 	this.m_bNeedsPower = bNeedsPower;
 	this.m_bNeedsMetal = bNeedsMetal;
+	this.m_bNeedsBlueprint = bNeedsBlueprint;
 }
 
 Structure.prototype.update = function()
 {	
+	this.m_iRequestDelay += m_fElapsedTime;
+
 	this.m_kCargoHold.update();
 
 	// Not all structures have or need a team!
@@ -159,20 +163,8 @@ Structure.prototype.update = function()
 
 Structure.prototype.draw = function()
 {		
-	// Alpha the structure if it isn't fully built!	
-	//var _alpha = 0.6 + (0.4 * (this.m_iMetalBuilt / this.m_iMetalRequired));
-	
-	// Draw with alpha is not constructed
-	//if(!this.m_bIsConstructed)
-		//m_kContext.globalAlpha = _alpha;
-	//else
-		//m_kContext.globalAlpha = 1;	
-
 	// Call base draw
 	GameObject.prototype.draw.call(this);
-	
-	// Reset alpha
-	//m_kContext.globalAlpha = 1;
 
 	// If this isn't placed draw a range circle
 	if(!this.m_bIsPlaced)
@@ -364,23 +356,22 @@ Structure.prototype.onCollision = function(ship)
 
 Structure.prototype.onRequest = function(request)
 {	
-	if(this.m_iRequestDelay < this.m_iRequestDelayMax)
-	{
-		this.m_iRequestDelay += m_fElapsedTime;
+	if(this.m_iRequestDelay >= this.m_iRequestDelayMax)
+	{	
+		// Make the request
+		if(m_kPathfinder.makeRequest(request))
+		{
+		}
+		else
+		{
+			this.m_iRequestDelay = 0;
+		}
 		
-		return false;
-	}
-
-	// Make the request
-	m_kPathfinder.makeRequest(request);
-	
-	if(!m_kPathfinder.m_kRequestResult.m_bRequestCompleted)
-	{
-		this.m_iRequestDelay = 0;
+		return m_kPathfinder.m_kRequestResult.m_bRequestCompleted;
 	}
 	
-	// Return the result!
-	return m_kPathfinder.m_kRequestResult.m_bRequestCompleted;
+	// Return false
+	return false;	
 }
 
 Structure.prototype.onPlace = function()
@@ -561,7 +552,7 @@ Structure.prototype.checkRequest = function(request)
 			}
 			else
 			{
-				// Only collect from extractors!
+				// Only store metal from extractors!
 				if(this.m_iType == 6)
 				{
 					return this.checkMetal(_requestAmount);

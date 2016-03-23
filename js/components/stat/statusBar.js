@@ -78,6 +78,23 @@ StatusBar.prototype.createPoints = function()
 StatusBar.prototype.setStatusText = function()
 {	
 	var _owner = this.m_kOwner;
+	
+	if(_owner.m_bNeedsBlueprint)
+	{
+		if(_owner.m_kCargoHold.m_liStored.length > 0)
+		{
+			if(_owner.m_kCargoHold.m_liStored[0].m_kObject.m_eObjectType != "Blueprint")
+			{
+				m_kContext.fillStyle = "blue";
+				return "NO BLUEPRINT";
+			}
+		}
+		else
+		{
+			m_kContext.fillStyle = "blue";
+			return "NO BLUEPRINT";
+		}
+	}
 
 	if(_owner.m_bNeedsPower)
 	{
@@ -91,11 +108,11 @@ StatusBar.prototype.setStatusText = function()
 	
 	if(_owner.m_bNeedsMetal)
 	{
-		if(_owner.m_iMetalStored < _owner.m_iMetalStoreMax)
+		if(_owner.m_iMetalStored < _owner.m_iMetalStoredMax)
 		{
 			m_kContext.fillStyle = "red";
 			
-			return "NO METAL";
+			return "LOW METAL";
 		}
 	}
 	

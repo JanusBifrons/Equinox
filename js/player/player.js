@@ -7,9 +7,9 @@ function Player(district, sector, x, y)
 	
 	// Team
 	this.m_iTeam = 1;
-	this.m_iTeam = 2;
-	this.m_iTeam = 4;
-	this.m_iTeam = 5;
+	//this.m_iTeam = 2;
+	//this.m_iTeam = 4;
+	//this.m_iTeam = 5;
 	
 	
 	// Structure
