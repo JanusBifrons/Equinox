@@ -818,6 +818,16 @@ Player.prototype.updateInput = function()
 		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
 		//this.m_iStructureIndex = 3
 	}
+	
+	// 5 KEY
+	if(isKeyDown(53))
+	{
+		this.m_bPlacingStructure = true;
+		this.m_kStructure = new Guardian(getMouseX(), getMouseY());
+		
+		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
+		//this.m_iStructureIndex = 3
+	}
 }
 
 Player.prototype.structureFromIndex = function(index)

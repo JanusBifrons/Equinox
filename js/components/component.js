@@ -104,11 +104,10 @@ Component.prototype.draw = function()
 	m_kContext.fillStyle = this.m_cDefaultColour;
 	m_kContext.lineWidth = 1;
 	
-	if(this.m_kOwner.m_eObjectType == "Ship")
+	if(this.m_kOwner.m_eObjectType == "Ship" || this.m_kOwner.m_eObjectType == "Scrap")
 	{
 		m_kContext.fillStyle = this.m_cPrimaryColour;
 	}
-	
 	
 	m_kContext.beginPath();
 	

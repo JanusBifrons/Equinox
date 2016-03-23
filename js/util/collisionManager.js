@@ -148,33 +148,23 @@ CollisionManager.prototype.checkWeapons = function(quadTree, ships, structures, 
 				// SHIP!
 				if(_elements[k].type == 0)
 				{
-					this.shipWeaponsToShip(ships[i], _elements[k].object);
+					this.weaponsToGameObject(ships[i], _elements[k].object);
 				}
 		
 				// STRUCTURE!
 				if(_elements[k].type == 1)
-					this.shipWeaponsToStructure(ships[i], _elements[k].object);
+					this.weaponsToGameObject(ships[i], _elements[k].object);
 				
 				// ASTEROID!
 				if(_elements[k].type == 2)
 				{
-					// Disabled for now
-					
-					// This will need to be reenabled to use mining lasers!
-					
-					//this.shipToAsteroid(ships[i], _elements[k].object);
+					this.weaponsToGameObject(ships[i], _elements[k].object);
 				}
 				
 				// OBJECT!
 				if(_elements[k].type == 3)
 				{
-					// Disabled for now
-					
-					// Will need to be reenabled to use mining lasers on scrap
-					
-					// Or to shoot mines or any object in space!
-					
-					//this.shipToObject(ships[i], _elements[k].object);
+					this.weaponsToGameObject(ships[i], _elements[k].object);
 				}
 			}
 		}
@@ -201,15 +191,25 @@ CollisionManager.prototype.checkWeapons = function(quadTree, ships, structures, 
 			{	
 				// SHIP!
 				if(_elements[k].type == 0)
-					this.structureWeaponsToShip(structures[i], _elements[k].object);
-				
+				{
+					this.weaponsToGameObject(structures[i], _elements[k].object);
+				}
+		
 				// STRUCTURE!
 				if(_elements[k].type == 1)
-					this.structureWeaponsToStructure(structures[i], _elements[k].object);
+					this.weaponsToGameObject(structures[i], _elements[k].object);
 				
 				// ASTEROID!
 				if(_elements[k].type == 2)
-					this.structureWeaponsToAsteroid(structures[i], _elements[k].object);
+				{
+					this.weaponsToGameObject(structures[i], _elements[k].object);
+				}
+				
+				// OBJECT!
+				if(_elements[k].type == 3)
+				{
+					this.weaponsToGameObject(structures[i], _elements[k].object);
+				}
 			}
 		}
 	}
@@ -255,6 +255,34 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 	
 	// No collision!
 	return false;
+}
+
+CollisionManager.prototype.weaponsToGameObject = function(armedObject, gameObject)
+{
+	if(armedObject.m_iID == gameObject.m_iID)
+		return;
+	
+	// Physical collisions are handled by the ships
+	// Only need to handle weapons vs ships
+	
+	// Retreive list of all active weapons
+	var _weapons = armedObject.activeWeapons();
+	
+	// If shields are up, hit check the shields, if not hit the hull
+	if(gameObject.m_iShields > 0)
+	{
+		for(var i = 0; i < _weapons.length; i++)
+			for(var j = 0; j < gameObject.m_liShields.length; j++)
+				if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, gameObject.m_liShields[j]))
+					_weapons[i].onHit(gameObject);
+	}
+	else
+	{
+		for(var i = 0; i < _weapons.length; i++)
+			for(var j = 0; j < gameObject.m_liComponents.length; j++)
+				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, gameObject.m_liComponents[j].m_cdCollision))
+					_weapons[i].onHit(gameObject);
+	}
 }
 
 CollisionManager.prototype.structureWeaponsToAsteroid = function(structure, asteroid)
@@ -399,6 +427,8 @@ CollisionManager.prototype.onExplosion = function(source, ships)
 // RETURN FALSE IF BLOCKED
 CollisionManager.prototype.checkRay = function(source, target, ray, structures, asteroids)
 {	
+	return true;
+
 	// Asteroids
 	for(var i = 0; i < asteroids.length; i++)
 	{		

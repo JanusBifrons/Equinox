@@ -55,15 +55,15 @@ Debug.prototype.createWeapons = function()
 	var _cannons = new Array();
 	var _cannon1 = new LightCannon(this, -12, -18, 0, 0);
 	var _cannon2 = new LightCannon(this, -12, 18, 0, 0);
-	//_cannons.push(_cannon1);
-	//_cannons.push(_cannon2);
+	_cannons.push(_cannon1);
+	_cannons.push(_cannon2);
 	
 	var _construction = new Array();
 	var _construction1 = new Construction(this, 20, 0, 0, 0);
 	_construction.push(_construction1);
 	
 	this.m_liWeapons.push(_beams);
-	//this.m_liWeapons.push(_cannons);
+	this.m_liWeapons.push(_cannons);
 	this.m_liWeapons.push(_construction);
 }
 

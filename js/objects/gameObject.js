@@ -356,6 +356,18 @@ GameObject.prototype.drawBody = function()
 			m_kContext.fillStyle = 'green';
 		}
 		
+		if(this.m_iTeam == 4)
+		{
+			m_kContext.strokeStyle = 'purple';	
+			m_kContext.fillStyle = 'purple';
+		}
+		
+		if(this.m_iTeam == 5)
+		{
+			m_kContext.strokeStyle = 'gold';	
+			m_kContext.fillStyle = 'gold';
+		}
+		
 		m_kContext.lineWidth = (15 / 100) * _shieldPercent;
 		
 		m_kContext.beginPath();

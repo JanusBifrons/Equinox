@@ -249,6 +249,20 @@ Structure.prototype.onHit = function(damage)
 
 // EVENTS
 
+Structure.prototype.onTarget = function(object)
+{
+	// Check to see if object is already a target!
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		if(this.m_liTargets[i].m_kTarget.m_iID == object.m_iID)
+		{
+			return;
+		}
+	}
+	
+	this.m_liTargets.push(new TargetObject(this, object, false));
+}
+
 Structure.prototype.onCollectMetal = function(metal)
 {
 	// Collect metal
