@@ -8,6 +8,10 @@ function LightBeam(owner, offsetX, offsetY, minRot, maxRot)
 	this.m_iType = 1;
 
 	this.m_kOwner = owner;
+	
+	this.m_liHitLocation = new Array();
+	this.m_liHitLocation[0] = 0;
+	this.m_liHitLocation[1] = 0;
 
 	this.m_kOffset = new Array();
 	this.m_kOffset[0] = offsetX;
@@ -121,7 +125,7 @@ LightBeam.prototype.draw = function()
 
 // EVENTS
 
-LightBeam.prototype.onHit = function(targetHit)
-{
-	Beam.prototype.onHit.call(this, targetHit);
-}
+//LightBeam.prototype.onHit = function(targetHit, componentHit)
+//{
+	//Beam.prototype.onHit.call(this, targetHit);
+//}
