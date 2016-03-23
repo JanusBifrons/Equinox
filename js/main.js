@@ -129,7 +129,7 @@ function draw()
 	// Draw
 	m_kContext.stroke();
 
-	//drawGrid();
+	drawGrid();
 	
 	// Draw the states
 	m_kStateManager.draw();

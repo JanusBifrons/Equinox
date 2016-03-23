@@ -9,7 +9,7 @@ function Blueprint(x, y, sector)
 	this.m_iPadding = 15;
 	
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Blueprint", "Blueprint", 0, sector, x, y, 0, 0, 0, 0, 100, 5, 0.06);
+	GameObject.prototype.initialize.call(this, "Item", "Blueprint", 0, sector, x, y, 0, 0, 0, 0, 100, 5, 0.06);
 	
 	// Call base initialize stats
 	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250, 0);
