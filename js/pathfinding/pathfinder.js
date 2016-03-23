@@ -29,7 +29,7 @@ Pathfinder.prototype.makeRequest = function(request)
 	while(this.m_liOpenList.length > 0)
 	{
 		if(this.findPath(request))
-		{
+		{			
 			// FOUND IT!
 			return true;
 		}
@@ -86,20 +86,6 @@ Pathfinder.prototype.findPath = function(request)
 	}
 	else
 	{		
-		// Add to game stats
-		//switch(request.m_iType)
-		//{
-			// Power
-			//case 0:
-				//m_kGameStats.powerGenerated(request.m_iAmount);
-				//break;
-			
-			// Metal
-			//case 1:
-				//m_kGameStats.metalCollected(request.m_iAmount);
-				//break;
-		//}
-
 		this.m_liPath.push(this.m_kCurrentNode);
 	
 		// Build path!
@@ -116,7 +102,6 @@ Pathfinder.prototype.findPath = function(request)
 		
 		this.m_kCurrentNode.setTransfer(this.m_liPath[this.m_liPath.length - 1]);
 		
-		
 		// Set up result
 		this.m_kRequestResult.m_bRequestCompleted = true;
 		this.m_kRequestResult.m_liPath = this.m_liPath;
@@ -125,12 +110,15 @@ Pathfinder.prototype.findPath = function(request)
 	}
 	
 	this.m_kRequestResult.m_bRequestCompleted = false;
-	
 	return false;
 }
 
 Pathfinder.prototype.goalCheck = function(request, currentNode)
-{		
+{
+	// Don't check yourself!
+	if(request.m_kStructure == currentNode)
+		return false;
+	
 	// Check if this node has some or all of the item requested
 	if(currentNode.checkRequest(request))
 	{				
@@ -138,12 +126,12 @@ Pathfinder.prototype.goalCheck = function(request, currentNode)
 		
 		// Check if we have all we asked for
 		if(this.m_kRequestResult.m_iAmount == request.m_iAmount)
-		{		
+		{			
 			// All done!
 			return true;
 		}
 		else
-		{
+		{			
 			// Nope, keep going!
 			return false;
 		}

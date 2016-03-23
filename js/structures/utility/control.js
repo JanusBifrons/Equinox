@@ -41,10 +41,10 @@ Control.prototype.update = function()
 	if(this.m_iMetalStored < this.m_iMetalStoredMax)
 	{
 		// Get some metal!
-		if(Structure.prototype.onRequest.call(this, new Request(this, 1, 1)))
-		{	
-			this.m_iMetalStored += 1;
-		}	
+		//if(Structure.prototype.onRequest.call(this, new Request(this, 1, 1)))
+		//{	
+			//this.m_iMetalStored += 1;
+		//}	
 	}	
 }
 
@@ -62,7 +62,7 @@ Control.prototype.createComponents = function()
 	
 	// Components
 	this.m_liComponents.push(new HexHull(this, 0, 0, 2.5));
-	this.m_liComponents.push(new EnergyBar(this, -50, 0, 2));
+	this.m_liComponents.push(new GeneratorBar(this, -50, 0, 2));
 	this.m_liComponents.push(new MetalBar(this, 50, 0, 2));
 }
 
