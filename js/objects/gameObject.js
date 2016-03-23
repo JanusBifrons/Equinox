@@ -331,8 +331,43 @@ GameObject.prototype.drawBody = function()
 			continue;
 		
 		// Draw Shield
-		m_kContext.strokeStyle = 'blue';	
-		m_kContext.fillStyle = 'blue';
+		
+		if(this.m_iTeam == 0)
+		{
+			m_kContext.strokeStyle = 'grey';	
+			m_kContext.fillStyle = 'grey';
+		}
+		
+		if(this.m_iTeam == 1)
+		{
+			m_kContext.strokeStyle = 'blue';	
+			m_kContext.fillStyle = 'blue';
+		}
+		
+		if(this.m_iTeam == 2)
+		{
+			m_kContext.strokeStyle = 'red';	
+			m_kContext.fillStyle = 'red';
+		}
+		
+		if(this.m_iTeam == 3)
+		{
+			m_kContext.strokeStyle = 'green';	
+			m_kContext.fillStyle = 'green';
+		}
+		
+		if(this.m_iTeam == 4)
+		{
+			m_kContext.strokeStyle = 'purple';	
+			m_kContext.fillStyle = 'purple';
+		}
+		
+		if(this.m_iTeam == 5)
+		{
+			m_kContext.strokeStyle = 'gold';	
+			m_kContext.fillStyle = 'gold';
+		}
+		
 		m_kContext.lineWidth = (15 / 100) * _shieldPercent;
 		
 		m_kContext.beginPath();
@@ -342,12 +377,18 @@ GameObject.prototype.drawBody = function()
 		m_kContext.closePath();	
 	}
 	
+	// Set colour
+	m_kContext.strokeStyle = 'grey';	
+	m_kContext.fillStyle = 'grey';
+	
 	// Reset alpha
 	m_kContext.globalAlpha = 1;
 	
 	// Draw components
 	for(var i = 0; i < this.m_liComponents.length; i++)
+	{
 		this.m_liComponents[i].draw();
+	}
 }
 
 GameObject.prototype.drawUI = function()

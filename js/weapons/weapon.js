@@ -70,7 +70,24 @@ Weapon.prototype.update = function()
 	
 	if(this.m_kOwner.m_liTargets.length > 0)
 	{		
+		m_kLog.addStaticItem("Turning towards targets!");
+		
 		this.fireOnTargets();
+		
+		return;
+		
+		var _targets = this.m_kOwner.m_liTargets;
+		
+		var _x = _targets[0].m_kTarget.m_liPos[0];
+		var _y = _targets[0].m_kTarget.m_liPos[1];
+		
+		var _turnAmount = this.turnToTarget(_x, _y);
+		
+		if(_turnAmount < (Math.PI / 4))
+			if(_turnAmount > -(Math.PI / 4))
+				this.onFire();
+
+
 	}
 	else
 	{
@@ -170,7 +187,7 @@ Weapon.prototype.updateOffsets = function()
 Weapon.prototype.fireOnTargets = function()
 {	
 	// Disabled
-	return;
+	//return;
 
 	var _targets = this.m_kOwner.m_liTargets;
 	var _closest = this.m_iRange;
@@ -180,9 +197,9 @@ Weapon.prototype.fireOnTargets = function()
 	// Determine closest target
 	for(var i = 0; i < _targets.length; i++)
 	{		
-		if(this.checkTarget(_targets[i].m_liPos))
+		if(this.checkTarget(_targets[i].m_kTarget.m_liPos))
 		{
-			_distance = calculateDistance(_targets[i].m_liPos, this.m_liPos);
+			_distance = calculateDistance(_targets[i].m_kTarget.m_liPos, this.m_liPos);
 			
 			if(_distance < _closest)
 			{
@@ -197,11 +214,11 @@ Weapon.prototype.fireOnTargets = function()
 	if(_targetIndex >= 0)
 	{
 		// Turn to face your target!
-		var _turnAmount = this.turnToTarget(_targets[_targetIndex].m_liPos[0], _targets[_targetIndex].m_liPos[1]);
+		var _turnAmount = this.turnToTarget(_targets[_targetIndex].m_kTarget.m_liPos[0], _targets[_targetIndex].m_kTarget.m_liPos[1]);
 		
 		if(_turnAmount < (Math.PI / 4))
 			if(_turnAmount > -(Math.PI / 4))
-				if(this.checkRay(_targets[_targetIndex]))
+				if(this.checkRay(_targets[_targetIndex].m_kTarget))
 					this.onFire();
 	}
 	else

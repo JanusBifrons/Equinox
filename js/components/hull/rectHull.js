@@ -42,25 +42,5 @@ RectHull.prototype.createPoints = function()
 	this.m_liPoints.push(new V(this.m_iWidth, this.m_iHeight - this.m_iCorner));
 	this.m_liPoints.push(new V(this.m_iWidth - this.m_iCorner, this.m_iHeight));
 	this.m_liPoints.push(new V(this.m_iCorner, this.m_iHeight));
-	this.m_liPoints.push(new V(0, this.m_iHeight - this.m_iCorner));
-	
-	return;
-	
-	var corner = 15;
-	var x = 0;
-	var y = 0;
-	var width = 180;
-	var height = 400;
-	
-	// Collision Detection
-	this.m_liPoints = new Array();
-	this.m_liPoints.push(new V(x, y + corner));
-	this.m_liPoints.push(new V(x + corner, y));
-	this.m_liPoints.push(new V(x + (width - corner), y));
-	this.m_liPoints.push(new V(x + width, y + corner));
-	this.m_liPoints.push(new V(x + width, y + (height - corner)));
-	this.m_liPoints.push(new V(x + (width - corner), y + height));
-	this.m_liPoints.push(new V(x + corner, y + height));
-	this.m_liPoints.push(new V(x, y + (height - corner)));
-	
+	this.m_liPoints.push(new V(0, this.m_iHeight - this.m_iCorner));	
 }

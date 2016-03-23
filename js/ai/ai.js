@@ -34,26 +34,10 @@ function AI(x, y, sector, shipType)
 	switch(shipType)
 	{
 		case 0:
-			this.m_kShip = new Havok(x, y, 0, 0, this);
-			this.m_kShip.setDampeners(true);
+			this.m_kShip = new Debug(x, y, 0, 0, this, sector, 2);
 			this.m_iOrbit = 100;
 			this.m_bManualFire = true;
-			break;
-			
-		case 1:
-			this.m_kShip = new Tyrant(x, y, 0, 0, this);
-			this.m_kShip.setDampeners(true);
-			this.m_iOrbit = 1000;
-			this.m_bManualFire = false;
-			break;
-			
-		case 2:
-			this.m_kShip = new Debug(x, y, 0, 0, this);
-			//this.m_kShip.setDampeners(true);
-			//this.m_iOrbit = 1000;
-			//this.m_bManualFire = true;
-			break;
-		
+			break;		
 	}
 	
 	console.log("AI initialised successfully.");
@@ -61,6 +45,27 @@ function AI(x, y, sector, shipType)
 
 AI.prototype.update = function()
 {		
+	this.m_liTargetLocation[0] = m_kPlayer.m_kShip.m_liPos[0];
+	this.m_liTargetLocation[1] = m_kPlayer.m_kShip.m_liPos[1];
+
+	var _relativeRotation = Math.atan2(this.m_kShip.m_liPos[1] - this.m_liTargetLocation[1], this.m_kShip.m_liPos[0] - this.m_liTargetLocation[0]);
+	
+	this.m_liDesiredLocation[0] = this.m_liTargetLocation[0] + (this.m_iOrbit * Math.cos(_relativeRotation));
+	this.m_liDesiredLocation[1] = this.m_liTargetLocation[1] + (this.m_iOrbit * Math.sin(_relativeRotation));
+	
+	this.m_iDistance = calculateDistance(this.m_liDesiredLocation, this.m_kShip.m_liPos);
+		
+	if(this.m_iDistance < 100)
+	{	
+		this.turnToFaceTarget();
+	}
+	else
+	{
+		this.turnToFaceTarget();
+		
+		this.m_kShip.accellerate();
+	}
+
 	return;
 
 	this.setTargets();

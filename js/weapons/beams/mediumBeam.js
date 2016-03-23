@@ -26,7 +26,7 @@ function MediumBeam(owner, offsetX, offsetY, minRot, maxRot)
 	this.m_iRotationMin = minRot;
 	this.m_iRotationMax = maxRot;
 	this.m_bUnlimitedRotation = false;
-	this.m_iRotationSpeed = 0.015;
+	this.m_iRotationSpeed = 0.0015;
 	
 	var _difference = this.m_iRotationMax - this.m_iRotationMin;
 	
@@ -41,13 +41,13 @@ function MediumBeam(owner, offsetX, offsetY, minRot, maxRot)
 	this.m_iRotation += this.m_iRotationOffset;
 	
 	// Stats
-	this.m_iRange = 400;
+	this.m_iRange = 1000;
 	this.m_iCooldown = 0;
 	this.m_iDamage = 200;
 	this.m_iDrain = 1;
 	
 	// Local variables	
-	this.m_iBeamDistance = 400;
+	this.m_iBeamDistance = this.m_iRange;
 	this.m_liBeam = new Array();
 	this.m_liBeam[0] = this.m_liPos[0] + (this.m_iBeamDistance * Math.cos(this.m_iRotation));
 	this.m_liBeam[1] = this.m_liPos[1] + (this.m_iBeamDistance * Math.sin(this.m_iRotation));

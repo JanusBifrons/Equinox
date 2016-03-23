@@ -7,6 +7,10 @@ function Player(district, sector, x, y)
 	
 	// Team
 	this.m_iTeam = 1;
+	this.m_iTeam = 2;
+	this.m_iTeam = 4;
+	this.m_iTeam = 5;
+	
 	
 	// Structure
 	this.m_kStructure = new Structure();
@@ -31,6 +35,7 @@ function Player(district, sector, x, y)
 
 	// Initialize players ship
 	this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
+	//this.m_kShip = new Asylum(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
 	//this.m_kShip = new Asylum(x, y, 0, 0, this);
 	//this.m_kShip = new Tyrant(x, y, 0, 0, this);
 	//this.m_kShip = new Havok(x, y, 0, 0, this);
@@ -211,7 +216,7 @@ Player.prototype.onOpenCargo = function(cargoHold)
 
 Player.prototype.onDragEnd = function()
 {	
-	//this.m_bIsDragging = false;
+	this.m_bIsDragging = false;
 	//this.m_bObjectSelected = false;
 
 	// Collision point for the mouse position IN SCREEN SPACE
@@ -236,19 +241,22 @@ Player.prototype.onDragEnd = function()
 		}
 	}
 	
-	if(this.m_kDraggedObject.m_bIsCargo)
+	if(this.m_bObjectSelected)
 	{
-		// Create X/Y coords in world space for mouse position
-		var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
-		
-		this.m_kDraggedObject.m_kStoredBy.onDrop(this.m_kDraggedObject);
-		
-		this.m_kDraggedObject.m_bIsCargo = false;
-		
-		this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
-		this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
-		
-		this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+		if(this.m_kDraggedObject.m_bIsCargo)
+		{
+			// Create X/Y coords in world space for mouse position
+			var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
+			
+			this.m_kDraggedObject.m_kStoredBy.onDrop(this.m_kDraggedObject);
+			
+			this.m_kDraggedObject.m_bIsCargo = false;
+			
+			this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
+			this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
+			
+			this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
+		}
 	}
 	
 	// Reset flags
@@ -292,49 +300,6 @@ Player.prototype.onDragEnd = function()
 	
 	// Reset flags
 	this.m_bObjectSelected = false;
-	
-	return;
-
-	// Collision point for the mouse position IN SCREEN SPACE
-	var _mouseCircle = new C(new V(m_iMouseX, m_iMouseY), 1);
-
-	// Store in cargo hold
-	if(this.m_kShip.m_kCargoHold.onMouseDrop(_mouseCircle) && this.m_bObjectSelected)
-	{
-		if(!this.m_kDraggedObject.m_bIsCargo)
-		{		
-			// Attempt to store object
-			if(this.m_kShip.m_kCargoHold.onStore(this.m_kDraggedObject))
-			{
-				// Remove object from the sector, it is now in a cargo hold!
-				this.m_kSector.removeObject(this.m_kDraggedObject);	
-			}
-		}
-	}
-	else
-	{
-		if(this.m_bIsDragging && this.m_bObjectSelected)
-		{
-			if(this.m_kDraggedObject.m_bIsCargo)
-			{
-				// Create X/Y coords in world space for mouse position
-				var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);		
-				
-				this.m_kDraggedObject.m_bIsCargo = false;
-				
-				this.m_kDraggedObject.m_liPos[0] = _worldPos.x;
-				this.m_kDraggedObject.m_liPos[1] = _worldPos.y;
-				
-				this.m_kSector.m_liObjects.push(this.m_kDraggedObject);
-				
-				this.m_kShip.m_kCargoHold.onDrop(this.m_kDraggedObject);
-			}
-		}
-	}
-	
-	// Reset flags
-	this.m_bObjectSelected = false;
-	this.m_bIsDragging = false;
 }
 
 Player.prototype.onDrag = function()
@@ -448,7 +413,7 @@ Player.prototype.bindKey = function(key)
 
 Player.prototype.selectObject = function(object)
 {					
-	if(object.m_eObjectType == "Scrap")
+	if(object.m_eObjectType == "Scrap" || object.m_eObjectType == "Blueprint")
 	{
 		this.m_kDraggedObject = object;
 		this.m_bObjectSelected = true;
@@ -762,6 +727,8 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = false;
 		this.m_bSelectedStructure = false;
+		
+		this.m_liCargoHolds.length = 0;
 	}
 	
 	// X Key
@@ -847,6 +814,16 @@ Player.prototype.updateInput = function()
 	{
 		this.m_bPlacingStructure = true;
 		this.m_kStructure = new Assembler(getMouseX(), getMouseY());
+		
+		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
+		//this.m_iStructureIndex = 3
+	}
+	
+	// 5 KEY
+	if(isKeyDown(53))
+	{
+		this.m_bPlacingStructure = true;
+		this.m_kStructure = new Guardian(getMouseX(), getMouseY());
 		
 		//this.m_kStructure = new Respawn(getMouseX(), getMouseY());
 		//this.m_iStructureIndex = 3

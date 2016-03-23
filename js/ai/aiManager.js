@@ -5,7 +5,8 @@ function AIManager(sector)
 	this.m_liAI = new Array();
 	
 	this.m_iSpawnTimer = 0;
-	this.m_iSpawnTimerMax = 150000; // 2.5 minutes
+	//this.m_iSpawnTimerMax = 150000; // 2.5 minutes
+	this.m_iSpawnTimerMax = 10000;
 	
 	//this.m_iSpawnTimerMax = 6000000000;
 	this.m_iSpawnTimer = this.m_iSpawnTimerMax * 0.99;
@@ -56,7 +57,7 @@ AIManager.prototype.update = function()
 		
 		//this.spawnAttack(_x, _y, 100, 1);
 		
-		this.createAI(-2000, -1000, 2);	
+		this.createAI(-2000, -1000, 0);	
 	}
 
 	// Update AI

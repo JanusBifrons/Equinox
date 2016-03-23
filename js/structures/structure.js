@@ -249,6 +249,20 @@ Structure.prototype.onHit = function(damage)
 
 // EVENTS
 
+Structure.prototype.onTarget = function(object)
+{
+	// Check to see if object is already a target!
+	for(var i = 0; i < this.m_liTargets.length; i++)
+	{
+		if(this.m_liTargets[i].m_kTarget.m_iID == object.m_iID)
+		{
+			return;
+		}
+	}
+	
+	this.m_liTargets.push(new TargetObject(this, object, false));
+}
+
 Structure.prototype.onCollectMetal = function(metal)
 {
 	// Collect metal
@@ -556,9 +570,9 @@ Structure.prototype.checkRequest = function(request)
 			break;
 			
 		// CONTROL (team)
-		case 2:			
-			if(this.m_iType == 0)
-			{
+		case 2:	
+			if(this.m_sName == "Control Tower")
+			{				
 				m_kPathfinder.m_kRequestResult.addAmount(this, 1);
 				return true;
 			}
@@ -777,10 +791,10 @@ Structure.prototype.updateTeam = function()
 	this.m_iTeamCheckTimer = this.m_iTeamCheckTimerMax;
 	
 	// Check for control tower!
-	if(this.onRequest(new Request(this, 2, 0)))
+	if(this.onRequest(new Request(this, 2, 1)))
 	{		
 		// Found one!
-		this.m_iTeam = m_kPathfinder.m_kRequestResult.m_liStructure[0].m_iTeam;
+		this.m_iTeam = m_kPathfinder.m_kRequestResult.m_liStructures[0].m_iTeam;
 	}
 	else
 	{		
