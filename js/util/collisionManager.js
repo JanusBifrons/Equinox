@@ -262,6 +262,27 @@ CollisionManager.prototype.weaponsToGameObject = function(armedObject, gameObjec
 	if(armedObject.m_iID == gameObject.m_iID)
 		return;
 	
+	// Retreive list of all active weapons
+	var _weapons = armedObject.activeWeapons();
+	
+	for(var i = 0; i < _weapons.length; i++)
+	{
+		for(var j = 0; j < gameObject.m_liComponents.length; j++)
+		{
+			if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, gameObject.m_liComponents[j].m_cdCollision))
+			{				
+				_weapons[i].onHit(gameObject, gameObject.m_liComponents[j]);
+				
+				break;
+			}
+		}
+	}
+	
+	return;
+	
+	if(armedObject.m_iID == gameObject.m_iID)
+		return;
+	
 	// Physical collisions are handled by the ships
 	// Only need to handle weapons vs ships
 	
@@ -285,103 +306,15 @@ CollisionManager.prototype.weaponsToGameObject = function(armedObject, gameObjec
 	}
 }
 
-CollisionManager.prototype.structureWeaponsToAsteroid = function(structure, asteroid)
-{
-	// Retreive list of all active weapons
-	var _weapons = structure.activeWeapons();
-	
-	for(var i = 0; i < _weapons.length; i++)
-		if(this.polygonPolygonCollisionDetection(asteroid.m_cdCollision, _weapons[i].m_cdCollisionPolygon))
-			_weapons[i].onHit(asteroid);
-}
-
-CollisionManager.prototype.structureWeaponsToStructure = function(structure, otherStructure)
-{
-	// Don't shoot yourself dummy!
-	if(structure.m_iID == otherStructure.m_iID)
-		return;
-	
-	// Retreive list of all active weapons
-	var _weapons = structure.activeWeapons();
-	
-	for(var i = 0; i < _weapons.length; i++)
-		for(var j = 0; j < otherStructure.m_liShields.length; j++)
-			if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, otherStructure.m_liShields[j]))
-				_weapons[i].onHit(otherStructure);
-}
-
-CollisionManager.prototype.structureWeaponsToShip = function(structure, ship)
-{
-	// Physical collisions are handled by the ships
-	// Only need to handle weapons vs ships
-	
-	// Retreive list of all active weapons
-	var _weapons = structure.activeWeapons();
-	
-	// If shields are up, hit check the shields, if not hit the hull
-	if(ship.m_iShields > 0)
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < ship.m_liShields.length; j++)
-				if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, ship.m_liShields[j]))
-					_weapons[i].onHit(ship);
-	}
-	else
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < ship.m_liComponents.length; j++)
-				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, ship.m_liComponents[j].m_cdCollision))
-					_weapons[i].onHit(ship);
-	}
-}
-
-CollisionManager.prototype.shipWeaponsToShip = function(ship, otherShip)
-{	
-	// Dont hit yourself dummy...
-	if(ship.m_iID == otherShip.m_iID)
-		return;
-
-	// Retreive list of all active weapons
-	var _weapons = ship.activeWeapons();
-	
-	if(otherShip.m_iShields > 0)
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < otherShip.m_liShields.length; j++)
-				if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, otherShip.m_liShields[j]))
-					_weapons[i].onHit(otherShip);
-	}
-	else
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < otherShip.m_liComponents.length; j++)
-				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, otherShip.m_liComponents[j].m_cdCollision))
-					_weapons[i].onHit(otherShip);
-	}
-}
-
-CollisionManager.prototype.shipWeaponsToStructure = function(ship, structure)
-{
-	// Retreive list of all active weapons
-	var _weapons = ship.activeWeapons();
-	
-	if(structure.m_iShields > 0)
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < structure.m_liShields.length; j++)
-				if(this.polygonCircleCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liShields[j]))
-					_weapons[i].onHit(structure.m_liComponents[j]);
-	}
-	else
-	{
-		for(var i = 0; i < _weapons.length; i++)
-			for(var j = 0; j < structure.m_liComponents.length; j++)
-				if(this.polygonPolygonCollisionDetection(_weapons[i].m_cdCollisionPolygon, structure.m_liComponents[j].m_cdCollision))
-					_weapons[i].onHit(structure.m_liComponents[j]);
-	}
-}
-
 // MISC
+
+CollisionManager.prototype.calculateIntersectionPoint = function(x1, y1, x2, y2, x3, y3, x4, y4)
+{
+	var _first = new Line2D(new Vec2D(x1, y1), new Vec2D(x2, y2));
+	var _second = new Line2D(new Vec2D(x3, y3), new Vec2D(x4, y4));
+	
+	return _first.intersectLine(_second);
+}	
 
 CollisionManager.prototype.routeCrossCheck = function(route, structures)
 {	
