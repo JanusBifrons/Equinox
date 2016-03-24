@@ -137,7 +137,7 @@ function turnToFace(fromX, fromY, toX, toY, rotation, maxRotation)
 	return rotation + diff;
 }
 
-function wrapAngle(angle)
+function wrapAngleOld(angle)
 {
 	while(angle < 0)
 	{
@@ -152,7 +152,7 @@ function wrapAngle(angle)
 	return angle;
 }
 
-function wrapAngleOld(angle)
+function wrapAngle(angle)
 {
 	while(angle < -Math.PI)
 	{

@@ -5,10 +5,6 @@ function Ship()
 {	
 	this.m_kOwner;
 	
-	// Construction
-	this.m_bIsConstructed = true;	// Cannot construct ships at the moment!
-	this.m_iMetalRequired = 1000; // DEBUG VALUE FOR DEFAULT! THIS IS NOT USED PRESENTLY
-	
 	// Movement Variables
 	this.m_bIsAfterburning = false;
 	
@@ -391,16 +387,12 @@ Ship.prototype.activeWeapons = function()
 	
 		// Loop through weapon set
 		for(var j = 0; j < _weapons.length; j++)
-		{
-			// Only certain types of weapons!
-			if(_weapons[j].m_iType == 1 || _weapons[j].m_iType == 2)
-			{					
-				// Has to be currently firing!
-				if(_weapons[j].m_bIsFiring)
-				{
-					// Add to list!
-					_activeWeapons.push(_weapons[j]);
-				}
+		{				
+			// Has to be currently firing!
+			if(_weapons[j].m_bIsFiring)
+			{
+				// Add to list!
+				_activeWeapons.push(_weapons[j]);
 			}
 		}
 	}

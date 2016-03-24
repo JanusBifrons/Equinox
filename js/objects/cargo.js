@@ -34,6 +34,8 @@ Cargo.prototype.draw = function(x, y, width, height)
 	this.m_iWidth = width;
 	this.m_iHeight = height;
 	
+	m_kContext.globalAlpha = 0.75;
+	
 	this.drawBackgroundBorder(x, y, width, height);
 	
 	this.drawHeader(x, y, width, height * 0.1);
@@ -45,6 +47,8 @@ Cargo.prototype.draw = function(x, y, width, height)
 	y += (height * 0.075);
 	
 	this.drawContents(x, y, width, height, height * 0.01);
+	
+	m_kContext.globalAlpha = 1;
 }
 
 // EVENTS
@@ -180,7 +184,7 @@ Cargo.prototype.drawCapacityBar = function(x, y, width, height)
 {
 	var _percentage = this.m_liStored.length / this.m_iCapacity;
 	
-	m_kContext.strokeStyle = 'white';	
+	m_kContext.strokeStyle = 'azure';	
 	m_kContext.fillStyle = 'black';
 	m_kContext.lineWidth = 1;
 	
@@ -191,6 +195,13 @@ Cargo.prototype.drawCapacityBar = function(x, y, width, height)
 	
 	// Filled amount
 	m_kContext.fillRect(x, y, width * _percentage, height);
+	
+	var _grd = m_kContext.createLinearGradient(x, y, x + width, y + height);
+	_grd.addColorStop(0, "black");
+	_grd.addColorStop(0.5, "grey");
+	_grd.addColorStop(1, "white");
+	
+	m_kContext.strokeStyle = _grd;	
 	
 	// Border
 	m_kContext.beginPath();
@@ -212,16 +223,23 @@ Cargo.prototype.drawCapacityBar = function(x, y, width, height)
 
 Cargo.prototype.drawHeader = function(x, y, width, height)
 {
-	m_kContext.strokeStyle = 'white';	
+	m_kContext.strokeStyle = 'azure';	
 	m_kContext.fillStyle = 'black';
 	m_kContext.lineWidth = 1;
 	
 	// Background
 	m_kContext.fillRect(x, y, width, height);
 	
+	var _grd = m_kContext.createLinearGradient(x, y, x + width, y + height);
+	_grd.addColorStop(0, "black");
+	_grd.addColorStop(0.5, "grey");
+	_grd.addColorStop(1, "white");
+	
+	m_kContext.strokeStyle = _grd;	
+	
 	// Border
 	m_kContext.beginPath();
-	m_kContext.rect(x, y, width, height);
+	m_kContext.strokeRect(x, y, width, height);
 	m_kContext.closePath();
 	m_kContext.stroke();
 	
@@ -237,16 +255,56 @@ Cargo.prototype.drawHeader = function(x, y, width, height)
 
 Cargo.prototype.drawBackgroundBorder = function(x, y, width, height)
 {
-	m_kContext.strokeStyle = 'white';	
+	m_kContext.strokeStyle = 'azure';	
 	m_kContext.fillStyle = 'black';
 	m_kContext.lineWidth = 1;
 	
 	// Background
 	m_kContext.fillRect(x, y, width, height);
 	
+	var _grd = m_kContext.createLinearGradient(x, y, x + width, y + height);
+	_grd.addColorStop(0, "black");
+	_grd.addColorStop(0.5, "grey");
+	_grd.addColorStop(1, "white");
+	
+	m_kContext.strokeStyle = _grd;	
+	
 	// Border
 	m_kContext.beginPath();
 	m_kContext.rect(x, y, width, height);
+	m_kContext.closePath();
+	m_kContext.stroke();
+	
+	return;
+	
+	var _x = x;
+	var _y = y;
+	var _step = width / 10;
+	
+
+	m_kContext.strokeStyle = 'azure';	
+	
+	m_kContext.beginPath();
+	
+	for(var i = 0; i < 9; i++)
+	{
+		_x += _step;
+		
+		m_kContext.moveTo(_x, _y);
+		m_kContext.lineTo(_x, _y + height);
+	}
+	
+	_x = x;
+	_y = y;
+	
+	for(var i = 0; i < 9; i++)
+	{
+		_y += _step;
+		
+		m_kContext.moveTo(_x, _y);
+		m_kContext.lineTo(_x + width, _y);
+	}
+
 	m_kContext.closePath();
 	m_kContext.stroke();
 }

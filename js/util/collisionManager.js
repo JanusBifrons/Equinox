@@ -226,7 +226,7 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 		for(var i = 0; i < gameObject.m_liShields.length; i++)
 			for(var j = 0; j < otherGameObject.m_liShields.length; j++)
 				if(this.circleCircleCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liShields[i]))
-					return gameObject.onCollision(this.m_kResponse.overlapV);
+					return gameObject.onCollision(this.m_kResponse.overlapV, otherGameObject);
 	}
 	
 	if(gameObject.m_iShields > 0 && otherGameObject.m_iShields <= 0)
@@ -234,7 +234,7 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 		for(var i = 0; i < gameObject.m_liShields.length; i++)
 			for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
 				if(this.polygonCircleCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liShields[i]))
-					return gameObject.onCollision(this.m_kResponse.overlapV);
+					return gameObject.onCollision(this.m_kResponse.overlapV, otherGameObject);
 	}
 	
 	if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields > 0)
@@ -242,7 +242,7 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 		for(var i = 0; i < gameObject.m_liComponents.length; i++)
 			for(var j = 0; j < otherGameObject.m_liShields.length; j++)
 				if(this.circlePolygonCollisionDetection(otherGameObject.m_liShields[j], gameObject.m_liComponents[i].m_cdCollision))
-					return gameObject.onCollision(this.m_kResponse.overlapV);
+					return gameObject.onCollision(this.m_kResponse.overlapV, otherGameObject);
 	}
 	
 	if(gameObject.m_iShields <= 0 && otherGameObject.m_iShields <= 0)
@@ -250,7 +250,7 @@ CollisionManager.prototype.gameObjectToGameObject = function(gameObject, otherGa
 		for(var i = 0; i < gameObject.m_liComponents.length; i++)
 			for(var j = 0; j < otherGameObject.m_liComponents.length; j++)
 				if(this.polygonPolygonCollisionDetection(otherGameObject.m_liComponents[j].m_cdCollision, gameObject.m_liComponents[i].m_cdCollision))
-					return gameObject.onCollision(this.m_kResponse.overlapV);
+					return gameObject.onCollision(this.m_kResponse.overlapV, otherGameObject);
 	}
 	
 	// No collision!

@@ -1,65 +1,41 @@
 Extractor.prototype = new Structure();
 Extractor.prototype.constructor = Extractor;
 
-function Extractor(x, y)
+function Extractor(x, y, sector)
 {
-	this.m_iType = 6;
+		// Call base initialize
+	GameObject.prototype.initialize.call(this, "Extractor", "Structure", 0, sector, x, y, 0, 0, 0, 0.035, 275, 20, 0);
 	
-	this.m_liPos = new Array();
-	this.m_liPos[0] = x;
-	this.m_liPos[1] = y;
-	this.m_iRadius = 25;
-	this.m_bIsSolid = true;
+	// Call base initialize stats
+	GameObject.prototype.initializeStats.call(this, 120, 100, 250, 120, 250, 120);
 	
-	this.m_iPowerStored = 0;
-	this.m_iPowerStoreMax = 2;
+	// Call base initialize resources
+	Structure.prototype.initializeResources.call(this, 20, 0, false, 2);
+	
+	// Call base initialize flags
+	Structure.prototype.initializeFlags.call(this, false, true, false, true);
+	
+	this.m_bCollideAsteroids = false;
+	
 	this.m_iMaxConnections = 1;
 	
-	// Stats
-	this.m_iShieldRegenCap = 0;
-	this.m_iShieldCap = 0;
-	this.m_iArmourCap = 0;
-	this.m_iArmourRegen = 0;
-	this.m_iHullCap = 100;
-	this.m_iHullRegen = 0;
+	// Construction
+	this.m_iMetalRequired = 75;
 	
-	// Local Variables
+	// Pathfinding
+	this.m_liSiblings = new Array();
+	this.m_liRoutes = new Array();
+	
+	// Local
+	this.m_bHasAsteroid = false;
+	this.m_kAsteroid;
+	
 	var _beams = new Array();
 	var _beam1 = new ExtractorBeam(this, -50, -50, 0, Math.PI * 2);
 	_beams.push(_beam1);
 
 	this.m_liWeapons = new Array();	
 	this.m_liWeapons.push(_beams);
-	
-	this.m_liTargets = new Array();
-	
-	// Metal
-	this.m_iMetalStored = 0;
-	this.m_iMetalStoredMax = 2;
-	
-	this.m_iID = guid();
-	
-	// Collision Detection
-	this.m_liShields = new Array();
-	this.m_liComponents = new Array();
-	this.m_bCollideAsteroids = false;
-	
-	// Construction
-	this.m_iMetalRequired = 36;
-	
-	// Drawing
-	this.m_iR = 50;
-	this.m_iG = 50;
-	this.m_iB = 255;
-	this.m_iA = 255;
-	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
-	
-	// Local
-	this.m_bHasAsterroid = false;
-	this.m_kAsteroid;
-	
-	// Components
-	this.m_liComponents.push(new HexHull(this, 0, 0, 1));
 	
 	console.log("Initialized Extractor structure successfully.");
 }
@@ -68,7 +44,7 @@ Extractor.prototype.update = function()
 {		
 	// Call base update
 	Structure.prototype.update.call(this);
-
+	
 	var _asteroids = this.m_kSector.m_kAsteroidManager.m_liAsteroids;
 	
 	// ISNT PLACED
@@ -86,11 +62,11 @@ Extractor.prototype.update = function()
 				this.m_liPos[0] = _asteroids[i].m_liPos[0];
 				this.m_liPos[1] = _asteroids[i].m_liPos[1];
 				
-				this.m_iRadius = _asteroids[i].m_iRadius + 40;
+				this.createComponents();
 				
-				this.m_liComponents.length = 0;
-				this.m_liComponents.push(new HexHull(this, 0, 0, this.m_iRadius / 100));
-				this.m_liComponents[0].update();
+				//this.m_liComponents.length = 0;
+				///this.m_liComponents.push(new HexHull(this, 0, 0, this.m_iRadius / 100));
+				//this.m_liComponents[0].update();
 				
 				this.m_bHasAsterroid = true;
 				this.m_kAsteroid = _asteroids[i];
@@ -99,31 +75,35 @@ Extractor.prototype.update = function()
 	}
 	
 	if(this.m_bIsConstructed)
-	{
-		this.m_liTargets.length = 0;
-	
-		if(this.m_iMetalStored < this.m_iMetalStoredMax)
-		{		
-			this.m_liTargets.push(this.m_kAsteroid);
-		}
-		
-		var _drain = (2 / 1000) * m_fElapsedTime;
-		
+	{		
 		if(this.m_iPowerStored < this.m_iPowerStoreMax)
-			if(Structure.prototype.onRequest.call(this, new Request(this, 0, 2)))
-				this.m_iPowerStored += 2;
+		{
+			if(Structure.prototype.onRequest.call(this, new Request(this, 0, 4)))
+			{
+				this.m_iPowerStored += 4;
+			}
+		}
 	}
-	
-	m_kLog.addStaticItem(this.m_iPowerStored, 255, 255, 255);
 }
 
 Extractor.prototype.draw = function()
 {	
 	// Call base draw
-	Structure.prototype.draw.call(this);	
+	Structure.prototype.draw.call(this);
 }
 
-// EVENTS
+// HELPERS
+
+Extractor.prototype.createComponents = function()
+{
+	this.m_liComponents = new Array();
+	
+	this.m_liComponents.push(new HexHull(this, 0, 0, 1));
+	this.m_liComponents.push(new MetalBar(this, 75, 0, 1));
+	this.m_liComponents.push(new EnergyBar(this, -75, 0, 1));
+}
+
+// EVENTS OVERRIDES
 
 Extractor.prototype.onPlace = function()
 {	
@@ -138,6 +118,9 @@ Extractor.prototype.onPlace = function()
 		return false;
 	}
 	
+	this.onTarget(this.m_kAsteroid);
+	
 	// Call base draw
 	return Structure.prototype.onPlace.call(this);
 }
+

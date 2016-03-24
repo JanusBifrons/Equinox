@@ -7,7 +7,7 @@ function Assembler(x, y, sector)
 	GameObject.prototype.initialize.call(this, "Assembler", "Structure", 0, sector, x, y, 0, 0, 0, 0.035, 275, 20, 0);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 120, 100, 250, 120, 250, 120);
+	GameObject.prototype.initializeStats.call(this, 1000, 60, 5000, 1000, 10000, 1000);
 	
 	// Call base initialize resources
 	Structure.prototype.initializeResources.call(this, 100, 0, false, 1000);
@@ -77,10 +77,12 @@ Assembler.prototype.onBuild = function()
 	var _time = this.m_kBlueprint.m_kObject.m_iConstructionTime;
 	var _progress = this.m_kBlueprint.m_iConstructionTimer;
 	
+	// Check if you've finished producing!
 	if(_progress >= _time)
-	{		
-		this.m_kBlueprint.m_iConstructionTimer = 0;
-		this.m_kBlueprint.m_iRuns -= 1;
+	{				
+		var _product = this.m_kBlueprint.onBuilt();
+		
+		this.m_kCargoHold.onStore(_product);
 		
 		return;
 	}

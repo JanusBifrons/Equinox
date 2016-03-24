@@ -5,7 +5,6 @@ function Structure()
 {		
 	// Switches
 	this.m_bIsPlaced = false;
-	this.m_bIsConstructed = false;
 	
 	// Placement switches
 	this.m_bCollideShips = true;
@@ -48,10 +47,6 @@ function Structure()
 	this.m_iMetalStoredMax = 0;
 	this.m_bMetalStore = false;
 	
-	// Construction
-	this.m_iMetalRequired = 0;
-	this.m_iMetalBuilt = 0;
-	
 	// Weapons
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -92,6 +87,8 @@ Structure.prototype.initializeFlags = function(bNeedsTeam, bNeedsPower, bNeedsMe
 	this.m_bNeedsPower = bNeedsPower;
 	this.m_bNeedsMetal = bNeedsMetal;
 	this.m_bNeedsBlueprint = bNeedsBlueprint;
+	
+	this.m_bIsConstructed = false;
 }
 
 Structure.prototype.update = function()
@@ -265,50 +262,6 @@ Structure.prototype.onCollectMetal = function(metal)
 		return true;
 	}
 	
-	return false;
-}
-
-Structure.prototype.onTractor = function(x, y)
-{
-	// Move towards point!
-}
-
-Structure.prototype.onConstruct = function(metal)
-{
-	// Check if this structure needs more construction!
-	if(this.m_iMetalBuilt < this.m_iMetalRequired)
-	{
-		// Construct using metal
-		this.m_iMetalBuilt += metal;
-
-		// Work out what percentage of the whole this bit was
-		var _percent = (metal / this.m_iMetalRequired);
-		
-		// If the hull isnt full, add that percentage to it
-		if(this.m_iHull < this.m_iHullCap)
-		{		
-			this.m_iHull += (this.m_iHullCap * _percent);
-		}
-		
-		// If the armour isnt full, add that percentage to it
-		if(this.m_iArmour < this.m_iArmourCap)
-		{
-			this.m_iArmour += (this.m_iArmourCap * _percent);
-		}
-		
-		// Successfully added metal to construction!
-		return true;
-	}
-	else
-	{	
-		// Constructed!
-		this.m_bIsConstructed = true;
-		
-		// Metal not needed!
-		return false;
-	}
-	
-	// Metal not needed!
 	return false;
 }
 
@@ -553,8 +506,8 @@ Structure.prototype.checkRequest = function(request)
 			else
 			{
 				// Only store metal from extractors!
-				if(this.m_iType == 6)
-				{
+				if(this.m_sName == "Extractor")
+				{					
 					return this.checkMetal(_requestAmount);
 				}
 			}

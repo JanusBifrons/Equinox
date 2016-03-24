@@ -6,10 +6,11 @@ function Player(district, sector, x, y)
 	this.m_iHyperTarget = sector.m_iID;
 	
 	// Team
-	this.m_iTeam = 1;
+	//this.m_iTeam = 1;
 	//this.m_iTeam = 2;
+	//this.m_iTeam = 3;
 	//this.m_iTeam = 4;
-	//this.m_iTeam = 5;
+	this.m_iTeam = 5;
 	
 	
 	// Structure
@@ -413,7 +414,9 @@ Player.prototype.bindKey = function(key)
 
 Player.prototype.selectObject = function(object)
 {					
-	if(object.m_eObjectType == "Scrap" || object.m_eObjectType == "Blueprint")
+	m_kLog.addItem(object.m_eObjectType, 2000, 255, 255, 255);
+
+	if(object.m_eObjectType == "Scrap" || object.m_eObjectType == "Blueprint" || object.m_eObjectType == "Item")
 	{
 		this.m_kDraggedObject = object;
 		this.m_bObjectSelected = true;
@@ -805,7 +808,8 @@ Player.prototype.updateInput = function()
 	if(isKeyDown(51))
 	{
 		this.m_bPlacingStructure = true;
-		this.m_kStructure = new ShieldWall(getMouseX(), getMouseY());
+		this.m_kStructure = new Extractor(getMouseX(), getMouseY(), this.m_kSector);
+		//this.m_kStructure = new ShieldWall(getMouseX(), getMouseY());
 		this.m_iStructureIndex = 2;
 	}
 	
