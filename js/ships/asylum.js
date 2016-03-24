@@ -27,7 +27,7 @@ function Asylum(x, y, moveX, moveY, owner, sector, team)
 	
 	this.m_kCargoHold = new Cargo(this.m_iID, 5);
 	
-	this.createWeapons();
+	//this.createWeapons();
 	
 	console.log("Initialized Asylum Ship successfully.");
 }

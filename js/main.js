@@ -12,6 +12,7 @@ var m_kShipParts;
 // States
 var m_kStateManager
 var m_kGameState;
+var m_kWeaponTestState;
 
 // Player
 var m_kPlayer;
@@ -21,6 +22,9 @@ var m_kDistrict;
 
 // Log
 var m_kLog;
+
+// Object Factory
+var m_kObjectFactory;
 
 // Collision Detection (External)
 var C;
@@ -35,9 +39,6 @@ var m_liKeysDown;
 
 // Collision Detection 
 var m_kCollisionManager;
-
-// Factory(s)
-var m_kObjectFactory;
 
 // Resource Pathfinder
 var m_kPathfinder;
@@ -69,14 +70,11 @@ function initMain()
 	
 	m_kCanvas.style.cursor = 'crosshair';
 	
-	// Graphics helper
-	m_kShipParts = new ShipParts();
+	// Object Factory
+	m_kObjectFactory = new ObjectFactory();
 	
 	// Collision Detection
 	m_kCollisionManager = new CollisionManager();
-	
-	// Projectile Factory
-	m_kObjectFactory = new ObjectFactory();
 	
 	// Log / Console
 	m_kLog = new Log();
@@ -92,10 +90,12 @@ function initMain()
 	
 	// Initialize States
 	m_kStateManager = new StateManager();
-	m_kGameState = new GameState();
+	//m_kGameState = new GameState();
+	m_kWeaponTestState = new WeaponTestState();
 	
 	// Add initial state
-	m_kStateManager.addState(m_kGameState);
+	//m_kStateManager.addState(m_kGameState);
+	m_kStateManager.addState(m_kWeaponTestState);
 	
 	// Zoom
 	//m_iZoomDefault = 30000;

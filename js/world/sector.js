@@ -30,7 +30,7 @@ function Sector(id, row, col, district, isSpawn)
 	}
 	else
 	{
-		this.m_kAsteroidManager.fillSector(5);
+		//this.m_kAsteroidManager.fillSector(5);
 	}
 	
 	//this.m_kAsteroidManager.fillSector(5);
@@ -202,15 +202,30 @@ Sector.prototype.populateQuadTree = function(ships, structures, asteroids, objec
 	// the box is being drawn too small!
 	for(var i = 0; i < objects.length; i++)
 	{		
-		// Add element
-		this.m_kQuadTree.insert({
-			x: objects[i].m_liPos[0] - 50,
-			y: objects[i].m_liPos[1] - 50,
-			width: 100,
-			height: 100,
-			object: objects[i],
-			type: 3
-		});
+		if(objects[i].m_eObjectType != "Weapon")
+		{
+			// Add element
+			this.m_kQuadTree.insert({
+				x: objects[i].m_liPos[0] - 50,
+				y: objects[i].m_liPos[1] - 50,
+				width: 100,
+				height: 100,
+				object: objects[i],
+				type: 3
+			});
+		}
+		else
+		{			
+			// Add element
+			this.m_kQuadTree.insert({
+				x: objects[i].m_liPos[0] - 50,
+				y: objects[i].m_liPos[1] - 50,
+				width: 100,
+				height: 100,
+				object: objects[i],
+				type: 4
+			});
+		}
 	}
 	
 	for(var i = 0; i < structures.length; i++)
@@ -496,7 +511,7 @@ Sector.prototype.updateObjects = function()
 		this.m_liObjects[i].update();
 		
 		// If destroyed, set index
-		if(this.m_liObjects[i].m_bDelete)
+		if(!this.m_liObjects[i].m_bIsAlive)
 		{		
 			_index = i;
 		}
@@ -567,6 +582,11 @@ Sector.prototype.removeShip = function(ship)
 		// Remove item
 		this.m_liShips.splice(_index, 1);
 	}
+}
+
+Sector.prototype.addObject = function(object)
+{
+	this.m_liObjects.push(object);
 }
 
 Sector.prototype.removeObject = function(object)

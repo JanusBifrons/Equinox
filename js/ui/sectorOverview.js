@@ -257,6 +257,9 @@ SectorOverview.prototype.populateObjects = function()
 	// Repopulate	
 	for(var i = 0; i < this.m_kSector.m_liObjects.length; i++)
 	{
+		if(this.m_kSector.m_liObjects[i].m_eObjectType == "Scrap" || this.m_kSector.m_liObjects[i].m_eObjectType == "Weapon")
+			continue;
+		
 		var _item = new SectorOverviewObject(this.m_kOwner,this.m_kSector.m_liObjects[i], 2);
 		
 		this.m_liObjects.push(_item);

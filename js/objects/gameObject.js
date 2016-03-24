@@ -46,6 +46,11 @@ function GameObject()
 	this.m_liComponents = new Array();
 	
 	// Build costs
+	this.m_bIsConstructed = true;
+	this.m_iMetalRequired = 0;
+	this.m_iMetalBuilt = 0;
+	
+	// Blueprint variables (I want to make this redundant...)
 	this.m_iConstructionTime = 15000;
 	this.m_iConstructionCost = 100;
 	
@@ -211,7 +216,7 @@ GameObject.prototype.onDrop = function(x, y, sector)
 	this.m_bIsCargo = false;
 }
 
-GameObject.prototype.onCollision = function(vector)
+GameObject.prototype.onCollision = function(vector, otherObject)
 {	
 	this.m_liPos[0] += (vector.x);
 	this.m_liPos[1] += (vector.y);
@@ -290,6 +295,13 @@ GameObject.prototype.onExplosion = function(x, y, size)
 
 GameObject.prototype.onRepair = function(metal)
 {	
+	if(!this.m_bIsConstructed)
+	{
+		this.onConstruct(metal);
+		
+		return;
+	}
+
 	// Work out what percentage of the whole this bit was
 	var _percent = (metal / this.m_iMetalRequired);
 	
@@ -313,10 +325,45 @@ GameObject.prototype.onTractor = function(x, y)
 	var _x = this.m_liPos[0] - x;
 	var _y = this.m_liPos[1] - y;
 	
-	var _direction = Math.atan2(-_y, -_x) + Math.PI;
+	var _direction = Math.atan2(_y, _x);
 	
 	this.m_liMove[0] -= Math.cos(_direction) * (this.m_iAccel * 2);
 	this.m_liMove[1] -= Math.sin(_direction) * (this.m_iAccel * 2);
+}
+
+GameObject.prototype.onConstruct = function(metal)
+{
+	// Check if this structure needs more construction!
+	if(this.m_iMetalBuilt < this.m_iMetalRequired)
+	{
+		// Construct using metal
+		this.m_iMetalBuilt += metal;
+
+		// Work out what percentage of the whole this bit was
+		var _percent = (metal / this.m_iMetalRequired);
+		
+		// If the hull isnt full, add that percentage to it
+		if(this.m_iHull < this.m_iHullCap)
+			this.m_iHull += (this.m_iHullCap * _percent);
+		
+		// If the armour isnt full, add that percentage to it
+		if(this.m_iArmour < this.m_iArmourCap)
+			this.m_iArmour += (this.m_iArmourCap * _percent);
+		
+		// Successfully added metal to construction!
+		return true;
+	}
+	else
+	{	
+		// Constructed!
+		this.m_bIsConstructed = true;
+		
+		// Metal not needed!
+		return false;
+	}
+	
+	// Metal not needed!
+	return false;
 }
 
 // DRAW HELPERS
