@@ -326,7 +326,7 @@ Sector.prototype.debug = function()
 	m_kLog.addStaticItem("Power: (+" + _powerGenerated + "/ -" + _powerDrarined + ")", 255, 255, 50);
 	
 	// Print it to the screen!
-	//m_kLog.addStaticItem("Objects: " + this.m_liObjects.length, 255, 255, 255);
+	m_kLog.addStaticItem("Objects: " + this.m_liObjects.length, 255, 255, 255);
 }
 
 Sector.prototype.drawSectorInfo = function()
@@ -635,9 +635,13 @@ Sector.prototype.createScrap = function(object)
 		if(!object.m_liComponents[i].m_bCanScrap)
 			continue;
 		
-		var _move = this.generateDrift();
+		//var _move = this.generateDrift();
 		
-		this.m_liObjects.push(new Scrap(object.m_liComponents[i], object.m_liMove[0] + _move[0], object.m_liMove[1] + _move[1]));
+		var _newMoveX = (object.m_liMove[0] * 0.9 + _move[0] * 0.1);
+		var _newMoveY = (object.m_liMove[1] * 0.9 + _move[1] * 0.1);
+		
+		this.m_liObjects.push(new Scrap(object.m_liComponents[i], _newMoveX, _newMoveY));
+		//this.m_liObjects.push(new Scrap(object.m_liComponents[i], object.m_liMove[0], object.m_liMove[1]));
 	}
 }
 

@@ -7,10 +7,10 @@ function Asylum(x, y, moveX, moveY, owner, sector, team)
 	this.m_kOwner = owner;
 
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Asylum", "Ship", team, sector, x, y, moveX, moveY, 0, 0.0035, 750, 20, 0.008);
+	GameObject.prototype.initialize.call(this, "Asylum", "Ship", team, sector, x, y, moveX, moveY, 0, 0.0035, 300, 1.5, 0.05);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 10, 75, 100, 100, 250, 100);
+	GameObject.prototype.initializeStats.call(this, 10, 750, 100, 100, 250, 100);
 	
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -27,7 +27,7 @@ function Asylum(x, y, moveX, moveY, owner, sector, team)
 	
 	this.m_kCargoHold = new Cargo(this.m_iID, 5);
 	
-	//this.createWeapons();
+	this.createWeapons();
 	
 	console.log("Initialized Asylum Ship successfully.");
 }
@@ -48,15 +48,15 @@ Asylum.prototype.createWeapons = function()
 {
 	// PORT SIDE CANNONS
 	var _portCannons = new Array();
-	var _cannon1 = new LightBeam(this, -35, -75, Math.PI + 0.2, Math.PI * 2);
-	var _cannon2 = new LightBeam(this, -95, -75, Math.PI, (Math.PI * 2) - 0.2);
+	var _cannon1 = new MediumCannon(this, -35, -100, -Math.PI, 0);
+	var _cannon2 = new MediumCannon(this, -95, -100, -Math.PI, 0);
 	_portCannons.push(_cannon1);
 	_portCannons.push(_cannon2);
 
 	// STARBOARD SIDE CANNONS
 	var _starboardCannons = new Array();
-	var _cannon3 = new LightBeam(this, -35, 75, 0, Math.PI - 0.2);
-	var _cannon4 = new LightBeam(this, -95, 75, 0.2, Math.PI);	
+	var _cannon3 = new MediumCannon(this, -35, 100, 0, Math.PI);
+	var _cannon4 = new MediumCannon(this, -95, 100, 0, Math.PI);	
 	_starboardCannons.push(_cannon3);
 	_starboardCannons.push(_cannon4);
 	
@@ -69,5 +69,10 @@ Asylum.prototype.createComponents = function()
 	// Ship components
 	this.m_liComponents = new Array();	
 	
-	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 1000, 500, 10));
+	this.m_liComponents.push(new RectHull(this, -125, 50, 1, 250, 100, 10));
+	this.m_liComponents.push(new RectHull(this, -125, -50, 1, 250, 100, 10));
+	this.m_liComponents.push(new RectHull(this, 125, 50, 1, 250, 100, 10));
+	this.m_liComponents.push(new RectHull(this, 125, -50, 1, 250, 100, 10));
+	
+	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 250, 100, 10));
 }

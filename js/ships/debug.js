@@ -10,7 +10,8 @@ function Debug(x, y, moveX, moveY, owner, sector, team)
 	GameObject.prototype.initialize.call(this, "DebugShip", "Ship", team, sector, x, y, moveX, moveY, 0, 0.035, 60, 20, 0.08);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 60, 75, 100, 100, 250, 100);
+	//GameObject.prototype.initializeStats.call(this, 60, 75, 100, 100, 250, 100);
+	GameObject.prototype.initializeStats.call(this, 60, 0, 100, 100, 250, 100);
 	
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -48,16 +49,18 @@ Debug.prototype.draw = function()
 Debug.prototype.createWeapons = function()
 {
 	var _beams = new Array();
-	var _beam1 = new LightBeam(this, 0, -20, 0, 0);
-	var _beam2 = new LightBeam(this, 0, 20, 0, 0);
-	//var _beam1 = new LightBeam(this, 0, -20, -(Math.PI * 0.75), Math.PI * 0.05);
-	//var _beam2 = new LightBeam(this, 0, 20, -(Math.PI * 0.05), Math.PI * 0.75);
+	//var _beam1 = new LightBeam(this, 0, -20, 0, 0);
+	//var _beam2 = new LightBeam(this, 0, 20, 0, 0);
+	var _beam1 = new LightBeam(this, 0, -20, -(Math.PI * 0.75), Math.PI * 0.05);
+	var _beam2 = new LightBeam(this, 0, 20, -(Math.PI * 0.05), Math.PI * 0.75);
 	_beams.push(_beam1);
 	_beams.push(_beam2);
 	
 	var _cannons = new Array();
-	var _cannon1 = new LightCannon(this, 0, -20, 0, 0);
-	var _cannon2 = new LightCannon(this, 0, 20, 0, 0);
+	//var _cannon1 = new LightCannon(this, 0, -20, 0, 0);
+	//var _cannon2 = new LightCannon(this, 0, 20, 0, 0);
+	var _cannon1 = new LightCannon(this, 0, -20,  -(Math.PI * 0.75), Math.PI * 0.05);
+	var _cannon2 = new LightCannon(this, 0, 20, -(Math.PI * 0.05), Math.PI * 0.75);
 	_cannons.push(_cannon1);
 	_cannons.push(_cannon2);
 	
@@ -69,7 +72,7 @@ Debug.prototype.createWeapons = function()
 	var _tractorBeam = new TractorBeam(this, 20, 0, -(Math.PI * 0.5), Math.PI * 0.5);
 	_tractorBeams.push(_tractorBeam);
 	
-	this.m_liWeapons.push(_beams);
+	//this.m_liWeapons.push(_beams);
 	this.m_liWeapons.push(_cannons);
 	//this.m_liWeapons.push(_constructionBeams);
 	//this.m_liWeapons.push(_tractorBeams);

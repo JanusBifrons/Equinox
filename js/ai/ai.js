@@ -65,6 +65,22 @@ AI.prototype.update = function()
 		
 		this.m_kShip.accellerate();
 	}
+	
+	this.m_kShip.m_liTargets.length = 0;
+	
+	// Fetch list of all potential targets
+	var _targets = this.m_kSector.m_liShips;
+
+	for(var i = 0; i < _targets.length; i++)
+	{	
+		if(_targets[i].m_iID != this.m_kShip.m_iID)
+		{
+			if(_targets[i].m_iTeam != this.m_kShip.m_iTeam)
+			{
+				this.m_kShip.onTarget(_targets[i]);
+			}
+		}
+	}
 
 	return;
 
