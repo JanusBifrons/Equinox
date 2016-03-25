@@ -35,8 +35,8 @@ function Player(district, sector, x, y)
 	this.m_iCameraSpeed = 0.5;
 
 	// Initialize players ship
-	this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
-	//this.m_kShip = new Asylum(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
+	//this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
+	this.m_kShip = new Asylum(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
 	//this.m_kShip = new Asylum(x, y, 0, 0, this);
 	//this.m_kShip = new Tyrant(x, y, 0, 0, this);
 	//this.m_kShip = new Havok(x, y, 0, 0, this);
@@ -414,8 +414,6 @@ Player.prototype.bindKey = function(key)
 
 Player.prototype.selectObject = function(object)
 {					
-	m_kLog.addItem(object.m_eObjectType, 2000, 255, 255, 255);
-
 	if(object.m_eObjectType == "Scrap" || object.m_eObjectType == "Blueprint" || object.m_eObjectType == "Item")
 	{
 		this.m_kDraggedObject = object;

@@ -1,10 +1,10 @@
-Laser.prototype = new GameObject();
-Laser.prototype.constructor = Laser;
+MediumLaser.prototype = new GameObject();
+MediumLaser.prototype.constructor = MediumLaser;
 
-function Laser(owner, x, y, rotation, sector)
+function MediumLaser(owner, x, y, rotation, sector)
 {	
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Laser", "Weapon", 0, sector, x, y, 0, 0, rotation, 0, 120, 50, 1);
+	GameObject.prototype.initialize.call(this, "Laser", "Weapon", 0, sector, x, y, 0, 0, rotation, 0, 120, 30, 1);
 	
 	// Call base initialize stats
 	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250, 0);
@@ -16,7 +16,7 @@ function Laser(owner, x, y, rotation, sector)
 	this.m_liMove[1] = Math.sin(this.m_iRotation) * this.m_iMaxSpeed;
 }
 
-Laser.prototype.update = function()
+MediumLaser.prototype.update = function()
 {	
 	// Call base update
 	GameObject.prototype.update.call(this);
@@ -26,7 +26,7 @@ Laser.prototype.update = function()
 	this.m_liMove[1] = Math.sin(this.m_iRotation) * this.m_iMaxSpeed;
 }
 
-Laser.prototype.draw = function()
+MediumLaser.prototype.draw = function()
 {
 	// Call base draw
 	GameObject.prototype.draw.call(this);
@@ -34,7 +34,7 @@ Laser.prototype.draw = function()
 
 // OVERRIDE EVENTS
 
-Laser.prototype.onCollision = function(vector, otherObject)
+MediumLaser.prototype.onCollision = function(vector, otherObject)
 {
 	// Don't hit the ship this came from!
 	if(this.m_kOwner.m_iID == otherObject.m_iID)
@@ -43,18 +43,18 @@ Laser.prototype.onCollision = function(vector, otherObject)
 	if(!this.m_bIsAlive)
 		return;
 	
-	var _damage = (150 / 1000) * m_fElapsedTime;
-	
-	otherObject.onHit(5);
+	otherObject.onHit(150);
 	
 	this.m_bIsAlive = false;
+	
+	m_kLog.addItem("Laser hit " + otherObject.m_iID, 1000, 255, 255, 255);
 }
 
 // OVERRIDE HELPERS
 
-Laser.prototype.createComponents = function()
+MediumLaser.prototype.createComponents = function()
 {	
 	this.m_liComponents = new Array();
 	
-	this.m_liComponents.push(new RectHull(this, 0, 0, 0.25, 100, 10, 0));
+	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 100, 10, 0));
 }

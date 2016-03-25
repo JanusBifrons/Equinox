@@ -6,7 +6,7 @@ function AIManager(sector)
 	
 	this.m_iSpawnTimer = 0;
 	//this.m_iSpawnTimerMax = 150000; // 2.5 minutes
-	this.m_iSpawnTimerMax = 10000;
+	this.m_iSpawnTimerMax = 60000;
 	
 	//this.m_iSpawnTimerMax = 6000000000;
 	this.m_iSpawnTimer = this.m_iSpawnTimerMax * 0.99;

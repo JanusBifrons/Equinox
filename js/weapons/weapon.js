@@ -109,7 +109,32 @@ Weapon.prototype.update = function()
 	this.updateOffsets();
 	
 	// Create X/Y coords in world space for mouse position
-	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);	
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);
+
+	var _targetIndex = this.selectBestTarget();
+	
+	if(_targetIndex >= 0)
+	{
+		var _x = this.m_kOwner.m_liTargets[_targetIndex].m_kTarget.m_liPos[0];
+		var _y = this.m_kOwner.m_liTargets[_targetIndex].m_kTarget.m_liPos[1];
+		
+		var _turn = this.turnToTarget(_x, _y);
+		
+		// Check if you're within a reasonable angle to open fire
+		if(_turn < (Math.PI / 6))
+			if(_turn > -(Math.PI / 6))
+				this.onFire();
+	}
+	else
+	{
+		// Rotate to middle of allowed angles
+		this.rotateToDefault();
+	}
+	
+	// Set collision box after moving!
+	this.createCollision();
+	
+	return;
 
 	// Check if target is within shooting angle
 	if(this.checkTarget(_worldPos.x, _worldPos.y))
@@ -190,12 +215,10 @@ Weapon.prototype.onHit = function(targetHit)
 Weapon.prototype.createCollision = function()
 {
 	// Remove collision polygon
-	this.m_cdCollisionPolygon = new P(new V(0, 0), [new V(0, 0)]);
-	this.m_cdCollisionPolygon.points.length = 0;
+	this.m_cdCollisionPolygon = new P(new V(0, 0), [new V(this.m_liPos[0], this.m_liPos[1])]);
 }
 
 // EVENTS
-
 
 Weapon.prototype.onFire = function()
 {
@@ -224,74 +247,33 @@ Weapon.prototype.onFire = function()
 	}
 }
 
-// DRAW HELPERS
-
-Weapon.prototype.drawWeapon = function()
-{
-	// Move screen to weapon location
-	m_kContext.save();
-	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
-	
-	// Rotate to players angle
-	m_kContext.rotate(this.m_iRotation);
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'white';
-	m_kContext.lineWidth = 1;
-	
-	// Base
-	m_kContext.beginPath();
-	m_kContext.arc(0, 0, 3, 0, 2 * Math.PI);
-	m_kContext.closePath();
-	m_kContext.fill();
-	m_kContext.stroke();
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'black';
-	m_kContext.lineWidth = 1;
-	
-	// Barrel
-	m_kContext.beginPath();
-	m_kContext.moveTo(0, -1);
-	m_kContext.lineTo(0, 1);
-	m_kContext.lineTo(10, 1);
-	m_kContext.lineTo(10, -1);
-	m_kContext.closePath();	
-	m_kContext.stroke();
-	m_kContext.fill();
-	
-	// Restore context back to default from relative to the ship
-	m_kContext.restore();	
-}
-
-// Weapons without a beam simply have no collision polygon
-Weapon.prototype.drawCollisionBox = function()
-{
-	if(this.m_bIsFiring)
-	{		
-		m_kContext.strokeStyle = this.m_cColour;	
-		m_kContext.fillStyle = this.m_cColour;	
-		
-		m_kContext.globalAlpha = 1;
-		m_kContext.lineWidth = 3;
-		
-		m_kContext.beginPath();
-		
-		for(var i = 0; i < this.m_cdCollisionPolygon.points.length; i++)
-		{
-			_x = this.m_cdCollisionPolygon.points[i].x;
-			_y = this.m_cdCollisionPolygon.points[i].y;
-			
-			m_kContext.lineTo(_x, _y);	
-		}
-		
-		m_kContext.closePath();
-		m_kContext.fill();	
-		m_kContext.stroke();	
-	}
-}
-
 // HELPERS
+
+Weapon.prototype.selectBestTarget = function()
+{
+	var _targets = this.m_kOwner.m_liTargets;
+	var _closest = this.m_iRange;
+	var _distance = 0;
+	var _targetIndex = -1;
+	
+	// Determine closest target
+	for(var i = 0; i < _targets.length; i++)
+	{		
+		if(this.checkTarget(_targets[i].m_kTarget.m_liPos[0], _targets[i].m_kTarget.m_liPos[1]))
+		{
+			_distance = calculateDistance(_targets[i].m_kTarget.m_liPos, this.m_liPos);
+			
+			if(_distance < _closest)
+			{
+				_closest = _distance;
+				
+				_targetIndex = i;
+			}
+		}
+	}
+	
+	return _targetIndex;
+}
 
 Weapon.prototype.rotateToDefault = function()
 {
@@ -493,4 +475,81 @@ Weapon.prototype.updateOffsets = function()
 	
 	// Reset rotation
 	this.m_iRotation = this.m_kOwner.m_iRotation;
+}
+
+// DRAW HELPERS
+
+Weapon.prototype.drawWeapon = function()
+{
+	var _percent = 0;
+	
+	if(this.m_iCooldownTimer > 0)
+	{
+		_percent = this.m_iCooldownTimer / this.m_iCooldown;	
+	}
+	
+	if(_percent > 1)
+		_percent = 1;
+	
+	// Move screen to weapon location
+	m_kContext.save();
+	m_kContext.translate(this.m_liPos[0], this.m_liPos[1]);
+	
+	// Rotate to players angle
+	m_kContext.rotate(this.m_iRotation);
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'white';
+	m_kContext.lineWidth = 1;
+	
+	// Base
+	m_kContext.beginPath();
+	m_kContext.arc(0, 0, 3, 0, 2 * Math.PI);
+	m_kContext.closePath();
+	m_kContext.fill();
+	m_kContext.stroke();
+	
+	m_kContext.strokeStyle = 'white';	
+	m_kContext.fillStyle = 'black';
+	m_kContext.lineWidth = 1;
+	
+	// Barrel
+	m_kContext.beginPath();
+	m_kContext.moveTo(0, -1);
+	m_kContext.lineTo(0, 1);
+	m_kContext.lineTo(2 + (8 * _percent), 1);
+	m_kContext.lineTo(2 + (8 * _percent), -1);
+	m_kContext.closePath();	
+	m_kContext.stroke();
+	m_kContext.fill();
+	
+	// Restore context back to default from relative to the ship
+	m_kContext.restore();	
+}
+
+// Weapons without a beam simply have no collision polygon
+Weapon.prototype.drawCollisionBox = function()
+{
+	if(this.m_bIsFiring)
+	{		
+		m_kContext.strokeStyle = this.m_cColour;	
+		m_kContext.fillStyle = this.m_cColour;	
+		
+		m_kContext.globalAlpha = 1;
+		m_kContext.lineWidth = 3;
+		
+		m_kContext.beginPath();
+		
+		for(var i = 0; i < this.m_cdCollisionPolygon.points.length; i++)
+		{
+			_x = this.m_cdCollisionPolygon.points[i].x;
+			_y = this.m_cdCollisionPolygon.points[i].y;
+			
+			m_kContext.lineTo(_x, _y);	
+		}
+		
+		m_kContext.closePath();
+		m_kContext.fill();	
+		m_kContext.stroke();	
+	}
 }

@@ -22,7 +22,7 @@ function GameState()
 	m_kDistrict.addSector(this.m_kSectorG);
 	
 	// Initialise local player
-	m_kPlayer = new Player(m_kDistrict, this.m_kSectorA, -1000, 0);
+	m_kPlayer = new Player(m_kDistrict, this.m_kSectorA, -1000, 1000);
 	m_kPlayer.bindControls(m_kPlayer);
 	
 	// Add ships to the sector and spawn it
@@ -34,10 +34,9 @@ function GameState()
 	this.m_kSectorA.addShip(new Debug(-5000 * Math.random(), 0, 0, 0, null, this.m_kSectorA, 4));
 	this.m_kSectorA.addShip(new Debug(-5000 * Math.random(), 0, 0, 0, null, this.m_kSectorA, 5));
 	
-	this.m_kSectorA.m_liObjects.push(new Blueprint(-1000, 1000, this.m_kSectorA, new Debug(0, 0, 0, 0, null, this.m_kSectorA, 0)));
-	this.m_kSectorA.m_liObjects.push(new Blueprint(-1500, 1000, this.m_kSectorA, new Asylum(0, 0, 0, 0, null, this.m_kSectorA, 0)));
-	
-	this.m_kSectorA.m_liObjects.push(new PackedObject(-500, 200, this.m_kSectorA, new Debug(0, 0, 0, 0, null, this.m_kSectorA, 0)));
+	//this.m_kSectorA.m_liObjects.push(new Blueprint(-1000, 1000, this.m_kSectorA, new Debug(0, 0, 0, 0, null, this.m_kSectorA, 0)));
+	//this.m_kSectorA.m_liObjects.push(new Blueprint(-1500, 1000, this.m_kSectorA, new Asylum(0, 0, 0, 0, null, this.m_kSectorA, 0)));
+	//this.m_kSectorA.m_liObjects.push(new PackedObject(-500, 200, this.m_kSectorA, new Debug(0, 0, 0, 0, null, this.m_kSectorA, 0)));
 }
 
 GameState.prototype.update = function()

@@ -42,6 +42,7 @@ function GameObject()
 	this.m_iHullRegen = 0;
 	
 	// Components and shields
+	this.m_iHitTimer = 0;
 	this.m_liShields = new Array();
 	this.m_liComponents = new Array();
 	
@@ -134,6 +135,8 @@ GameObject.prototype.initializeStats = function(shieldRegen, shieldCap, armourCa
 
 GameObject.prototype.update = function()
 {	
+	this.m_iHitTimer += m_fElapsedTime;
+
 	// Update collision position
 	_shield = new C(new V(this.m_liPos[0], this.m_liPos[1]), this.m_iRadius);
 	
@@ -227,6 +230,8 @@ GameObject.prototype.onCollision = function(vector, otherObject)
 
 GameObject.prototype.onHit = function(damage)
 {	
+	this.m_iHitTimer = 0;
+
 	// Check if hit is on shields	
 	if(this.m_iShields > 0)
 	{
@@ -254,9 +259,7 @@ GameObject.prototype.onHit = function(damage)
 		
 		// Check if object is alive!
 		if(this.m_iHull <= 0)
-		{			
-			//m_kLog.addItem("!IMPORTANT!", 5000, 255, 0, 0);
-			//m_kLog.addItem("This object has died... but if you didn't write specific code, it likely is still alive with zero health!", 5000, 255, 0, 0);			
+		{				
 		
 			return true; // Object died!
 		}
@@ -456,6 +459,17 @@ GameObject.prototype.drawUI = function()
 	m_kContext.fillStyle = 'white';
 	m_kContext.lineWidth = 1;
 	
+	// Font size, type and colour
+	m_kContext.font="15px Verdana";
+	
+	m_kContext.fillText(this.m_sName, -_drawDistance, -_drawDistance - 12);
+	m_kContext.fillText(this.m_eObjectType, -_drawDistance, -_drawDistance);
+	
+	
+	m_kContext.fillText(this.m_iShields, -_drawDistance, _drawDistance + 10);
+	m_kContext.fillText(this.m_iArmour, -_drawDistance, _drawDistance + 20);
+	m_kContext.fillText(this.m_iHull, -_drawDistance, _drawDistance + 30);
+	
 	// Top Left
 	m_kContext.beginPath();
 	m_kContext.moveTo(-_drawDistance, -_drawDistance);
@@ -500,6 +514,10 @@ GameObject.prototype.drawUI = function()
 
 GameObject.prototype.regenStats = function()
 {
+	// If you've been hit in the last 10th of a second dont regen yet
+	if(this.m_iHitTimer < 1000)
+		return;
+	
 	// Count Down Shield Regen Timer
 	if(this.m_iShieldRegen > 0)
 		this.m_iShieldRegen -= m_fElapsedTime;
