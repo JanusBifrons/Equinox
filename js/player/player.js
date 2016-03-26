@@ -35,11 +35,10 @@ function Player(district, sector, x, y)
 	this.m_iCameraSpeed = 0.5;
 
 	// Initialize players ship
-	//this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
-	this.m_kShip = new Asylum(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
-	//this.m_kShip = new Asylum(x, y, 0, 0, this);
-	//this.m_kShip = new Tyrant(x, y, 0, 0, this);
-	//this.m_kShip = new Havok(x, y, 0, 0, this);
+	this.m_kShip = new Debug(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
+	//this.m_kShip = new Asylum(x, y, 0, 0, this, this.m_kSector, this.m_iTeam);
+	
+	this.m_kShip.m_iWeaponSelected = 0;
 	
 	// This is compensation for my terrible input code which is buggy
 	this.m_iInteriaTimerMax = 1000;

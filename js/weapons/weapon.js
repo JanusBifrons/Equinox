@@ -35,6 +35,7 @@ function Weapon()
 	this.m_iCooldownTimer = 0;
 	
 	// Switches
+	this.m_bIsSelected = false;
 	this.m_bCanFire = false;
 	this.m_bIsFiring = false;
 	this.m_bIsCoolingDown = false;
@@ -80,6 +81,7 @@ Weapon.prototype.initialize = function(owner, offsetX, offsetY, minRotation, max
 	this.m_iCooldownTimer = this.m_iCooldown;
 	
 	// Switches
+	this.m_bIsSelected = false;
 	this.m_bCanFire = false;
 	this.m_bIsFiring = false;
 	this.m_bIsCoolingDown = false;
@@ -93,6 +95,9 @@ Weapon.prototype.initialize = function(owner, offsetX, offsetY, minRotation, max
 
 Weapon.prototype.update = function()
 {
+	// Create X/Y coords in world space for mouse position
+	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);
+	
 	// Update timer
 	this.m_iCooldownTimer += m_fElapsedTime;
 	
@@ -108,9 +113,6 @@ Weapon.prototype.update = function()
 	// Update position and rotation offsets
 	this.updateOffsets();
 	
-	// Create X/Y coords in world space for mouse position
-	var _worldPos = m_kCamera.screenToWorld(m_iMouseX, m_iMouseY, _worldPos);
-
 	var _targetIndex = this.selectBestTarget();
 	
 	if(_targetIndex >= 0)
@@ -127,8 +129,22 @@ Weapon.prototype.update = function()
 	}
 	else
 	{
-		// Rotate to middle of allowed angles
-		this.rotateToDefault();
+		if(this.m_bIsSelected)
+		{
+			if(this.checkTarget(_worldPos.x, _worldPos.y))
+			{
+				// Turn to face target
+				this.turnToTarget(_worldPos.x, _worldPos.y)
+			}
+			else
+			{
+				this.rotateToDefault();	
+			}
+		}
+		else
+		{
+			this.rotateToDefault();
+		}
 	}
 	
 	// Set collision box after moving!
@@ -163,35 +179,8 @@ Weapon.prototype.draw = function()
 	
 	this.drawWeapon();
 	
-	return;
-	
-	m_kContext.strokeStyle = 'white';	
-	m_kContext.fillStyle = 'white'
-	m_kContext.lineWidth = 1;
-	
-	// Draw firing angle!
-	m_kContext.beginPath();
-	m_kContext.arc(this.m_liPos[0], this.m_liPos[1], this.m_iRange, this.m_kOwner.m_iRotation + this.m_iRotationMin, this.m_kOwner.m_iRotation + this.m_iRotationMax);
-	m_kContext.stroke();
-	m_kContext.closePath();
-	
-	var _x = this.m_liPos[0] + (this.m_iRange * Math.cos(this.m_kOwner.m_iRotation + this.m_iRotationMin));
-	var _y = this.m_liPos[1] + (this.m_iRange * Math.sin(this.m_kOwner.m_iRotation + this.m_iRotationMin));
-
-	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
-	m_kContext.lineTo(_x, _y);	
-	m_kContext.stroke();
-	m_kContext.closePath();
-	
-	var _x = this.m_liPos[0] + (this.m_iRange * Math.cos(this.m_kOwner.m_iRotation + this.m_iRotationMax));
-	var _y = this.m_liPos[1] + (this.m_iRange * Math.sin(this.m_kOwner.m_iRotation + this.m_iRotationMax));
-
-	m_kContext.beginPath();
-	m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
-	m_kContext.lineTo(_x, _y);	
-	m_kContext.stroke();
-	m_kContext.closePath();
+	if(this.m_bIsSelected)	
+		this.drawAimGuide();
 }
 
 // OVERRIDERS
@@ -478,6 +467,74 @@ Weapon.prototype.updateOffsets = function()
 }
 
 // DRAW HELPERS
+
+Weapon.prototype.drawAimGuide = function()
+{
+	// Draw overall guide for total aim
+	m_kContext.globalAlpha = 0.35;
+	
+	m_kContext.strokeStyle = 'grey';	
+	m_kContext.fillStyle = 'grey'
+	m_kContext.lineWidth = 1;
+	
+	this.drawArc(this.m_iRange, this.m_iRotationMin, this.m_iRotationMax);
+	this.drawArc(this.m_iRange * 0.8, this.m_iRotationMin, this.m_iRotationMax);
+	this.drawArc(this.m_iRange * 0.6, this.m_iRotationMin, this.m_iRotationMax);
+	this.drawArc(this.m_iRange * 0.4, this.m_iRotationMin, this.m_iRotationMax);
+	this.drawArc(this.m_iRange * 0.2, this.m_iRotationMin, this.m_iRotationMax);
+	
+	m_kContext.globalAlpha = 1;
+	
+	if(this.m_bIsSelected)
+	{		
+		m_kContext.globalAlpha = 0.45;
+
+		m_kContext.strokeStyle = 'white';	
+		m_kContext.fillStyle = 'white'
+		m_kContext.lineWidth = 1;
+		
+		var _minVariance = this.m_iRotationOffset - Math.PI * 0.05;
+		var _maxVariance = this.m_iRotationOffset + Math.PI * 0.05;
+		
+		this.drawArc(this.m_iRange, _minVariance, _maxVariance);
+		this.drawArc(this.m_iRange * 0.8, _minVariance, _maxVariance);
+		this.drawArc(this.m_iRange * 0.6, _minVariance, _maxVariance);
+		this.drawArc(this.m_iRange * 0.4, _minVariance, _maxVariance);
+		this.drawArc(this.m_iRange * 0.2, _minVariance, _maxVariance);
+	}
+}
+
+Weapon.prototype.drawArc = function(range, min, max)
+{	
+	// Draw firing angle!
+	m_kContext.beginPath();
+	m_kContext.arc(this.m_liPos[0], this.m_liPos[1], range, this.m_kOwner.m_iRotation + min, this.m_kOwner.m_iRotation + max);
+	m_kContext.stroke();
+	m_kContext.closePath();
+	
+	if(range < this.m_iRange)
+	{
+		return;
+	}
+	
+	var _x = this.m_liPos[0] + (range * Math.cos(this.m_kOwner.m_iRotation + min));
+	var _y = this.m_liPos[1] + (range * Math.sin(this.m_kOwner.m_iRotation + min));
+
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
+	m_kContext.lineTo(_x, _y);	
+	m_kContext.stroke();
+	m_kContext.closePath();
+	
+	var _x = this.m_liPos[0] + (range * Math.cos(this.m_kOwner.m_iRotation + max));
+	var _y = this.m_liPos[1] + (range * Math.sin(this.m_kOwner.m_iRotation + max));
+
+	m_kContext.beginPath();
+	m_kContext.moveTo(this.m_liPos[0], this.m_liPos[1]);
+	m_kContext.lineTo(_x, _y);	
+	m_kContext.stroke();
+	m_kContext.closePath();
+}
 
 Weapon.prototype.drawWeapon = function()
 {

@@ -17,7 +17,7 @@ function Scrap(component, moveX, moveY)
 	GameObject.prototype.initialize.call(this, "Scrap", "Scrap", _team, _sector, _x, _y, moveX, moveY, 0, 0, 50, 5, 0.009);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 250000, 0);
+	GameObject.prototype.initializeStats.call(this, 0, 0, 0, 0, 10, 0);
 	
 	console.log("Initialized Asteroid successfully.");
 }
@@ -34,6 +34,17 @@ Scrap.prototype.draw = function()
 {
 	// Call base draw
 	GameObject.prototype.draw.call(this);
+}
+
+// EVENT OVERRIDE
+
+Scrap.prototype.onHit = function(damage)
+{
+	// Call base onHit
+	if(GameObject.prototype.onHit.call(this, damage))
+	{
+		this.m_bIsAlive = false;
+	}
 }
 
 // HELPERS

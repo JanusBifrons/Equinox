@@ -7,10 +7,10 @@ function Asylum(x, y, moveX, moveY, owner, sector, team)
 	this.m_kOwner = owner;
 
 	// Call base initialize
-	GameObject.prototype.initialize.call(this, "Asylum", "Ship", team, sector, x, y, moveX, moveY, 0, 0.0035, 300, 1.5, 0.05);
+	GameObject.prototype.initialize.call(this, "Asylum", "Ship", team, sector, x, y, moveX, moveY, 0, 0.0035, 1600, 1.5, 0.05);
 	
 	// Call base initialize stats
-	GameObject.prototype.initializeStats.call(this, 10, 750, 100, 100, 250, 100);
+	GameObject.prototype.initializeStats.call(this, 10, 1, 100, 100, 250, 100);
 	
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
@@ -69,10 +69,10 @@ Asylum.prototype.createComponents = function()
 	// Ship components
 	this.m_liComponents = new Array();	
 	
-	this.m_liComponents.push(new RectHull(this, -125, 50, 1, 250, 100, 10));
-	this.m_liComponents.push(new RectHull(this, -125, -50, 1, 250, 100, 10));
-	this.m_liComponents.push(new RectHull(this, 125, 50, 1, 250, 100, 10));
-	this.m_liComponents.push(new RectHull(this, 125, -50, 1, 250, 100, 10));
+	//this.m_liComponents.push(new RectHull(this, -125, 50, 1, 250, 100, 10));
+	//this.m_liComponents.push(new RectHull(this, -125, -50, 1, 250, 100, 10));
+	//this.m_liComponents.push(new RectHull(this, 125, 50, 1, 250, 100, 10));
+	//this.m_liComponents.push(new RectHull(this, 125, -50, 1, 250, 100, 10));
 	
-	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 250, 100, 10));
+	this.m_liComponents.push(new RectHull(this, 0, 0, 1, 2500, 2500, 250));
 }

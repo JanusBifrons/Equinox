@@ -4,7 +4,8 @@ LightCannon.prototype.constructor = LightCannon;
 function LightCannon(owner, offsetX, offsetY, minRotation, maxRotation)
 {
 	// Call base initialize
-	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 1500, 1, 0.2);
+	//Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 1500, 1, 0.2);
+	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 1500, 1, 1);
 	
 	console.log("Light Cannon initialised successfully.");
 }
