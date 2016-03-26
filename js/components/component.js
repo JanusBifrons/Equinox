@@ -100,7 +100,6 @@ Component.prototype.update = function()
 Component.prototype.draw = function()
 {
 	m_kContext.strokeStyle = 'black';	
-	//m_kContext.fillStyle = this.m_cPrimaryColour;
 	m_kContext.fillStyle = this.m_cDefaultColour;
 	m_kContext.lineWidth = 1;
 	
@@ -108,6 +107,10 @@ Component.prototype.draw = function()
 	{
 		m_kContext.fillStyle = this.m_cPrimaryColour;
 	}
+	
+	m_kContext.lineJoin = 'bevel';
+	m_kContext.miterLimit = 15;
+	m_kContext.lineCap = "round";
 	
 	m_kContext.beginPath();
 	

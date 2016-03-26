@@ -16,7 +16,7 @@ function Ship()
 	// Weapons
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
-	this.m_iWeaponSelected = 0;
+	this.m_iWeaponSelected = -1;
 	
 	// Hyper Drive
 	this.m_iHyperTarget = 0;
@@ -48,6 +48,15 @@ Ship.prototype.update = function()
 		{				
 			// Update!
 			_weapons[j].update();
+			
+			if(i == this.m_iWeaponSelected)
+			{
+				_weapons[j].m_bIsSelected = true;
+			}
+			else
+			{
+				_weapons[j].m_bIsSelected = false;
+			}
 		}
 	}
 	
@@ -202,6 +211,26 @@ Ship.prototype.createComponents = function()
 }
 
 // HELPERS
+
+Ship.prototype.drawAimGuide = function()
+{
+	// Loop through all weapons
+	for(var i = 0; i < this.m_liWeapons.length; i++)
+	{	
+		// To increase readability
+		var _weapons = this.m_liWeapons[i];
+	
+		// Loop through weapon set
+		for(var j = 0; j < _weapons.length; j++)
+		{				
+			if(i == this.m_iWeaponSelected)
+			{
+				// Draw weapon guides!
+				_weapons[j].drawAimGuide();	
+			}
+		}
+	}
+}
 
 Ship.prototype.updateTargets = function()
 {

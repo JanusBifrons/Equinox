@@ -260,7 +260,8 @@ GameObject.prototype.onHit = function(damage)
 		// Check if object is alive!
 		if(this.m_iHull <= 0)
 		{				
-		
+			//this.m_bIsAlive = false;
+			
 			return true; // Object died!
 		}
 	}

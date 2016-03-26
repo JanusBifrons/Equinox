@@ -72,7 +72,7 @@ Debug.prototype.createWeapons = function()
 	var _tractorBeam = new TractorBeam(this, 20, 0, -(Math.PI * 0.5), Math.PI * 0.5);
 	_tractorBeams.push(_tractorBeam);
 	
-	//this.m_liWeapons.push(_beams);
+	this.m_liWeapons.push(_beams);
 	this.m_liWeapons.push(_cannons);
 	//this.m_liWeapons.push(_constructionBeams);
 	//this.m_liWeapons.push(_tractorBeams);
