@@ -40,6 +40,8 @@ function Weapon()
 	this.m_bIsFiring = false;
 	this.m_bIsCoolingDown = false;
 	
+	this.m_liTargetPriorities = new Array();
+	
 	this.m_cColour = 'white';
 }
 
@@ -91,6 +93,8 @@ Weapon.prototype.initialize = function(owner, offsetX, offsetY, minRotation, max
 	
 	// Concatinate colour
 	this.m_cColour = concatenate(this.m_iR, this.m_iG, this.m_iB, this.m_iA);
+	
+	this.m_liTargetPriorities = new Array();
 }
 
 Weapon.prototype.update = function()
@@ -115,10 +119,12 @@ Weapon.prototype.update = function()
 	
 	var _targetIndex = this.selectBestTarget();
 	
-	if(_targetIndex >= 0)
+	if(_targetIndex != -1)
 	{
-		var _x = this.m_kOwner.m_liTargets[_targetIndex].m_kTarget.m_liPos[0];
-		var _y = this.m_kOwner.m_liTargets[_targetIndex].m_kTarget.m_liPos[1];
+		var _targets = this.m_kOwner.m_liTargets;
+		
+		var _x = _targets[_targetIndex].m_kTarget.m_liPos[0];
+		var _y = _targets[_targetIndex].m_kTarget.m_liPos[1];
 		
 		var _turn = this.turnToTarget(_x, _y);
 		
@@ -245,7 +251,7 @@ Weapon.prototype.selectBestTarget = function()
 	var _distance = 0;
 	var _targetIndex = -1;
 	
-	// Determine closest target
+		// Determine closest target
 	for(var i = 0; i < _targets.length; i++)
 	{		
 		if(this.checkTarget(_targets[i].m_kTarget.m_liPos[0], _targets[i].m_kTarget.m_liPos[1]))
@@ -262,6 +268,69 @@ Weapon.prototype.selectBestTarget = function()
 	}
 	
 	return _targetIndex;
+	
+	return;
+	
+	var _targets = new Array();
+	var _closest = this.m_iRange;
+	var _distance = 0;
+	var _targetIndex = -1;
+	
+	if(this.m_liTargetPriorities.length <= 0)
+	{
+		for(var i = 0; i < this.m_kOwner.m_liTargets.length; i++)
+		{
+			var _pos = new Array();
+			_pos[0] = this.m_kOwner.m_liTargets[i].m_kTarget.m_liPos[0];
+			_pos[1] = this.m_kOwner.m_liTargets[i].m_kTarget.m_liPos[1];
+			
+			_targets.push(_pos);
+		}
+	}
+	else
+	{
+		var _objects = this.m_kOwner.m_kSector.m_liObjects;
+		
+		for(var i = 0; i < _objects.length; i++)
+		{
+			for(var j = 0; j < this.m_liTargetPriorities.length; j++)
+			{			
+				if(_objects[i].m_sName == this.m_liTargetPriorities[j])
+				{
+					var _pos = new Array();
+					_pos[0] = _objects[i].m_liPos[0];
+					_pos[1] = _objects[i].m_liPos[1];
+					
+					_targets.push(_pos);
+				}
+			}
+		}
+	}
+	
+	// Determine closest target
+	for(var i = 0; i < _targets.length; i++)
+	{		
+		if(this.checkTarget(_targets[i][0], _targets[i][1]))
+		{
+			_distance = calculateDistance(_targets[i], this.m_liPos);
+			
+			if(_distance < _closest)
+			{
+				_closest = _distance;
+				
+				_targetIndex = i;
+			}
+		}
+	}
+	
+	if(_targetIndex != -1)
+	{	
+		return _targets[_targetIndex];	
+	}
+	else
+	{
+		return new Array();
+	}
 }
 
 Weapon.prototype.rotateToDefault = function()

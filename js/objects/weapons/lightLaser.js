@@ -51,7 +51,7 @@ LightLaser.prototype.onCollision = function(vector, otherObject)
 	if(!this.m_bIsAlive)
 		return;
 	
-	otherObject.onHit(5);
+	otherObject.onHit(20);
 	
 	this.m_bIsAlive = false;
 	

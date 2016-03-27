@@ -72,10 +72,20 @@ Debug.prototype.createWeapons = function()
 	var _tractorBeam = new TractorBeam(this, 20, 0, -(Math.PI * 0.5), Math.PI * 0.5);
 	_tractorBeams.push(_tractorBeam);
 	
+	var _launchers = new Array();
+	var _launcher1 = new LightLauncher(this, 20, 0, -(Math.PI * 0.5), Math.PI * 0.5);
+	_launchers.push(_launcher1);
+	
+	var _antiMissileBeams = new Array();
+	var _antiMissileBeam1 = new AntiMissileBeam(this, 20, 0, -(Math.PI * 0.5), Math.PI * 0.5);
+	_antiMissileBeams.push(_antiMissileBeam1);
+	
 	this.m_liWeapons.push(_beams);
-	this.m_liWeapons.push(_cannons);
+	//this.m_liWeapons.push(_cannons);
 	//this.m_liWeapons.push(_constructionBeams);
 	//this.m_liWeapons.push(_tractorBeams);
+	this.m_liWeapons.push(_launchers);
+	this.m_liWeapons.push(_antiMissileBeams);
 }
 
 Debug.prototype.createComponents = function()

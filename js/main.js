@@ -90,12 +90,12 @@ function initMain()
 	
 	// Initialize States
 	m_kStateManager = new StateManager();
-	m_kGameState = new GameState();
-	//m_kWeaponTestState = new WeaponTestState();
+	//m_kGameState = new GameState();
+	m_kWeaponTestState = new WeaponTestState();
 	
 	// Add initial state
-	m_kStateManager.addState(m_kGameState);
-	//m_kStateManager.addState(m_kWeaponTestState);
+	//m_kStateManager.addState(m_kGameState);
+	m_kStateManager.addState(m_kWeaponTestState);
 	
 	// Zoom
 	//m_iZoomDefault = 30000;
