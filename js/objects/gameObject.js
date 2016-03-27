@@ -42,7 +42,6 @@ function GameObject()
 	this.m_iHullRegen = 0;
 	
 	// Components and shields
-	this.m_iHitTimer = 0;
 	this.m_liShields = new Array();
 	this.m_liComponents = new Array();
 	
@@ -135,8 +134,6 @@ GameObject.prototype.initializeStats = function(shieldRegen, shieldCap, armourCa
 
 GameObject.prototype.update = function()
 {	
-	this.m_iHitTimer += m_fElapsedTime;
-
 	// Update collision position
 	_shield = new C(new V(this.m_liPos[0], this.m_liPos[1]), this.m_iRadius);
 	
@@ -230,7 +227,7 @@ GameObject.prototype.onCollision = function(vector, otherObject)
 
 GameObject.prototype.onHit = function(damage)
 {	
-	this.m_iHitTimer = 0;
+	var _remainingDamage = damage;
 
 	// Check if hit is on shields	
 	if(this.m_iShields > 0)
@@ -240,33 +237,48 @@ GameObject.prototype.onHit = function(damage)
 		
 		// Reset shield regen timer
 		this.m_iShieldRegen = this.m_iShieldRegenCap;
+		
+		// Object lives on!
+		return false;
 	}
-	else if(this.m_iArmour > 0)
+	
+	if(this.m_iArmour > 0)
 	{
-		// Impact on the armour
-		this.m_iArmour -= damage;
+		if(this.m_iArmour > damage)
+		{
+			// Impact on the armour
+			this.m_iArmour -= damage;		
 		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-	}
-	else
-	{
-		// Impact on the health
-		this.m_iHull -= damage;
-		
-		// Reset shield regen timer
-		this.m_iShieldRegen = this.m_iShieldRegenCap;
-		
-		// Check if object is alive!
-		if(this.m_iHull <= 0)
-		{				
-			//this.m_bIsAlive = false;
+			// No damage remaining
+			_remainingDamage -= damage;
+		}
+		else
+		{
+			_remainingDamage = damage - this.m_iArmour;
 			
-			return true; // Object died!
+			this.m_iArmour -= _remainingDamage;
+			
+			m_kLog.addItem("Damage " + damage, 1000, 255, 255, 255);			
+			m_kLog.addItem("Remaining " + _remainingDamage, 1000, 255, 255, 255);
 		}
 	}
 	
-	return false; // Player lives on
+	if(this.m_iHull > _remainingDamage)
+	{
+		// Impact on the health
+		this.m_iHull -= _remainingDamage;
+	}
+	else
+	{
+		// KA-BOOM!
+		return true; // Object died!
+	}
+	
+			
+	// Reset shield regen timer
+	this.m_iShieldRegen = this.m_iShieldRegenCap;
+	
+	return false; // Object lives on
 }
 
 GameObject.prototype.onExplosion = function(x, y, size)
@@ -368,6 +380,34 @@ GameObject.prototype.onConstruct = function(metal)
 	
 	// Metal not needed!
 	return false;
+}
+
+// CONTROL HELPERS
+
+GameObject.prototype.accellerate = function()
+{
+	this.m_liMove[0] += Math.cos(this.m_iRotation) * this.m_iAccel;
+	this.m_liMove[1] += Math.sin(this.m_iRotation) * this.m_iAccel;
+		
+	this.m_bIsAccelerating = true;
+}
+
+GameObject.prototype.deccellerate = function()
+{
+	this.m_liMove[0] -= Math.cos(this.m_iRotation) * this.m_iAccel;
+	this.m_liMove[1] -= Math.sin(this.m_iRotation) * this.m_iAccel;
+}
+
+GameObject.prototype.rotateLeft = function()
+{
+	this.m_iRotation = wrapAngle(this.m_iRotation - this.m_iRotationSpeed);
+	
+	return false;
+}
+
+GameObject.prototype.rotateRight = function()
+{
+	this.m_iRotation = wrapAngle(this.m_iRotation + this.m_iRotationSpeed);
 }
 
 // DRAW HELPERS
@@ -514,11 +554,7 @@ GameObject.prototype.drawUI = function()
 // HELPERS
 
 GameObject.prototype.regenStats = function()
-{
-	// If you've been hit in the last 10th of a second dont regen yet
-	if(this.m_iHitTimer < 1000)
-		return;
-	
+{	
 	// Count Down Shield Regen Timer
 	if(this.m_iShieldRegen > 0)
 		this.m_iShieldRegen -= m_fElapsedTime;

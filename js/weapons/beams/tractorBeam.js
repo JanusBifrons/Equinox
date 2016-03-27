@@ -4,7 +4,7 @@ TractorBeam.prototype.constructor = TractorBeam;
 function TractorBeam(owner, offsetX, offsetY, minRotation, maxRotation)
 {
 	// Call base initialize
-	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 500, 0);
+	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 2000, 0, 0);
 	
 	// Override colour
 	this.m_cColour = 'lightgreen';

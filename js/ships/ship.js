@@ -16,7 +16,7 @@ function Ship()
 	// Weapons
 	this.m_liWeapons = new Array();
 	this.m_liTargets = new Array();
-	this.m_iWeaponSelected = -1;
+	this.m_iWeaponSelected = 0;
 	
 	// Hyper Drive
 	this.m_iHyperTarget = 0;
@@ -139,16 +139,16 @@ Ship.prototype.onFire = function()
 {
 	// Do nothing if ship is destroyed
 	if(!this.m_bIsAlive)
-		return;
+		return;	
 	
 	// Retreive selected weapon set
 	var _weapons = this.m_liWeapons[this.m_iWeaponSelected];
 	
 	// Loop through all weapons in set
-	for(var j = 0; j < _weapons.length; j++)
+	for(var i = 0; i < _weapons.length; i++)
 	{
 		// FIRE!!
-		_weapons[j].onFire();
+		_weapons[i].onFire();
 	}
 }
 
@@ -430,33 +430,6 @@ Ship.prototype.activeWeapons = function()
 }
 
 // INPUT ACCESSORS
-
-Ship.prototype.accellerate = function()
-{
-	this.m_liMove[0] += Math.cos(this.m_iRotation) * this.m_iAccel;
-	this.m_liMove[1] += Math.sin(this.m_iRotation) * this.m_iAccel;
-		
-	this.m_bIsAccelerating = true;
-}
-
-Ship.prototype.deccellerate = function()
-{
-	this.m_liMove[0] -= Math.cos(this.m_iRotation) * this.m_iAccel;
-	this.m_liMove[1] -= Math.sin(this.m_iRotation) * this.m_iAccel;
-}
-
-Ship.prototype.rotateLeft = function()
-{
-	this.m_iRotation = wrapAngle(this.m_iRotation - this.m_iRotationSpeed);
-	
-	return false;
-}
-
-Ship.prototype.rotateRight = function()
-{
-	this.m_iRotation = wrapAngle(this.m_iRotation + this.m_iRotationSpeed);
-}
-
 
 // This is mostly for the AI to prevent reversing
 Ship.prototype.stop = function()
