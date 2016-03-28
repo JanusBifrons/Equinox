@@ -155,28 +155,6 @@ Weapon.prototype.update = function()
 	
 	// Set collision box after moving!
 	this.createCollision();
-	
-	return;
-
-	// Check if target is within shooting angle
-	if(this.checkTarget(_worldPos.x, _worldPos.y))
-	{
-		// Turn to face target
-		var _turn = this.turnToTarget(_worldPos.x, _worldPos.y)
-		
-		// Check if you're within a reasonable angle to open fire
-		if(_turn < (Math.PI / 6))
-			if(_turn > -(Math.PI / 6))
-				this.onFire();
-	}
-	else
-	{
-		// Rotate to middle of allowed angles
-		this.rotateToDefault();
-	}
-	
-	// Set collision box after moving!
-	this.createCollision();
 }
 
 Weapon.prototype.draw = function()
