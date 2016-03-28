@@ -5,7 +5,7 @@ function LightLauncher(owner, offsetX, offsetY, minRotation, maxRotation)
 {
 	// Call base initialize
 	//Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.015, 1500, 1, 0.2);
-	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.0005, 1500, 5, 2.5);
+	Weapon.prototype.initialize.call(this, owner, offsetX, offsetY, minRotation, maxRotation, 0.0005, 1500, 5, 0.5);
 	
 	console.log("Light Launcher initialised successfully.");
 }
